@@ -228,6 +228,25 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .photo-action-btn{padding:14px;border-radius:14px;border:none;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--font);transition:var(--tr);background:var(--surface2);color:var(--text);display:flex;align-items:center;justify-content:center;gap:10px}
 .photo-action-btn:active{opacity:.7}
 .avatar-img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+/* ─ SPLASH ─ */
+#splash{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:var(--bg);transition:opacity .5s ease,transform .5s ease}
+#splash.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+.splash-orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.splash-orb{position:absolute;border-radius:50%;filter:blur(70px);animation:float 6s ease-in-out infinite}
+.splash-orb1{width:400px;height:400px;background:var(--orb1);top:-100px;right:-100px}
+.splash-orb2{width:350px;height:350px;background:var(--orb2);bottom:-80px;left:-100px;animation-delay:2s}
+.splash-orb3{width:280px;height:280px;background:var(--orb3);top:40%;right:-60px;animation-delay:4s}
+.splash-avatar{width:100px;height:100px;border-radius:34px;background:linear-gradient(135deg,var(--accent),#7b5ea7);display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:28px;box-shadow:0 16px 48px rgba(79,142,255,.4);animation:splashPop .6s cubic-bezier(.34,1.56,.64,1) both;position:relative;overflow:hidden}
+.splash-avatar img{width:100%;height:100%;object-fit:cover;border-radius:34px}
+.splash-appname{font-size:28px;font-weight:600;letter-spacing:-.5px;margin-bottom:10px;animation:splashFade .5s .2s ease both}
+.splash-msg{font-size:14px;color:var(--t2);animation:splashFade .5s .35s ease both;margin-bottom:40px}
+.splash-loader{display:flex;gap:6px;animation:splashFade .5s .5s ease both}
+.splash-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.3;animation:dotPulse 1.2s ease-in-out infinite}
+.splash-dot:nth-child(2){animation-delay:.2s}
+.splash-dot:nth-child(3){animation-delay:.4s}
+@keyframes splashPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes splashFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes dotPulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -246,6 +265,21 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </style>
 </head>
 <body>
+<div id="splash">
+  <div class="splash-orbs">
+    <div class="splash-orb splash-orb1"></div>
+    <div class="splash-orb splash-orb2"></div>
+    <div class="splash-orb splash-orb3"></div>
+  </div>
+  <div class="splash-avatar" id="splashAvatar">💰</div>
+  <div class="splash-appname" id="splashAppName">Mon Budget</div>
+  <div class="splash-msg">Chargement de vos finances...</div>
+  <div class="splash-loader">
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+  </div>
+</div>
 <div class="orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 
 <div id="app">
@@ -737,10 +771,31 @@ function updateAvatars(){
     : emoji;
 }
 
+
+function showSplash(){
+  const splash = document.getElementById('splash');
+  const splashAvatar = document.getElementById('splashAvatar');
+  const splashName = document.getElementById('splashAppName');
+  // Set avatar
+  if(prefs.avatarPhoto){
+    splashAvatar.innerHTML = '<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover;border-radius:34px">';
+  } else {
+    splashAvatar.textContent = prefs.avatarEmoji || '💰';
+  }
+  // Set app name
+  splashName.textContent = prefs.appName || 'Mon Budget';
+  // Hide after delay
+  setTimeout(()=>{
+    splash.classList.add('hide');
+    setTimeout(()=>{ splash.style.display='none'; }, 520);
+  }, 1800);
+}
+
 // Init
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
 applyPrefs();
+showSplash();
 setType('expense');
 renderDash();
 </script>
