@@ -286,7 +286,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="header">
     <div class="header-top">
       <div><div class="header-title" id="hTitle">Mon Budget</div><div class="month-label" id="monthLabel"></div></div>
-      <div class="header-avatar" id="avatarBtn" onclick="openPhotoModal()">💰</div>
+      <div class="header-avatar" id="avatarBtn" onclick="nav('settings')">💰</div>
     </div>
   </div>
   <div class="scroll">
@@ -600,7 +600,7 @@ function renderSettings(){
   const el=document.getElementById('s-settings');
   const isDark=prefs.theme==='dark'||(prefs.theme==='auto'&&window.matchMedia('(prefers-color-scheme:dark)').matches);
   el.innerHTML=`<div class="set-pad">
-    <div class="profile-avatar" id="avatarLarge" onclick="openPhotoModal()">💰</div>
+    <div class="profile-avatar" id="avatarLarge" onclick="nav('settings')">💰</div>
     <div class="profile-name" id="appNameDisplay">${prefs.appName||'Mon Budget'}</div>
 
     <div class="set-section" style="margin-top:20px">
@@ -649,6 +649,12 @@ function renderSettings(){
     <div class="set-section">
       <div class="set-title">Général</div>
       <div class="set-card">
+        <div class="set-row" onclick="openPhotoModal()" style="cursor:pointer">
+          <div class="set-icon" style="background:linear-gradient(135deg,var(--accent),#7b5ea7);overflow:hidden" id="settingsAvatarIcon">${prefs.avatarPhoto?'<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover">': (prefs.avatarEmoji||'💰')}</div>
+          <div class="set-info"><div class="set-name">Photo de profil</div><div class="set-desc">Emoji ou image depuis ta galerie</div></div>
+          <span class="set-right">›</span>
+        </div>
+        <div class="divider"></div>
         <div class="set-row">
           <div class="set-icon" style="background:rgba(156,39,176,.15)">✏️</div>
           <div class="set-info"><div class="set-name">Nom de l'appli</div><div class="set-desc" id="appNameDesc">${prefs.appName||'Mon Budget'}</div></div>
@@ -768,6 +774,14 @@ function updateAvatars(){
   const el2 = document.getElementById('avatarLarge');
   if(el2) el2.innerHTML = hasPhoto
     ? `<img src="${prefs.avatarPhoto}" class="avatar-img" alt="avatar">`
+    : emoji;
+  const el3 = document.getElementById('settingsAvatarIcon');
+  if(el3) el3.innerHTML = hasPhoto
+    ? `<img src="${prefs.avatarPhoto}" style="width:100%;height:100%;object-fit:cover">`
+    : emoji;
+  const el4 = document.getElementById('splashAvatar');
+  if(el4) el4.innerHTML = hasPhoto
+    ? `<img src="${prefs.avatarPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:34px">`
     : emoji;
 }
 
