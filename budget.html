@@ -361,11 +361,18 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           <button class="type-btn active" id="btn-exp" onclick="setType('expense')">Dépense</button>
           <button class="type-btn" id="btn-inc" onclick="setType('income')">Revenu</button>
         </div>
-        <div class="f-group" style="text-align:center">
-          <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:2px">Montant</div>
-          <div style="display:flex;align-items:center;justify-content:center">
-            <span style="font-size:38px;font-weight:200;color:var(--t2);margin-right:2px">€</span>
-            <input type="number" id="amount" class="amount-big" placeholder="0" inputmode="decimal" min="0" step="0.01" style="width:200px">
+        <div class="f-group" style="text-align:center;padding:8px 0 4px">
+          <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:10px">Montant</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px">
+            <span id="amount-currency" style="font-size:32px;font-weight:200;color:var(--t2)">€</span>
+            <div style="position:relative;display:inline-block">
+              <input type="number" id="amount" inputmode="decimal" min="0" step="0.01"
+                style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:text;z-index:2"
+                oninput="updateAmountDisplay(this.value)">
+              <div id="amount-display"
+                style="font-size:52px;font-weight:200;letter-spacing:-2px;color:var(--t3);min-width:120px;text-align:center;border-bottom:2px solid var(--glass-b);padding-bottom:4px;transition:color .15s"
+                onclick="document.getElementById('amount').focus()">0</div>
+            </div>
           </div>
         </div>
         <div class="f-group"><label class="f-label">Description</label><input type="text" id="desc" placeholder="Ex : Courses Leclerc"></div>
@@ -524,6 +531,19 @@ function setType(t){
   sel.innerHTML=CATS[t].map(c=>`<option value="${c.id}">${c.e} ${c.l}</option>`).join('');
 }
 
+
+function updateAmountDisplay(val){
+  const display = document.getElementById('amount-display');
+  if(!display) return;
+  const num = parseFloat(val);
+  if(!val || isNaN(num)){
+    display.textContent = '0';
+    display.style.color = 'var(--t3)';
+  } else {
+    display.textContent = new Intl.NumberFormat('fr-FR', {minimumFractionDigits:0, maximumFractionDigits:2}).format(num);
+    display.style.color = 'var(--text)';
+  }
+}
 function addTransaction(){
   const amt=parseFloat(document.getElementById('amount').value);
   const desc=document.getElementById('desc').value.trim();
@@ -550,7 +570,7 @@ function nav(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===s));
   document.getElementById('s-'+s).classList.add('active');
-  if(s==='add'){setType('expense');document.getElementById('txdate').value=new Date().toISOString().split('T')[0]}
+  if(s==='add'){setType('expense');document.getElementById('txdate').value=new Date().toISOString().split('T')[0];const ad=document.getElementById('amount-display');if(ad){ad.textContent='0';ad.style.color='var(--t3)';}const ai=document.getElementById('amount');if(ai)ai.value='';}
   if(s==='dash')renderDash();
   if(s==='history')renderHistory();
   if(s==='budget')renderBudget();
@@ -775,7 +795,7 @@ function setTheme(t){prefs.theme=t;savePrefs();renderSettings();toast(t==='auto'
 function setAccent(i){prefs.accentIdx=i;savePrefs();renderSettings();toast('🎨 Couleur mise à jour')}
 function togglePref(key,val){prefs[key]=val;savePrefs();toast(val?'✅ Activé':'Désactivé')}
 function updateAppName(v){prefs.appName=v||'Mon Budget';savePrefs();const d=document.getElementById('appNameDesc');if(d)d.textContent=prefs.appName}
-function setCurrency(v){prefs.currency=v;savePrefs();toast('💱 Devise : '+v)}
+function setCurrency(v){prefs.currency=v;savePrefs();const c=document.getElementById('amount-currency');if(c)c.textContent=v;toast('💱 Devise : '+v)}
 function setPayDay(d){prefs.payDay=d;savePrefs();renderDash();toast('📅 Jour de paie : le '+d)}
 
 function exportCSV(){
