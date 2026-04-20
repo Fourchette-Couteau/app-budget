@@ -317,10 +317,44 @@ const ACCENTS=[
 
 function getCat(id){return[...CATS.expense,...CATS.income].find(c=>c.id===id)||{l:id,e:'📦',c:'#888'}}
 function fmtAmt(v){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).format(v)}
-function nowMonth(){const n=new Date();return`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`}
+function currentPeriod(){
+  const n=new Date();
+  const day=n.getDate();
+  const pd=prefs&&prefs.payDay?prefs.payDay:1;
+  let y=n.getFullYear(), m=n.getMonth();
+  if(day<pd){ m--; if(m<0){m=11;y--} }
+  const start=new Date(y,m,pd);
+  const end=new Date(y,m+1,pd-1);
+  return {
+    start:`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`,
+    end:`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`,
+    label:`${String(start.getDate()).padStart(2,'0')}/${String(start.getMonth()+1).padStart(2,'0')} → ${String(end.getDate()).padStart(2,'0')}/${String(end.getMonth()+1).padStart(2,'0')}`
+  };
+}
+function inPeriod(date, p){return date>=p.start && date<=p.end}
+function prevPeriods(n){
+  const periods=[];
+  const pd=prefs&&prefs.payDay?prefs.payDay:1;
+  const now=new Date();
+  let y=now.getFullYear(), m=now.getMonth();
+  const day=now.getDate();
+  if(day<pd){m--;if(m<0){m=11;y--}}
+  for(let i=n-1;i>=0;i--){
+    let pm=m-i, py=y;
+    while(pm<0){pm+=12;py--}
+    const start=new Date(py,pm,pd);
+    const end=new Date(py,pm+1,pd-1);
+    periods.push({
+      start:`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`,
+      end:`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`,
+      label:`${String(start.getDate()).padStart(2,'0')}/${String(start.getMonth()+1).padStart(2,'0')}`
+    });
+  }
+  return periods;
+}
 
 let data=JSON.parse(localStorage.getItem('budget_v4')||'{"transactions":[],"budgets":[{"cat":"food","limit":400},{"cat":"transport","limit":150},{"cat":"loisirs","limit":100},{"cat":"restaurants","limit":80}]}');
-let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"appName":"Mon Budget","currency":"€"}');
+let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"appName":"Mon Budget","currency":"€","payDay":25}');
 let txType='expense';
 let donutChart=null;
 
@@ -392,8 +426,8 @@ function nav(s){
 }
 
 function renderDash(){
-  const month=nowMonth();
-  const mTx=data.transactions.filter(t=>t.date.startsWith(month));
+  const period=currentPeriod();
+  const mTx=data.transactions.filter(t=>inPeriod(t.date,period));
   const income=mTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const expense=mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
   const balance=income-expense;
@@ -401,17 +435,16 @@ function renderDash(){
   const byCat={};
   mTx.filter(t=>t.type==='expense').forEach(t=>{byCat[t.cat]=(byCat[t.cat]||0)+t.amount});
   const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-  const now=new Date();
-  const months=[];
-  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`)}
-  const mExp=months.map(m=>data.transactions.filter(t=>t.date.startsWith(m)&&t.type==='expense').reduce((s,t)=>s+t.amount,0));
+  const periods=prevPeriods(6);
+  const mExp=periods.map(p=>data.transactions.filter(t=>inPeriod(t.date,p)&&t.type==='expense').reduce((s,t)=>s+t.amount,0));
   const maxE=Math.max(...mExp,1);
   const recent=data.transactions.slice(0,5);
   const cur=prefs.currency||'€';
   const el=document.getElementById('s-dash');
+  document.getElementById('monthLabel').textContent=period.label;
   el.innerHTML=`<div class="dash-pad">
     <div class="balance-card">
-      <div class="balance-label">Solde du mois</div>
+      <div class="balance-label">Période en cours</div>
       <div class="balance-amount">${balance>=0?'':'-'}${fmtAmt(Math.abs(balance))} ${cur}</div>
       <div class="balance-sub">Taux d'épargne : <strong>${Math.max(0,savRate)}%</strong></div>
       <div class="balance-row">
@@ -429,16 +462,16 @@ function renderDash(){
       <div class="legend">${cats.slice(0,6).map(([id,amt])=>{const c=getCat(id);return`<div class="leg-item"><div class="leg-dot" style="background:${c.c}"></div><span>${c.l}</span><span style="margin-left:auto;font-weight:500;color:var(--text)">${fmtAmt(amt)} ${cur}</span></div>`}).join('')}</div>
     </div>`:''}
     ${prefs.showBars?`
-    <div class="sec-label">6 derniers mois</div>
+    <div class="sec-label">6 dernières périodes</div>
     <div class="glass-card chart-card">
-      <div class="bar-wrap">${months.map((m,i)=>{const h=Math.max(4,Math.round((mExp[i]/maxE)*100));return`<div class="bar-col"><div class="bar-body${m===month?' cur':''}" style="height:${h}px"></div><div class="bar-ml">${m.slice(5)}</div></div>`}).join('')}</div>
+      <div class="bar-wrap">${periods.map((p,i)=>{const h=Math.max(4,Math.round((mExp[i]/maxE)*100));const isCur=i===periods.length-1;return`<div class="bar-col"><div class="bar-body${isCur?' cur':''}" style="height:${h}px"></div><div class="bar-ml">${p.label}</div></div>`}).join('')}</div>
     </div>`:''}
     ${prefs.showRecent && recent.length?`
     <div class="sec-label">Dernières transactions</div>
     <div class="glass-card" style="overflow:hidden">
       ${recent.map((t,i)=>{const c=getCat(t.cat);return`${i>0?'<div class="divider"></div>':''}<div class="tx-item"><div class="tx-icon">${c.e}</div><div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l} · ${t.date.slice(8)}/${t.date.slice(5,7)}</div></div><div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div></div>`}).join('')}
     </div>`:''}
-    ${!cats.length?'<div class="empty">Aucune transaction ce mois.<br>Appuie sur ⊕ pour commencer !</div>':''}
+    ${!cats.length?'<div class="empty">Aucune transaction cette période.<br>Appuie sur ⊕ pour commencer !</div>':''}
   </div>`;
   if(prefs.showDonut && cats.length){
     setTimeout(()=>{
@@ -465,9 +498,9 @@ function renderHistory(){
 }
 
 function renderBudget(){
-  const month=nowMonth();const spent={};
+  const period=currentPeriod();const spent={};
   const cur=prefs.currency||'€';
-  data.transactions.filter(t=>t.date.startsWith(month)&&t.type==='expense').forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
+  data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense').forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
   const el=document.getElementById('s-budget');
   el.innerHTML=`<div class="bud-pad">
     <div class="sec-label">Limites du mois</div>
@@ -563,6 +596,14 @@ function renderSettings(){
             ${['€','$','£','CHF','¥'].map(c=>`<option${prefs.currency===c?' selected':''}>${c}</option>`).join('')}
           </select>
         </div>
+        <div class="divider"></div>
+        <div class="set-row">
+          <div class="set-icon" style="background:rgba(99,217,160,.15)">📅</div>
+          <div class="set-info"><div class="set-name">Jour de paie</div><div class="set-desc">La période repart de ce jour chaque mois</div></div>
+          <select onchange="setPayDay(parseInt(this.value))" style="width:auto;padding:8px 32px 8px 12px;font-size:14px;background:var(--surface2)">
+            ${Array.from({length:28},(_,i)=>i+1).map(d=>`<option value="${d}"${prefs.payDay===d?' selected':''}>${d}</option>`).join('')}
+          </select>
+        </div>
       </div>
     </div>
 
@@ -595,6 +636,7 @@ function setAccent(i){prefs.accentIdx=i;savePrefs();renderSettings();toast('🎨
 function togglePref(key,val){prefs[key]=val;savePrefs();toast(val?'✅ Activé':'Désactivé')}
 function updateAppName(v){prefs.appName=v||'Mon Budget';savePrefs();const d=document.getElementById('appNameDesc');if(d)d.textContent=prefs.appName}
 function setCurrency(v){prefs.currency=v;savePrefs();toast('💱 Devise : '+v)}
+function setPayDay(d){prefs.payDay=d;savePrefs();renderDash();toast('📅 Jour de paie : le '+d)}
 
 function exportCSV(){
   const rows=[['Date','Type','Catégorie','Description','Montant'],...data.transactions.map(t=>[t.date,t.type==='expense'?'Dépense':'Revenu',getCat(t.cat).l,t.desc,t.amount])];
@@ -612,8 +654,7 @@ function confirmReset(){
 }
 
 // Init
-const now=new Date();
-document.getElementById('monthLabel').textContent=now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
 applyPrefs();
 setType('expense');
