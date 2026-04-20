@@ -281,6 +281,36 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .sav-entry-amt.dep{color:var(--inc-t)}
 .sav-entry-amt.with{color:var(--exp-t)}
 .goal-edit-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+/* ─ TAX ─ */
+.tax-pad{padding:16px}
+.tax-hero{border-radius:var(--radius);padding:26px 22px 22px;margin-bottom:12px;position:relative;overflow:hidden;background:linear-gradient(135deg,#2c3e6b,#1a2a5e);box-shadow:0 8px 40px rgba(44,62,107,.5)}
+.tax-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(255,255,255,.15),transparent 60%);pointer-events:none}
+.tax-hero-label{font-size:12px;font-weight:500;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.tax-hero-amount{font-size:44px;font-weight:300;color:#fff;letter-spacing:-2px;line-height:1}
+.tax-hero-sub{font-size:13px;color:rgba(255,255,255,.65);margin-top:6px}
+.tax-row-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.tax-mini{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)}
+.tax-mini-label{font-size:11px;color:var(--t2);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.tax-mini-val{font-size:18px;font-weight:400;letter-spacing:-.3px}
+.tax-mini-val.green{color:var(--inc-t)}
+.tax-mini-val.red{color:var(--exp-t)}
+.tax-input-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.tax-section-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.tax-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:10px;background:rgba(44,62,107,.15);color:#4a6fa5}
+[data-theme="dark"] .tax-badge{background:rgba(100,140,220,.2);color:#8ab4f8}
+.tranche-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--sep)}
+.tranche-item:last-child{border-bottom:none}
+.tranche-bar-wrap{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.tranche-bar{height:100%;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.tranche-label{font-size:12px;color:var(--t2);width:36px;text-align:right;flex-shrink:0}
+.tranche-amt{font-size:12px;font-weight:500;width:72px;text-align:right;flex-shrink:0}
+.tax-info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--sep);font-size:14px}
+.tax-info-row:last-child{border-bottom:none;padding-bottom:0}
+.tax-info-row.total{font-weight:600;font-size:15px;padding-top:12px;margin-top:4px;border-top:.5px solid var(--sep);border-bottom:none}
+.tax-info-label{color:var(--t2)}
+.tax-info-val{font-weight:500}
+.tax-exempt-tag{font-size:11px;background:rgba(26,158,92,.12);color:var(--inc-t);padding:2px 8px;border-radius:8px;font-weight:500}
+.tax-disclaimer{font-size:12px;color:var(--t3);text-align:center;padding:8px 4px 4px;line-height:1.5}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -355,7 +385,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="nav">
       <button class="nav-btn active" onclick="nav('dash')" data-s="dash"><span class="nav-icon">⊟</span><span class="nav-lbl">Accueil</span></button>
       <button class="nav-btn" onclick="nav('add')" data-s="add"><span class="nav-icon">⊕</span><span class="nav-lbl">Ajouter</span></button>
-      <button class="nav-btn" onclick="nav('history')" data-s="history"><span class="nav-icon">☰</span><span class="nav-lbl">Historique</span></button>
       <button class="nav-btn" onclick="nav('savings')" data-s="savings"><span class="nav-icon">🐷</span><span class="nav-lbl">Épargne</span></button>
       <button class="nav-btn" onclick="nav('budget')" data-s="budget"><span class="nav-icon">◎</span><span class="nav-lbl">Budgets</span></button>
     </div>
@@ -576,6 +605,7 @@ function renderDash(){
       ${recent.map((t,i)=>{const c=getCat(t.cat);return`${i>0?'<div class="divider"></div>':''}<div class="tx-item"><div class="tx-icon">${c.e}</div><div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l} · ${t.date.slice(8)}/${t.date.slice(5,7)}</div></div><div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div></div>`}).join('')}
     </div>`:''}
     ${!cats.length?'<div class="empty">Aucune transaction cette période.<br>Appuie sur ⊕ pour commencer !</div>':''}
+    ${buildTaxCard(cur)}
   </div>`;
   if(prefs.showDonut && cats.length){
     setTimeout(()=>{
@@ -956,6 +986,114 @@ function saveGoal(){
   if(!data.savingsGoals) data.savingsGoals=[];
   data.savingsGoals=[{name,amount}];
   save();renderSavings();toast('🎯 Objectif enregistré !');
+}
+
+
+/* ── CALCULATEUR IMPÔTS MILITAIRE 2024 ── */
+// Barème IR 2024 (revenus 2023) - célibataire (1 part)
+const TRANCHES = [
+  {min:0,      max:11294,  rate:0,    label:'0%'},
+  {min:11294,  max:28797,  rate:0.11, label:'11%'},
+  {min:28797,  max:82341,  rate:0.30, label:'30%'},
+  {min:82341,  max:177106, rate:0.41, label:'41%'},
+  {min:177106, max:Infinity,rate:0.45,label:'45%'},
+];
+
+// Primes militaires exonérées d'IR (liste non exhaustive des principales)
+const PRIMES_EXONEREES = [
+  {id:'issu',    label:'Indemnité de sujétion spéciale (ISS)',       montant:0, note:'Variable selon grade'},
+  {id:'opex',    label:'Indemnité OPEX',                              montant:0, note:'Si déployé en opération'},
+  {id:'service', label:'Prime de service et de technicité (PST)',     montant:0, note:'Variable'},
+  {id:'risque',  label:'Indemnité pour risques professionnels',       montant:0, note:'Parachutisme, plongée...'},
+  {id:'eloign',  label:'Indemnité d\'éloignement (DOM-COM)',          montant:0, note:'Si affecté outre-mer'},
+];
+
+let taxPrefs = JSON.parse(localStorage.getItem('tax_prefs') || '{"solde":0,"primes_imposables":0,"primes_exonerees":{},"allocFam":0}');
+function saveTaxPrefs(){localStorage.setItem('tax_prefs', JSON.stringify(taxPrefs))}
+
+function calcIR(revenuImposable){
+  // Abattement 10% frais pro (min 495, max 14171)
+  const abattement = Math.min(Math.max(revenuImposable * 0.10, 495), 14171);
+  const base = Math.max(0, revenuImposable - abattement);
+  let impot = 0;
+  const detail = [];
+  for(const t of TRANCHES){
+    if(base <= t.min) break;
+    const taxable = Math.min(base, t.max) - t.min;
+    const montant = taxable * t.rate;
+    if(t.rate > 0) detail.push({label:t.label, taxable, montant});
+    impot += montant;
+  }
+  // Décote (si impôt brut < 1929€ pour célibataire)
+  let decote = 0;
+  if(impot < 1929) decote = Math.max(0, 873 - 0.4525 * impot);
+  const impotNet = Math.max(0, impot - decote);
+  return {base, abattement, impotBrut:impot, decote, impotNet, detail};
+}
+
+function buildTaxCard(cur){
+  // Collect all salary income from current year
+  const year = new Date().getFullYear();
+  const yearTx = data.transactions.filter(t=>t.type==='income' && t.date.startsWith(year+''));
+  const yearIncome = yearTx.reduce((s,t)=>s+t.amount, 0);
+  if(yearIncome === 0) return '';
+
+  // How many months of data do we have this year?
+  const monthsWithData = new Set(yearTx.map(t=>t.date.slice(0,7))).size;
+  const currentMonth = new Date().getMonth() + 1;
+  // Annualize: if we have partial year, project to 12 months
+  const annualized = monthsWithData > 0 ? Math.round((yearIncome / monthsWithData) * 12) : yearIncome;
+
+  const result = calcIR(annualized);
+  const tauxEffectif = annualized > 0 ? (result.impotNet / annualized * 100) : 0;
+  const mensuel = result.impotNet / 12;
+  const alreadyPaid = mensuel * currentMonth; // approx already withheld
+  const maxImpot = result.detail.length > 0 ? Math.max(...result.detail.map(d=>d.montant)) : 1;
+
+  return `
+  <div class="sec-label">Estimation impôts ${year}</div>
+  <div class="glass-card tax-input-card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div>
+        <div style="font-size:12px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">IR estimé ${year}</div>
+        <div style="font-size:32px;font-weight:300;letter-spacing:-1px;color:var(--exp-t)">${fmtAmt(Math.round(result.impotNet))} ${cur}</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:3px">≈ ${fmtAmt(Math.round(mensuel))} ${cur}/mois · taux ${tauxEffectif.toFixed(1)}%</div>
+      </div>
+      <span class="tax-badge" style="margin-top:4px">Automatique</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:var(--surface2);border-radius:10px;padding:10px 12px">
+        <div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin-bottom:3px">Revenus annualisés</div>
+        <div style="font-size:15px;font-weight:400">${fmtAmt(annualized)} ${cur}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:10px 12px">
+        <div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin-bottom:3px">Abattement 10%</div>
+        <div style="font-size:15px;font-weight:400;color:var(--inc-t)">-${fmtAmt(Math.round(result.abattement))} ${cur}</div>
+      </div>
+    </div>
+
+    ${result.detail.length > 0 ? `
+    <div style="margin-bottom:12px">
+      ${result.detail.map(t=>`
+      <div class="tranche-item">
+        <div class="tranche-label" style="color:var(--text)">${t.label}</div>
+        <div class="tranche-bar-wrap"><div class="tranche-bar" style="width:${Math.round((t.montant/maxImpot)*100)}%;background:var(--exp-t);opacity:.7"></div></div>
+        <div class="tranche-amt" style="color:var(--exp-t)">${fmtAmt(Math.round(t.montant))} ${cur}</div>
+      </div>`).join('')}
+      ${result.decote > 0 ? `<div style="font-size:12px;color:var(--inc-t);margin-top:6px;padding-top:6px;border-top:.5px solid var(--sep)">Décote appliquée : -${fmtAmt(Math.round(result.decote))} ${cur}</div>` : ''}
+    </div>` : ''}
+
+    <div style="font-size:11px;color:var(--t3);line-height:1.5;padding-top:10px;border-top:.5px solid var(--sep)">
+      📊 Basé sur ${fmtAmt(Math.round(yearIncome))} ${cur} de revenus sur ${monthsWithData} mois · Barème IR ${year} · 1 part · À titre indicatif
+    </div>
+  </div>`;
+}
+
+function updateTaxPref(key, val){
+  taxPrefs[key] = parseFloat(val) || 0;
+  saveTaxPrefs();
+  renderDash();
 }
 
 // Init
