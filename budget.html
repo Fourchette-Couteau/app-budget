@@ -311,6 +311,25 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tax-info-val{font-weight:500}
 .tax-exempt-tag{font-size:11px;background:rgba(26,158,92,.12);color:var(--inc-t);padding:2px 8px;border-radius:8px;font-weight:500}
 .tax-disclaimer{font-size:12px;color:var(--t3);text-align:center;padding:8px 4px 4px;line-height:1.5}
+/* ─ RECURRING ─ */
+.rec-pad{padding:16px}
+.rec-item{padding:14px 16px;display:flex;align-items:center;gap:12px}
+.rec-icon{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--surface2)}
+.rec-info{flex:1;min-width:0}
+.rec-name{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-meta{font-size:12px;color:var(--t2);margin-top:2px}
+.rec-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.rec-amt{font-size:15px;font-weight:500}
+.rec-amt.exp{color:var(--exp-t)}
+.rec-amt.inc{color:var(--inc-t)}
+.rec-next{font-size:11px;color:var(--t3)}
+.rec-add-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.rec-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(79,142,255,.12);color:var(--accent)}
+.rec-badge.green{background:rgba(26,158,92,.12);color:var(--inc-t)}
+.rec-today-card{background:linear-gradient(135deg,var(--accent),#7b5ea7);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;box-shadow:0 6px 24px rgba(79,142,255,.3)}
+.rec-today-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.rec-today-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.15)}
+.rec-today-item:last-child{border-bottom:none;padding-bottom:0}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -386,6 +405,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div id="s-history" class="screen"></div>
     <div id="s-budget" class="screen"></div>
     <div id="s-savings" class="screen"></div>
+    <div id="s-recurring" class="screen"></div>
     <div id="s-settings" class="screen"></div>
   </div>
   <nav class="nav-wrap">
@@ -575,6 +595,7 @@ function nav(s){
   if(s==='history')renderHistory();
   if(s==='budget')renderBudget();
   if(s==='savings')renderSavings();
+  if(s==='recurring')renderRecurring();
   if(s==='settings'){renderSettings();document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'))}
 }
 
@@ -789,6 +810,17 @@ function renderSettings(){
           <div class="set-icon" style="background:rgba(255,152,0,.15)">📊</div>
           <div class="set-info"><div class="set-name">Exporter en CSV</div><div class="set-desc">Pour Excel ou Google Sheets</div></div>
           <span class="set-right" style="font-size:18px">↗</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-title">Transactions récurrentes</div>
+      <div class="set-card">
+        <div class="set-row" onclick="nav('recurring')" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(79,142,255,.15)">🔁</div>
+          <div class="set-info"><div class="set-name">Gérer les récurrences</div><div class="set-desc" id="recCount">Chargement...</div></div>
+          <span class="set-right">›</span>
         </div>
       </div>
     </div>
@@ -1188,10 +1220,167 @@ function updateTaxPref(key, val){
   renderDash();
 }
 
+
+/* ── TRANSACTIONS RÉCURRENTES ── */
+const FREQ_LABELS = {monthly:'Mensuel', weekly:'Hebdo', bimonthly:'Bi-mensuel'};
+
+function getNextDate(rec){
+  // Find the next date this recurring tx should fire
+  const today = new Date().toISOString().split('T')[0];
+  const pd = prefs.payDay || 25;
+  if(rec.freq === 'monthly'){
+    const now = new Date();
+    let d = new Date(now.getFullYear(), now.getMonth(), rec.day);
+    if(d.toISOString().split('T')[0] < today) d = new Date(now.getFullYear(), now.getMonth()+1, rec.day);
+    return d.toISOString().split('T')[0];
+  }
+  return today;
+}
+
+function processDueRecurring(){
+  if(!data.recurring || data.recurring.length === 0) return;
+  const today = new Date().toISOString().split('T')[0];
+  const todayDay = new Date().getDate();
+  let added = 0;
+  data.recurring.forEach(rec => {
+    if(!rec.active) return;
+    if(rec.freq === 'monthly' && todayDay === rec.day){
+      // Check if already added this month
+      const monthStr = today.slice(0,7);
+      const alreadyAdded = data.transactions.some(t =>
+        t.recurringId === rec.id && t.date.startsWith(monthStr)
+      );
+      if(!alreadyAdded){
+        data.transactions.unshift({
+          id: Date.now() + Math.random(),
+          type: rec.type,
+          amount: rec.amount,
+          desc: rec.desc + ' (auto)',
+          cat: rec.cat,
+          date: today,
+          recurringId: rec.id
+        });
+        added++;
+      }
+    }
+  });
+  if(added > 0){
+    save();
+    toast('🔁 ' + added + ' transaction(s) récurrente(s) ajoutée(s) !');
+  }
+}
+
+function renderRecurring(){
+  if(!data.recurring) data.recurring = [];
+  const cur = prefs.currency || '€';
+  const today = new Date();
+  const todayDay = today.getDate();
+
+  // Due today
+  const dueToday = data.recurring.filter(r => r.active && r.freq==='monthly' && r.day===todayDay);
+
+  const el = document.getElementById('s-recurring');
+  el.innerHTML = `<div class="rec-pad">
+    ${dueToday.length > 0 ? `
+    <div class="rec-today-card">
+      <div class="rec-today-title">🔔 À passer aujourd'hui</div>
+      ${dueToday.map(r=>`<div class="rec-today-item"><span style="color:#fff;font-size:14px;font-weight:500">${r.desc}</span><span style="color:rgba(255,255,255,.9);font-size:14px">${r.type==='expense'?'-':'+'}${fmtAmt(r.amount)} ${cur}</span></div>`).join('')}
+    </div>` : ''}
+
+    <div class="rec-add-card">
+      <div style="font-size:15px;font-weight:600;margin-bottom:14px">🔁 Nouvelle récurrence</div>
+      <div class="type-toggle" style="margin-bottom:12px">
+        <button class="type-btn active" id="rec-btn-exp" onclick="setRecType('expense')">Dépense</button>
+        <button class="type-btn" id="rec-btn-inc" onclick="setRecType('income')">Revenu</button>
+      </div>
+      <div class="f-group"><label class="f-label">Description</label><input type="text" id="rec-desc" placeholder="Ex : Loyer, Netflix..."></div>
+      <div class="f-row">
+        <div class="f-group"><label class="f-label">Montant (${cur})</label><input type="number" id="rec-amount" placeholder="500" inputmode="decimal"></div>
+        <div class="f-group"><label class="f-label">Jour du mois</label>
+          <select id="rec-day">${Array.from({length:28},(_,i)=>i+1).map(d=>`<option value="${d}"${d===1?' selected':''}>${d}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="f-group"><label class="f-label">Catégorie</label><select id="rec-cat">${CATS.expense.map(c=>`<option value="${c.id}">${c.e} ${c.l}</option>`).join('')}</select></div>
+      <button class="btn-save" onclick="addRecurring()">Ajouter la récurrence</button>
+    </div>
+
+    ${data.recurring.length > 0 ? `
+    <div class="sec-label">Mes récurrences</div>
+    <div class="glass-card" style="overflow:hidden">
+      ${data.recurring.map((r,i)=>{
+        const c = getCat(r.cat);
+        const next = getNextDate(r);
+        return `${i>0?'<div class="divider"></div>':''}
+        <div class="rec-item">
+          <div class="rec-icon">${c.e}</div>
+          <div class="rec-info">
+            <div class="rec-name">${r.desc}</div>
+            <div class="rec-meta">${FREQ_LABELS[r.freq]||r.freq} · le ${r.day} · ${c.l}</div>
+          </div>
+          <div class="rec-right">
+            <div class="rec-amt ${r.type==='expense'?'exp':'inc'}">${r.type==='expense'?'-':'+'}${fmtAmt(r.amount)} ${cur}</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <div class="rec-next">le ${r.day}</div>
+              <label style="position:relative;width:36px;height:20px;flex-shrink:0">
+                <input type="checkbox" ${r.active?'checked':''} onchange="toggleRecurring(${i},this.checked)" style="opacity:0;position:absolute;inset:0">
+                <div style="position:absolute;inset:0;border-radius:10px;background:${r.active?'var(--accent)':'var(--surface2)'};transition:.2s"></div>
+                <div style="position:absolute;top:2px;left:${r.active?'18':'2'}px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+              </label>
+              <button class="tx-del" onclick="deleteRecurring(${i})">×</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : '<div class="empty">Aucune récurrence.<br>Ajoute ton loyer, tes abonnements...</div>'}
+  </div>`;
+
+  // Update settings count
+  const rc = document.getElementById('recCount');
+  if(rc) rc.textContent = data.recurring.length + ' récurrence(s) active(s)';
+}
+
+let recType = 'expense';
+function setRecType(t){
+  recType = t;
+  document.getElementById('rec-btn-exp').classList.toggle('active', t==='expense');
+  document.getElementById('rec-btn-inc').classList.toggle('active', t==='income');
+  const sel = document.getElementById('rec-cat');
+  if(sel) sel.innerHTML = CATS[t].map(c=>`<option value="${c.id}">${c.e} ${c.l}</option>`).join('');
+}
+
+function addRecurring(){
+  const desc = document.getElementById('rec-desc').value.trim();
+  const amount = parseFloat(document.getElementById('rec-amount').value);
+  const day = parseInt(document.getElementById('rec-day').value);
+  const cat = document.getElementById('rec-cat').value;
+  if(!desc){toast('💡 Entre une description');return}
+  if(!amount||amount<=0){toast('💡 Entre un montant');return}
+  if(!data.recurring) data.recurring=[];
+  data.recurring.push({id:Date.now(), type:recType, desc, amount, day, cat, freq:'monthly', active:true});
+  save();
+  document.getElementById('rec-desc').value='';
+  document.getElementById('rec-amount').value='';
+  toast('✅ Récurrence ajoutée !');
+  renderRecurring();
+}
+
+function toggleRecurring(i, val){
+  data.recurring[i].active = val;
+  save();
+  toast(val ? '▶️ Activée' : '⏸ Désactivée');
+  renderRecurring();
+}
+
+function deleteRecurring(i){
+  openModal('Supprimer cette récurrence','',()=>{
+    data.recurring.splice(i,1);save();renderRecurring();toast('🗑 Supprimée');
+  });
+}
 // Init
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
 applyPrefs();
+processDueRecurring();
 showSplash();
 setType('expense');
 renderDash();
