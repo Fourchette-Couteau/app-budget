@@ -768,12 +768,27 @@ function renderSettings(){
     </div>
 
     <div class="set-section">
-      <div class="set-title">Données</div>
+      <div class="set-title">Données & Sauvegarde</div>
       <div class="set-card">
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(76,175,80,.15)">📁</div>
-          <div class="set-info"><div class="set-name">Exporter en CSV</div><div class="set-desc">${data.transactions.length} transactions</div></div>
-          <span class="set-right" onclick="exportCSV()" style="cursor:pointer;font-size:18px">↗</span>
+        <div class="set-row" onclick="exportBackup()" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(79,142,255,.15)">💾</div>
+          <div class="set-info"><div class="set-name">Sauvegarder mes données</div><div class="set-desc">${data.transactions.length} transactions · ${(data.savings||[]).length} épargnes</div></div>
+          <span class="set-right" style="font-size:18px">↗</span>
+        </div>
+        <div class="divider"></div>
+        <div class="set-row" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(99,217,160,.15)">📥</div>
+          <div class="set-info"><div class="set-name">Restaurer une sauvegarde</div><div class="set-desc">Importer un fichier .json</div></div>
+          <label style="cursor:pointer;color:var(--accent);font-size:13px;font-weight:500">
+            Choisir
+            <input type="file" accept=".json" style="display:none" onchange="importBackup(event)">
+          </label>
+        </div>
+        <div class="divider"></div>
+        <div class="set-row" onclick="exportCSV()" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(255,152,0,.15)">📊</div>
+          <div class="set-info"><div class="set-name">Exporter en CSV</div><div class="set-desc">Pour Excel ou Google Sheets</div></div>
+          <span class="set-right" style="font-size:18px">↗</span>
         </div>
       </div>
     </div>
@@ -787,7 +802,7 @@ function renderSettings(){
       </div>
     </div>
 
-    <div style="text-align:center;padding:8px;font-size:12px;color:var(--t3)">Mon Budget v2.0</div>
+    <div style="text-align:center;padding:8px;font-size:12px;color:var(--t3)">Mon Budget v2.5</div>
   </div>`;
 }
 
@@ -798,6 +813,63 @@ function updateAppName(v){prefs.appName=v||'Mon Budget';savePrefs();const d=docu
 function setCurrency(v){prefs.currency=v;savePrefs();const c=document.getElementById('amount-currency');if(c)c.textContent=v;toast('💱 Devise : '+v)}
 function setPayDay(d){prefs.payDay=d;savePrefs();renderDash();toast('📅 Jour de paie : le '+d)}
 
+
+function exportBackup(){
+  const backup = {
+    version: '2.5',
+    date: new Date().toISOString(),
+    data: data,
+    prefs: prefs
+  };
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
+  a.href = url;
+  a.download = `budget-sauvegarde-${dateStr}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('💾 Sauvegarde téléchargée !');
+}
+
+function importBackup(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = r => {
+    try {
+      const backup = JSON.parse(r.target.result);
+      // Validate structure
+      if(!backup.data || !backup.data.transactions){
+        toast('❌ Fichier invalide');
+        return;
+      }
+      openModal(
+        'Restaurer la sauvegarde',
+        `Du ${new Date(backup.date).toLocaleDateString('fr-FR')} · ${backup.data.transactions.length} transactions. Tes données actuelles seront remplacées.`,
+        ()=>{
+          data = backup.data;
+          if(!data.savings) data.savings = [];
+          if(!data.savingsGoals) data.savingsGoals = [];
+          if(backup.prefs){
+            Object.assign(prefs, backup.prefs);
+            savePrefs();
+          }
+          save();
+          applyPrefs();
+          renderDash();
+          nav('dash');
+          toast('✅ Données restaurées !');
+        }
+      );
+    } catch(e){
+      toast('❌ Fichier corrompu');
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+}
 function exportCSV(){
   const rows=[['Date','Type','Catégorie','Description','Montant'],...data.transactions.map(t=>[t.date,t.type==='expense'?'Dépense':'Revenu',getCat(t.cat).l,t.desc,t.amount])];
   const csv=rows.map(r=>r.join(';')).join('\n');
