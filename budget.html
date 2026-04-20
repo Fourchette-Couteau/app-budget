@@ -247,6 +247,40 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 @keyframes splashPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
 @keyframes splashFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes dotPulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+/* ─ SAVINGS ─ */
+.sav-pad{padding:16px}
+.sav-hero{border-radius:var(--radius);padding:28px 22px 24px;margin-bottom:12px;position:relative;overflow:hidden;background:linear-gradient(135deg,#1a9e5c,#0d7a47);box-shadow:0 8px 40px rgba(26,158,92,.4)}
+.sav-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(255,255,255,.18),transparent 60%);pointer-events:none}
+.sav-hero-label{font-size:12px;font-weight:500;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.sav-hero-amount{font-size:46px;font-weight:300;color:#fff;letter-spacing:-2px;line-height:1;margin-bottom:6px}
+.sav-hero-sub{font-size:13px;color:rgba(255,255,255,.7)}
+.sav-goal-bar-wrap{margin-top:16px}
+.sav-goal-bar-track{height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden;margin-top:6px}
+.sav-goal-bar-fill{height:100%;border-radius:3px;background:#fff;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.sav-goal-labels{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.7);margin-top:4px}
+.sav-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sav-stat{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)}
+.sav-stat-label{font-size:11px;color:var(--t2);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.sav-stat-val{font-size:20px;font-weight:300;letter-spacing:-.3px}
+.sav-stat-val.green{color:var(--inc-t)}
+.sav-add-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.sav-add-title{font-size:15px;font-weight:600;margin-bottom:14px}
+.sav-input-row{display:flex;gap:10px;align-items:flex-end}
+.sav-btn{padding:13px 20px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,#1a9e5c,#0d7a47);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);transition:var(--tr);white-space:nowrap;box-shadow:0 4px 16px rgba(26,158,92,.35)}
+.sav-btn:active{transform:scale(.97);opacity:.9}
+.sav-btn.withdraw{background:var(--surface2);color:var(--exp-t);box-shadow:none}
+.sav-entry{display:flex;align-items:center;gap:12px;padding:13px 16px;transition:background var(--tr)}
+.sav-entry:active{background:var(--row-hover)}
+.sav-entry-icon{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sav-entry-icon.dep{background:rgba(26,158,92,.12)}
+.sav-entry-icon.with{background:rgba(255,95,95,.12)}
+.sav-entry-info{flex:1;min-width:0}
+.sav-entry-label{font-size:15px;font-weight:500}
+.sav-entry-date{font-size:12px;color:var(--t2);margin-top:1px}
+.sav-entry-amt{font-size:15px;font-weight:500}
+.sav-entry-amt.dep{color:var(--inc-t)}
+.sav-entry-amt.with{color:var(--exp-t)}
+.goal-edit-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -314,6 +348,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <div id="s-history" class="screen"></div>
     <div id="s-budget" class="screen"></div>
+    <div id="s-savings" class="screen"></div>
     <div id="s-settings" class="screen"></div>
   </div>
   <nav class="nav-wrap">
@@ -321,6 +356,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <button class="nav-btn active" onclick="nav('dash')" data-s="dash"><span class="nav-icon">⊟</span><span class="nav-lbl">Accueil</span></button>
       <button class="nav-btn" onclick="nav('add')" data-s="add"><span class="nav-icon">⊕</span><span class="nav-lbl">Ajouter</span></button>
       <button class="nav-btn" onclick="nav('history')" data-s="history"><span class="nav-icon">☰</span><span class="nav-lbl">Historique</span></button>
+      <button class="nav-btn" onclick="nav('savings')" data-s="savings"><span class="nav-icon">🐷</span><span class="nav-lbl">Épargne</span></button>
       <button class="nav-btn" onclick="nav('budget')" data-s="budget"><span class="nav-icon">◎</span><span class="nav-lbl">Budgets</span></button>
     </div>
   </nav>
@@ -420,7 +456,7 @@ function prevPeriods(n){
   return periods;
 }
 
-let data=JSON.parse(localStorage.getItem('budget_v4')||'{"transactions":[],"budgets":[{"cat":"food","limit":400},{"cat":"transport","limit":150},{"cat":"loisirs","limit":100},{"cat":"restaurants","limit":80}]}');
+let data=JSON.parse(localStorage.getItem('budget_v4')||'{"transactions":[],"budgets":[{"cat":"food","limit":400},{"cat":"transport","limit":150},{"cat":"loisirs","limit":100},{"cat":"restaurants","limit":80}],"savings":[],"savingsGoals":[]}');
 let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"appName":"Mon Budget","currency":"€","payDay":25}');
 let txType='expense';
 let donutChart=null;
@@ -489,6 +525,7 @@ function nav(s){
   if(s==='dash')renderDash();
   if(s==='history')renderHistory();
   if(s==='budget')renderBudget();
+  if(s==='savings')renderSavings();
   if(s==='settings'){renderSettings();document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'))}
 }
 
@@ -803,6 +840,122 @@ function showSplash(){
     splash.classList.add('hide');
     setTimeout(()=>{ splash.style.display='none'; }, 520);
   }, 1800);
+}
+
+
+function renderSavings(){
+  if(!data.savings) data.savings=[];
+  if(!data.savingsGoals) data.savingsGoals=[];
+  const cur=prefs.currency||'€';
+  const total=data.savings.reduce((s,e)=>s+(e.type==='deposit'?e.amount:-e.amount),0);
+  const goal=data.savingsGoals[0]||null;
+  const goalAmt=goal?goal.amount:0;
+  const goalPct=goalAmt>0?Math.min(Math.round((total/goalAmt)*100),100):0;
+  // This month deposits
+  const pm=currentPeriod();
+  const thisPeriod=data.savings.filter(e=>inPeriod(e.date,pm)&&e.type==='deposit').reduce((s,e)=>s+e.amount,0);
+  // Projection: avg monthly deposit
+  const allDeposits=data.savings.filter(e=>e.type==='deposit');
+  const months={};
+  allDeposits.forEach(e=>{const m=e.date.slice(0,7);months[m]=(months[m]||0)+e.amount});
+  const mVals=Object.values(months);
+  const avgMonthly=mVals.length>0?Math.round(mVals.reduce((a,b)=>a+b,0)/mVals.length):0;
+  const monthsLeft=goalAmt>0&&avgMonthly>0?Math.ceil((goalAmt-total)/avgMonthly):null;
+  // Date projection
+  let projDate='';
+  if(monthsLeft!==null&&monthsLeft>0){
+    const d=new Date();d.setMonth(d.getMonth()+monthsLeft);
+    projDate=d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  } else if(goalAmt>0&&total>=goalAmt){
+    projDate='Objectif atteint ! 🎉';
+  }
+
+  const el=document.getElementById('s-savings');
+  el.innerHTML=`<div class="sav-pad">
+    <div class="sav-hero">
+      <div class="sav-hero-label">Épargne totale</div>
+      <div class="sav-hero-amount">${fmtAmt(Math.max(0,total))} ${cur}</div>
+      <div class="sav-hero-sub">${thisPeriod>0?`+${fmtAmt(thisPeriod)} ${cur} cette période`:'Aucun versement cette période'}</div>
+      ${goalAmt>0?`
+      <div class="sav-goal-bar-wrap">
+        <div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:500">Objectif : ${fmtAmt(goalAmt)} ${cur} ${goal.name?'— '+goal.name:''}</div>
+        <div class="sav-goal-bar-track"><div class="sav-goal-bar-fill" style="width:${goalPct}%"></div></div>
+        <div class="sav-goal-labels"><span>${goalPct}%</span><span>${fmtAmt(Math.max(0,goalAmt-total))} ${cur} restants</span></div>
+      </div>`:''}
+    </div>
+
+    <div class="sav-stats">
+      <div class="sav-stat"><div class="sav-stat-label">Versement moyen</div><div class="sav-stat-val green">${avgMonthly>0?fmtAmt(avgMonthly)+' '+cur+'/m':'—'}</div></div>
+      <div class="sav-stat"><div class="sav-stat-label">${goalAmt>0?'Projection':'Total versements'}</div><div class="sav-stat-val">${goalAmt>0?(projDate||'—'):fmtAmt(allDeposits.reduce((s,e)=>s+e.amount,0))+' '+cur}</div></div>
+    </div>
+
+    <div class="sav-add-card">
+      <div class="sav-add-title">Ajouter un mouvement</div>
+      <div class="f-group"><label class="f-label">Description (optionnel)</label><input type="text" id="sav-desc" placeholder="Ex : Virement mensuel"></div>
+      <div class="f-row" style="margin-bottom:12px">
+        <div class="f-group" style="margin-bottom:0"><label class="f-label">Montant (${cur})</label><input type="number" id="sav-amount" placeholder="200" inputmode="decimal" min="0" step="0.01"></div>
+        <div class="f-group" style="margin-bottom:0"><label class="f-label">Date</label><input type="date" id="sav-date" value="${new Date().toISOString().split('T')[0]}"></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="sav-btn" style="flex:1" onclick="addSaving('deposit')">+ Déposer</button>
+        <button class="sav-btn withdraw" style="flex:1" onclick="addSaving('withdraw')">− Retirer</button>
+      </div>
+    </div>
+
+    <div class="goal-edit-card">
+      <div class="sav-add-title">🎯 Objectif d'épargne</div>
+      <div class="f-row">
+        <div class="f-group"><label class="f-label">Nom (ex: Vacances)</label><input type="text" id="goal-name" placeholder="Mon objectif" value="${goal?goal.name:''}"></div>
+        <div class="f-group"><label class="f-label">Montant cible (${cur})</label><input type="number" id="goal-amount" placeholder="5000" inputmode="decimal" value="${goalAmt||''}"></div>
+      </div>
+      <button class="sav-btn" style="width:100%" onclick="saveGoal()">Enregistrer l'objectif</button>
+    </div>
+
+    ${data.savings.length?`
+    <div class="sec-label">Historique</div>
+    <div class="glass-card" style="overflow:hidden">
+      ${data.savings.slice().reverse().map((e,i,arr)=>`
+        ${i>0?'<div class="divider"></div>':''}
+        <div class="sav-entry">
+          <div class="sav-entry-icon ${e.type==='deposit'?'dep':'with'}">${e.type==='deposit'?'💰':'💸'}</div>
+          <div class="sav-entry-info">
+            <div class="sav-entry-label">${e.desc||( e.type==='deposit'?'Versement':'Retrait')}</div>
+            <div class="sav-entry-date">${e.date.slice(8)}/${e.date.slice(5,7)}/${e.date.slice(0,4)}</div>
+          </div>
+          <div class="sav-entry-amt ${e.type==='deposit'?'dep':'with'}">${e.type==='deposit'?'+':'-'}${fmtAmt(e.amount)} ${cur}</div>
+          <button class="tx-del" onclick="deleteSaving(${data.savings.length-1-i})">×</button>
+        </div>`).join('')}
+    </div>`:'<div class="empty">Aucun mouvement d\'épargne.<br>Commence par déposer de l\'argent !</div>'}
+  </div>`;
+}
+
+function addSaving(type){
+  const amt=parseFloat(document.getElementById('sav-amount').value);
+  const desc=document.getElementById('sav-desc').value.trim();
+  const date=document.getElementById('sav-date').value||new Date().toISOString().split('T')[0];
+  if(!amt||amt<=0){toast('💡 Entre un montant valide');return}
+  if(!data.savings) data.savings=[];
+  data.savings.push({id:Date.now(),type,amount:amt,desc,date});
+  save();
+  document.getElementById('sav-amount').value='';
+  document.getElementById('sav-desc').value='';
+  toast(type==='deposit'?'💰 Versement enregistré !':'💸 Retrait enregistré !');
+  renderSavings();
+}
+
+function deleteSaving(i){
+  openModal('Supprimer ce mouvement','Cette action est irréversible.',()=>{
+    data.savings.splice(i,1);save();renderSavings();toast('🗑 Supprimé');
+  });
+}
+
+function saveGoal(){
+  const name=document.getElementById('goal-name').value.trim();
+  const amount=parseFloat(document.getElementById('goal-amount').value);
+  if(!amount||amount<=0){toast('💡 Entre un montant cible');return}
+  if(!data.savingsGoals) data.savingsGoals=[];
+  data.savingsGoals=[{name,amount}];
+  save();renderSavings();toast('🎯 Objectif enregistré !');
 }
 
 // Init
