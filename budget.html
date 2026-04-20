@@ -330,6 +330,25 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .rec-today-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
 .rec-today-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.15)}
 .rec-today-item:last-child{border-bottom:none;padding-bottom:0}
+/* ─ PIN ─ */
+#pinScreen{position:fixed;inset:0;z-index:998;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .3s}
+#pinScreen.show{opacity:1;pointer-events:all}
+.pin-avatar{width:72px;height:72px;border-radius:24px;background:linear-gradient(135deg,var(--accent),#7b5ea7);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px;box-shadow:0 8px 32px rgba(79,142,255,.3)}
+.pin-title{font-size:22px;font-weight:600;letter-spacing:-.3px;margin-bottom:6px}
+.pin-subtitle{font-size:14px;color:var(--t2);margin-bottom:36px}
+.pin-dots{display:flex;gap:16px;margin-bottom:40px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--t3);transition:all .15s cubic-bezier(.4,0,.2,1)}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);transform:scale(1.1)}
+.pin-dot.error{background:var(--red);border-color:var(--red);animation:pinShake .3s ease}
+@keyframes pinShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:260px}
+.pin-key{height:68px;border-radius:50%;border:none;background:var(--surface2);color:var(--text);font-size:24px;font-weight:400;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform .1s,background .1s;font-family:var(--font);letter-spacing:-.5px}
+.pin-key:active{transform:scale(.9);background:var(--surface)}
+.pin-key-sub{font-size:8px;font-weight:600;letter-spacing:1.5px;color:var(--t2);text-transform:uppercase}
+.pin-key.del{background:none;font-size:20px}
+.pin-key.faceid{background:none;font-size:26px}
+.pin-error-msg{font-size:13px;color:var(--red);margin-top:16px;min-height:20px;transition:opacity .2s}
+.pin-setup-hint{font-size:12px;color:var(--t3);margin-top:20px;text-align:center;line-height:1.5;padding:0 30px}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -362,6 +381,33 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="splash-dot"></div>
     <div class="splash-dot"></div>
   </div>
+</div>
+<div id="pinScreen">
+  <div class="pin-avatar" id="pinAvatar">💰</div>
+  <div class="pin-title" id="pinTitle">Mon Budget</div>
+  <div class="pin-subtitle" id="pinSubtitle">Entrer le code</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinKey('1')">1<span class="pin-key-sub"></span></button>
+    <button class="pin-key" onclick="pinKey('2')">2<span class="pin-key-sub">ABC</span></button>
+    <button class="pin-key" onclick="pinKey('3')">3<span class="pin-key-sub">DEF</span></button>
+    <button class="pin-key" onclick="pinKey('4')">4<span class="pin-key-sub">GHI</span></button>
+    <button class="pin-key" onclick="pinKey('5')">5<span class="pin-key-sub">JKL</span></button>
+    <button class="pin-key" onclick="pinKey('6')">6<span class="pin-key-sub">MNO</span></button>
+    <button class="pin-key" onclick="pinKey('7')">7<span class="pin-key-sub">PQRS</span></button>
+    <button class="pin-key" onclick="pinKey('8')">8<span class="pin-key-sub">TUV</span></button>
+    <button class="pin-key" onclick="pinKey('9')">9<span class="pin-key-sub">WXYZ</span></button>
+    <button class="pin-key faceid" id="pinFaceBtn" onclick="tryFaceID()" style="opacity:0">🫥</button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-error-msg" id="pinError"></div>
+  <div class="pin-setup-hint" id="pinHint"></div>
 </div>
 <div class="orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 
@@ -769,6 +815,12 @@ function renderSettings(){
           <span class="set-right">›</span>
         </div>
         <div style="padding:0 16px 14px"><input type="text" id="appNameInput" placeholder="Mon Budget" value="${prefs.appName||''}" oninput="updateAppName(this.value)" style="margin-top:8px"></div>
+        <div class="divider"></div>
+        <div class="set-row" onclick="openPinSetup()" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(255,59,48,.12)">🔒</div>
+          <div class="set-info"><div class="set-name">Code PIN</div><div class="set-desc" id="pinStatusDesc">${prefs.pinEnabled?'Activé · Appuie pour modifier':'Désactivé'}</div></div>
+          <span class="set-right" style="font-size:13px;font-weight:500;color:${prefs.pinEnabled?'var(--inc-t)':'var(--t2)'}">${prefs.pinEnabled?'ON':'OFF'}</span>
+        </div>
         <div class="divider"></div>
         <div class="set-row">
           <div class="set-icon" style="background:rgba(255,193,7,.15)">💱</div>
@@ -1376,12 +1428,152 @@ function deleteRecurring(i){
     data.recurring.splice(i,1);save();renderRecurring();toast('🗑 Supprimée');
   });
 }
+
+/* ── CODE PIN ── */
+let pinBuffer = '';
+let pinMode = 'unlock'; // unlock | setup1 | setup2
+let pinTemp = '';
+let pinResolve = null;
+
+function initPinScreen(){
+  const hasPhoto = prefs.avatarPhoto;
+  const emoji = prefs.avatarEmoji || '💰';
+  const av = document.getElementById('pinAvatar');
+  if(av) av.innerHTML = hasPhoto ? `<img src="${prefs.avatarPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:24px">` : emoji;
+  const pt = document.getElementById('pinTitle');
+  if(pt) pt.textContent = prefs.appName || 'Mon Budget';
+}
+
+function showPinScreen(mode='unlock'){
+  pinMode = mode;
+  pinBuffer = '';
+  pinTemp = '';
+  initPinScreen();
+  updatePinDots();
+  const sub = document.getElementById('pinSubtitle');
+  const hint = document.getElementById('pinHint');
+  const err = document.getElementById('pinError');
+  if(err) err.textContent = '';
+  if(mode === 'unlock'){
+    if(sub) sub.textContent = 'Entrer le code';
+    if(hint) hint.textContent = '';
+    // Show Face ID button if available
+    const fb = document.getElementById('pinFaceBtn');
+    if(fb){fb.style.opacity='1';fb.textContent='🫥';}
+    tryFaceID();
+  } else if(mode === 'setup1'){
+    if(sub) sub.textContent = 'Nouveau code PIN';
+    if(hint) hint.textContent = 'Choisissez un code à 4 chiffres pour protéger vos données.';
+    const fb = document.getElementById('pinFaceBtn');
+    if(fb) fb.style.opacity='0';
+  } else if(mode === 'setup2'){
+    if(sub) sub.textContent = 'Confirmer le code';
+    if(hint) hint.textContent = '';
+  }
+  document.getElementById('pinScreen').classList.add('show');
+}
+
+function hidePinScreen(){
+  document.getElementById('pinScreen').classList.remove('show');
+}
+
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    const d = document.getElementById('pd'+i);
+    if(d){
+      d.classList.toggle('filled', i < pinBuffer.length);
+      d.classList.remove('error');
+    }
+  }
+}
+
+function pinShakeError(msg){
+  for(let i=0;i<4;i++){
+    const d = document.getElementById('pd'+i);
+    if(d){ d.classList.remove('filled'); void d.offsetWidth; d.classList.add('error'); }
+  }
+  const err = document.getElementById('pinError');
+  if(err) err.textContent = msg;
+  setTimeout(()=>{ pinBuffer=''; updatePinDots(); }, 600);
+}
+
+function pinKey(k){
+  if(pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if(pinBuffer.length === 4){
+    setTimeout(()=>handlePinComplete(), 150);
+  }
+}
+
+function pinDel(){
+  if(pinBuffer.length > 0){
+    pinBuffer = pinBuffer.slice(0,-1);
+    updatePinDots();
+  }
+}
+
+function handlePinComplete(){
+  const stored = localStorage.getItem('budget_pin');
+  if(pinMode === 'unlock'){
+    if(pinBuffer === stored){
+      hidePinScreen();
+      pinBuffer = '';
+      updatePinDots();
+    } else {
+      pinShakeError('Code incorrect');
+    }
+  } else if(pinMode === 'setup1'){
+    pinTemp = pinBuffer;
+    pinBuffer = '';
+    updatePinDots();
+    showPinScreen('setup2');
+  } else if(pinMode === 'setup2'){
+    if(pinBuffer === pinTemp){
+      localStorage.setItem('budget_pin', pinBuffer);
+      prefs.pinEnabled = true;
+      savePrefs();
+      hidePinScreen();
+      toast('🔒 Code PIN activé !');
+      renderSettings();
+    } else {
+      pinShakeError('Les codes ne correspondent pas');
+      pinTemp = '';
+      setTimeout(()=>showPinScreen('setup1'), 800);
+    }
+  }
+}
+
+function openPinSetup(){
+  if(prefs.pinEnabled){
+    openModal('Code PIN', 'Désactiver ou modifier le code PIN ?', ()=>{
+      // Disable
+      localStorage.removeItem('budget_pin');
+      prefs.pinEnabled = false;
+      savePrefs();
+      toast('🔓 Code PIN désactivé');
+      renderSettings();
+    });
+    // Add modify option - just show setup after modal cancel
+  } else {
+    showPinScreen('setup1');
+  }
+}
+
+function tryFaceID(){
+  if(!window.PublicKeyCredential) return;
+  // Try biometric if supported — gracefully falls back to PIN
+  const fb = document.getElementById('pinFaceBtn');
+  if(fb) fb.textContent = '⊙';
+}
+
 // Init
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
 applyPrefs();
 processDueRecurring();
 showSplash();
+if(prefs.pinEnabled){ setTimeout(()=>showPinScreen("unlock"), 1900); }
 setType('expense');
 renderDash();
 </script>
