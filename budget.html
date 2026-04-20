@@ -82,17 +82,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .header-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#fff;cursor:pointer;transition:transform .15s}
 .header-avatar:active{transform:scale(.9)}
 
-.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--safe-bottom) + 80px);scroll-behavior:smooth}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--safe-bottom) + 110px);scroll-behavior:smooth}
 .screen{display:none;animation:fadeUp .3s ease}
 .screen.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-.nav{position:fixed;bottom:0;left:0;right:0;z-index:10;padding:10px 8px calc(var(--safe-bottom) + 6px);background:var(--nav-bg);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:0.5px solid var(--glass-b);display:flex;transition:background var(--tr)}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;border:none;background:none;cursor:pointer;transition:var(--tr);border-radius:12px}
-.nav-icon{font-size:21px;line-height:1;transition:transform .2s}
+.nav-wrap{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;flex-direction:column;align-items:center;padding-bottom:calc(var(--safe-bottom) + 8px);pointer-events:none}
+.nav{display:flex;align-items:center;gap:2px;background:var(--nav-bg);backdrop-filter:blur(32px) saturate(200%);-webkit-backdrop-filter:blur(32px) saturate(200%);border:.5px solid var(--glass-b);border-radius:28px;padding:6px 8px;box-shadow:0 8px 32px rgba(0,0,0,.25),0 1px 0 rgba(255,255,255,.08) inset;pointer-events:all;transition:background var(--tr)}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;border:none;background:none;cursor:pointer;transition:var(--tr);border-radius:22px;min-width:60px}
+.nav-btn.active{background:var(--surface2)}
+.nav-icon{font-size:20px;line-height:1;transition:transform .2s}
 .nav-lbl{font-size:10px;font-weight:500;color:var(--t3);transition:color var(--tr)}
 .nav-btn.active .nav-lbl{color:var(--accent)}
-.nav-btn.active .nav-icon{transform:scale(1.12)}
+.nav-btn.active .nav-icon{transform:scale(1.1)}
+.home-bar{width:134px;height:5px;border-radius:3px;background:var(--text);opacity:.2;margin-top:8px;pointer-events:none;flex-shrink:0}
 
 .glass-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:0.5px solid var(--glass-b);border-radius:var(--radius);box-shadow:var(--shadow);transition:background var(--tr),border-color var(--tr)}
 
@@ -210,7 +213,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .profile-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:600;color:#fff;margin:20px auto 8px;cursor:pointer}
 
 /* Toast */
-.toast{position:fixed;bottom:calc(var(--safe-bottom) + 88px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
+.toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
 
@@ -264,12 +267,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div id="s-budget" class="screen"></div>
     <div id="s-settings" class="screen"></div>
   </div>
-  <nav class="nav">
-    <button class="nav-btn active" onclick="nav('dash')" data-s="dash"><span class="nav-icon">⊟</span><span class="nav-lbl">Accueil</span></button>
-    <button class="nav-btn" onclick="nav('add')" data-s="add"><span class="nav-icon">⊕</span><span class="nav-lbl">Ajouter</span></button>
-    <button class="nav-btn" onclick="nav('history')" data-s="history"><span class="nav-icon">☰</span><span class="nav-lbl">Historique</span></button>
-    <button class="nav-btn" onclick="nav('budget')" data-s="budget"><span class="nav-icon">◎</span><span class="nav-lbl">Budgets</span></button>
-    <button class="nav-btn" onclick="nav('settings')" data-s="settings"><span class="nav-icon">⚙</span><span class="nav-lbl">Réglages</span></button>
+  <nav class="nav-wrap">
+    <div class="nav">
+      <button class="nav-btn active" onclick="nav('dash')" data-s="dash"><span class="nav-icon">⊟</span><span class="nav-lbl">Accueil</span></button>
+      <button class="nav-btn" onclick="nav('add')" data-s="add"><span class="nav-icon">⊕</span><span class="nav-lbl">Ajouter</span></button>
+      <button class="nav-btn" onclick="nav('history')" data-s="history"><span class="nav-icon">☰</span><span class="nav-lbl">Historique</span></button>
+      <button class="nav-btn" onclick="nav('budget')" data-s="budget"><span class="nav-icon">◎</span><span class="nav-lbl">Budgets</span></button>
+    </div>
+    <div class="home-bar"></div>
   </nav>
 </div>
 
@@ -422,7 +427,7 @@ function nav(s){
   if(s==='dash')renderDash();
   if(s==='history')renderHistory();
   if(s==='budget')renderBudget();
-  if(s==='settings')renderSettings();
+  if(s==='settings'){renderSettings();document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'))}
 }
 
 function renderDash(){
