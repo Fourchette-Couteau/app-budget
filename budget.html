@@ -1102,8 +1102,11 @@ function addBudget(){
 function renderSettings(){
   const el=document.getElementById('s-settings');
   const isDark=prefs.theme==='dark'||(prefs.theme==='auto'&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+  const avatarContent = prefs.avatarPhoto
+    ? `<img src="${prefs.avatarPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+    : (prefs.avatarEmoji||'💰');
   el.innerHTML=`<div class="set-pad">
-    <div class="profile-avatar" id="avatarLarge" onclick="nav('settings')">💰</div>
+    <div class="profile-avatar" id="avatarLarge" onclick="openPhotoModal()">${avatarContent}</div>
     <div class="profile-name" id="appNameDisplay">${prefs.appName||'Mon Budget'}</div>
 
     <div class="set-section" style="margin-top:20px">
