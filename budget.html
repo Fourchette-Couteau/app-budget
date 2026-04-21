@@ -367,10 +367,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .forecast-divider{width:.5px;height:32px;background:var(--sep)}
 .forecast-tip{font-size:12px;color:var(--t2);margin-top:12px;padding-top:10px;border-top:.5px solid var(--sep);line-height:1.5;text-align:center}
 /* ─ EDIT TX MODAL ─ */
-.edit-modal-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.edit-modal-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;padding:0 16px;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .edit-modal-bg.show{opacity:1;pointer-events:all}
 .edit-modal{background:var(--bg2);border-radius:24px 24px 0 0;padding:20px 24px calc(env(safe-area-inset-bottom,0px)+28px);width:100%;max-width:500px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
-.edit-modal-bg.show .edit-modal{transform:translateY(0)}
+.edit-modal-bg.show .edit-modal{transform:translateY(0);margin-bottom:calc(env(safe-area-inset-bottom,0px) + 12px)}
 .edit-modal-handle{width:36px;height:4px;border-radius:2px;background:var(--t3);margin:0 auto 16px}
 .edit-modal-title{font-size:17px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:10px}
 .edit-modal-icon{width:36px;height:36px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -434,14 +434,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
 
 /* confirm modal */
-.modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .modal-bg.show{opacity:1;pointer-events:all}
-.modal{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;padding:24px 24px calc(env(safe-area-inset-bottom,0px)+28px);width:100%;max-width:500px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.modal{background:var(--bg2);border-radius:var(--radius);margin:0 16px calc(env(safe-area-inset-bottom,0px) + 12px);width:calc(100% - 32px);max-width:500px;transform:translateY(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow:hidden}
 .modal-bg.show .modal{transform:translateY(0)}
+.modal-inner{padding:22px 20px 20px}
 .modal-title{font-size:17px;font-weight:600;text-align:center;margin-bottom:8px}
 .modal-msg{font-size:14px;color:var(--t2);text-align:center;margin-bottom:20px}
 .modal-btns{display:flex;flex-direction:column;gap:10px}
-.btn-modal{padding:14px;border-radius:var(--radius-sm);border:none;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--font);transition:var(--tr)}
+.btn-modal{padding:14px;border-radius:var(--radius-sm);border:none;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--font);transition:var(--tr);width:100%;display:block}
 .btn-modal.cancel{background:var(--surface2);color:var(--text)}
 .btn-modal.confirm{background:rgba(255,95,95,.15);color:var(--red)}
 </style>
@@ -639,11 +640,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="toast" id="toast"></div>
 <div class="modal-bg" id="modalBg">
   <div class="modal">
-    <div class="modal-title" id="modalTitle"></div>
-    <div class="modal-msg" id="modalMsg"></div>
-    <div class="modal-btns">
-      <button class="btn-modal confirm" id="modalConfirm">Supprimer</button>
-      <button class="btn-modal cancel" onclick="closeModal()">Annuler</button>
+    <div class="modal-inner">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-msg" id="modalMsg"></div>
+      <div class="modal-btns">
+        <button class="btn-modal confirm" id="modalConfirm">Supprimer</button>
+        <button class="btn-modal cancel" onclick="closeModal()">Annuler</button>
+      </div>
     </div>
   </div>
 </div>
