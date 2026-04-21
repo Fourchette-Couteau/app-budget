@@ -365,6 +365,19 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .forecast-stat-label{font-size:11px;color:var(--t2)}
 .forecast-divider{width:.5px;height:32px;background:var(--sep)}
 .forecast-tip{font-size:12px;color:var(--t2);margin-top:12px;padding-top:10px;border-top:.5px solid var(--sep);line-height:1.5;text-align:center}
+/* ─ EDIT TX MODAL ─ */
+.edit-modal-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.edit-modal-bg.show{opacity:1;pointer-events:all}
+.edit-modal{background:var(--bg2);border-radius:24px 24px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+24px);width:100%;max-width:500px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.edit-modal-bg.show .edit-modal{transform:translateY(0)}
+.edit-modal-handle{width:36px;height:4px;border-radius:2px;background:var(--t3);margin:0 auto 16px}
+.edit-modal-title{font-size:17px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.edit-modal-icon{width:36px;height:36px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.edit-actions{display:flex;gap:10px;margin-top:16px}
+.btn-edit-save{flex:1;padding:14px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#7b5ea7);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);transition:var(--tr)}
+.btn-edit-save:active{opacity:.85;transform:scale(.98)}
+.btn-edit-del{padding:14px 18px;border-radius:var(--radius-sm);border:none;background:var(--expense-bg,rgba(255,95,95,.1));color:var(--red);font-size:15px;cursor:pointer;font-family:var(--font);transition:var(--tr)}
+.btn-edit-del:active{opacity:.7}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -481,6 +494,37 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 
+<div class="edit-modal-bg" id="editModalBg" onclick="closeEditModal(event)">
+  <div class="edit-modal">
+    <div class="edit-modal-handle"></div>
+    <div class="edit-modal-title">
+      <div class="edit-modal-icon" id="editModalIcon">📦</div>
+      Modifier la transaction
+    </div>
+    <div class="f-group">
+      <label class="f-label">Montant</label>
+      <input type="number" id="edit-amount" inputmode="decimal" min="0" step="0.01">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Description</label>
+      <input type="text" id="edit-desc">
+    </div>
+    <div class="f-row">
+      <div class="f-group">
+        <label class="f-label">Catégorie</label>
+        <select id="edit-cat"></select>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Date</label>
+        <input type="date" id="edit-date">
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-edit-save" onclick="saveEditTx()">Enregistrer</button>
+      <button class="btn-edit-del" onclick="deleteEditTx()">🗑</button>
+    </div>
+  </div>
+</div>
 <div class="photo-modal-bg" id="photoModalBg" onclick="closePhotoModal(event)">
   <div class="photo-modal">
     <div class="photo-modal-handle"></div>
@@ -641,6 +685,70 @@ function addTransaction(){
   nav('dash');
 }
 
+
+/* ── MODIFIER TRANSACTION ── */
+let editingTxId = null;
+
+function openEditTx(id){
+  const tx = data.transactions.find(t=>t.id===id);
+  if(!tx) return;
+  editingTxId = id;
+  const c = getCat(tx.cat);
+
+  // Fill icon
+  document.getElementById('editModalIcon').textContent = c.e;
+
+  // Fill fields
+  document.getElementById('edit-amount').value = tx.amount;
+  document.getElementById('edit-desc').value = tx.desc;
+  document.getElementById('edit-date').value = tx.date;
+
+  // Fill category select with right type
+  const sel = document.getElementById('edit-cat');
+  sel.innerHTML = [...CATS.expense, ...CATS.income].map(cat =>
+    `<option value="${cat.id}" ${cat.id===tx.cat?'selected':''}>${cat.e} ${cat.l}</option>`
+  ).join('');
+
+  document.getElementById('editModalBg').classList.add('show');
+}
+
+function closeEditModal(e){
+  if(!e || e.target === document.getElementById('editModalBg'))
+    document.getElementById('editModalBg').classList.remove('show');
+}
+
+function saveEditTx(){
+  if(!editingTxId) return;
+  const amt = parseFloat(document.getElementById('edit-amount').value);
+  const desc = document.getElementById('edit-desc').value.trim();
+  const cat = document.getElementById('edit-cat').value;
+  const date = document.getElementById('edit-date').value;
+  if(!amt||amt<=0){toast('💡 Montant invalide');return}
+  if(!desc){toast('💡 Description vide');return}
+  const idx = data.transactions.findIndex(t=>t.id===editingTxId);
+  if(idx > -1){
+    data.transactions[idx] = {...data.transactions[idx], amount:amt, desc, cat, date};
+    save();
+    document.getElementById('editModalBg').classList.remove('show');
+    renderDash();
+    renderHistory();
+    toast('✅ Transaction modifiée !');
+  }
+  editingTxId = null;
+}
+
+function deleteEditTx(){
+  if(!editingTxId) return;
+  openModal('Supprimer la transaction','Cette action est irréversible.',()=>{
+    data.transactions = data.transactions.filter(t=>t.id!==editingTxId);
+    save();
+    document.getElementById('editModalBg').classList.remove('show');
+    renderDash();
+    renderHistory();
+    toast('🗑 Supprimée');
+    editingTxId = null;
+  });
+}
 function deleteTx(id){
   openModal('Supprimer la transaction','Cette action est irréversible.',()=>{
     data.transactions=data.transactions.filter(t=>t.id!==id);
@@ -705,7 +813,7 @@ function renderDash(){
     ${prefs.showRecent && recent.length?`
     <div class="sec-label">Dernières transactions</div>
     <div class="glass-card" style="overflow:hidden">
-      ${recent.map((t,i)=>{const c=getCat(t.cat);return`${i>0?'<div class="divider"></div>':''}<div class="tx-item"><div class="tx-icon">${c.e}</div><div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l} · ${t.date.slice(8)}/${t.date.slice(5,7)}</div></div><div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div></div>`}).join('')}
+      ${recent.map((t,i)=>{const c=getCat(t.cat);return`${i>0?'<div class="divider"></div>':''}<div class="tx-item" onclick="openEditTx(${t.id})" style="cursor:pointer"><div class="tx-icon">${c.e}</div><div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l} · ${t.date.slice(8)}/${t.date.slice(5,7)}</div></div><div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div></div>`}).join('')}
     </div>`:''}
     ${!cats.length?'<div class="empty">Aucune transaction cette période.<br>Appuie sur ⊕ pour commencer !</div>':''}
     ${buildForecastCard(period, expense, income, cur)}
@@ -730,7 +838,7 @@ function renderHistory(){
   el.innerHTML=days.map(day=>{
     const [y,m,d]=day.split('-');
     return`<div class="tx-gdate">${d}/${m}/${y}</div><div class="glass-card" style="margin:0 16px 10px;overflow:hidden">
-      ${grouped[day].map((t,i)=>{const c=getCat(t.cat);return`${i>0?'<div class="divider"></div>':''}<div class="tx-item"><div class="tx-icon">${c.e}</div><div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l}</div></div><div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div><button class="tx-del" onclick="deleteTx(${t.id})">×</button></div>`}).join('')}
+      ${grouped[day].map((t,i)=>{const c=getCat(t.cat);return`${i>0?'<div class="divider"></div>':''}<div class="tx-item" onclick="openEditTx(${t.id})" style="cursor:pointer"><div class="tx-icon">${c.e}</div><div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l}</div></div><div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div><span style="font-size:18px;color:var(--t3);padding:0 4px">›</span></div>`}).join('')}
     </div>`;
   }).join('');
 }
