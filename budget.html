@@ -1083,6 +1083,12 @@ function renderSettings(){
           <div class="set-info"><div class="set-name">Dernières transactions</div><div class="set-desc">Aperçu sur l'accueil</div></div>
           <label class="toggle"><input type="checkbox" ${prefs.showRecent?'checked':''} onchange="togglePref('showRecent',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
         </div>
+        <div class="divider"></div>
+        <div class="set-row">
+          <div class="set-icon" style="background:rgba(99,217,160,.15)">💰</div>
+          <div class="set-info"><div class="set-name">Épargne automatique</div><div class="set-desc">Vire le solde restant en épargne à chaque nouvelle période</div></div>
+          <label class="toggle"><input type="checkbox" ${prefs.autoSavings!==false?'checked':''} onchange="togglePref('autoSavings',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
       </div>
     </div>
 
@@ -1684,6 +1690,60 @@ function getNextDate(rec){
   return today;
 }
 
+
+function processEndOfPeriodSavings(){
+  if(prefs.autoSavings === false) return;
+  if(!data.savings) data.savings = [];
+
+  const today = fmtDate(new Date());
+  const pd = prefs.payDay || 25;
+
+  // Get current period start to know what the PREVIOUS period was
+  const period = currentPeriod();
+  const prevEnd = new Date(period.start);
+  prevEnd.setDate(prevEnd.getDate() - 1);
+  const prevEndStr = fmtDate(prevEnd);
+
+  // Get previous period start
+  const prevStart = new Date(period.start);
+  prevStart.setMonth(prevStart.getMonth() - 1);
+  // Clamp to last day if needed
+  const prevStartStr = fmtDate(new Date(prevStart.getFullYear(), prevStart.getMonth(), clampDay(prevStart.getFullYear(), prevStart.getMonth(), pd)));
+
+  // Check if we already did auto-savings for this period transition
+  const alreadyDone = data.savings.some(s => s.autoForPeriod === period.start);
+  if(alreadyDone) return;
+
+  // Only run on payday or just after (first 2 days of new period)
+  const daysSinceStart = Math.round((new Date(today) - new Date(period.start)) / (1000*60*60*24));
+  if(daysSinceStart > 2) return; // Only run in first 2 days of new period
+
+  // Calculate previous period balance
+  const prevTx = data.transactions.filter(t => t.date >= prevStartStr && t.date <= prevEndStr);
+  if(prevTx.length === 0) return; // No transactions in prev period, skip
+
+  const prevIncome  = prevTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount, 0);
+  const prevExpense = prevTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount, 0);
+  const leftover = Math.round((prevIncome - prevExpense) * 100) / 100;
+
+  if(leftover <= 0) return; // Nothing to save or negative, skip
+
+  // Add to savings automatically
+  data.savings.push({
+    id: Date.now(),
+    type: 'deposit',
+    amount: leftover,
+    desc: `Reliquat période ${prevStartStr.slice(8)}/${prevStartStr.slice(5,7)} → ${prevEndStr.slice(8)}/${prevEndStr.slice(5,7)}`,
+    date: today,
+    autoForPeriod: period.start, // marker so we don't do it twice
+    auto: true
+  });
+  save();
+
+  setTimeout(()=>{
+    toast(`💰 ${leftover.toLocaleString('fr-FR')} € transférés en épargne !`);
+  }, 2500);
+}
 function processDueRecurring(){
   if(!data.recurring || data.recurring.length === 0) return;
   const today = new Date().toISOString().split('T')[0];
@@ -2245,6 +2305,7 @@ function nativeShare(){
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
 applyPrefs();
+processEndOfPeriodSavings();
 processDueRecurring();
 showSplash();
 if(prefs.pinEnabled){ setTimeout(()=>showPinScreen("unlock"), 1900); }
