@@ -349,6 +349,22 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .pin-key.faceid{background:none;font-size:26px}
 .pin-error-msg{font-size:13px;color:var(--red);margin-top:16px;min-height:20px;transition:opacity .2s}
 .pin-setup-hint{font-size:12px;color:var(--t3);margin-top:20px;text-align:center;line-height:1.5;padding:0 30px}
+/* ─ FORECAST ─ */
+.forecast-card{padding:18px;margin-bottom:12px}
+.forecast-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.forecast-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px}
+.forecast-badge.ok{background:rgba(26,158,92,.12);color:var(--inc-t)}
+.forecast-badge.warn{background:rgba(255,179,64,.15);color:var(--amber)}
+.forecast-badge.over{background:rgba(255,95,95,.12);color:var(--exp-t)}
+.forecast-bar-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin:10px 0 6px}
+.forecast-bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1);position:relative}
+.forecast-bar-fill::after{content:'';position:absolute;right:0;top:-3px;width:2px;height:14px;background:inherit;border-radius:1px;opacity:.6}
+.forecast-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-top:8px}
+.forecast-stat{text-align:center;flex:1}
+.forecast-stat-val{font-size:16px;font-weight:500;margin-bottom:2px}
+.forecast-stat-label{font-size:11px;color:var(--t2)}
+.forecast-divider{width:.5px;height:32px;background:var(--sep)}
+.forecast-tip{font-size:12px;color:var(--t2);margin-top:12px;padding-top:10px;border-top:.5px solid var(--sep);line-height:1.5;text-align:center}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -692,6 +708,7 @@ function renderDash(){
       ${recent.map((t,i)=>{const c=getCat(t.cat);return`${i>0?'<div class="divider"></div>':''}<div class="tx-item"><div class="tx-icon">${c.e}</div><div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l} · ${t.date.slice(8)}/${t.date.slice(5,7)}</div></div><div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div></div>`}).join('')}
     </div>`:''}
     ${!cats.length?'<div class="empty">Aucune transaction cette période.<br>Appuie sur ⊕ pour commencer !</div>':''}
+    ${buildForecastCard(period, expense, income, cur)}
     ${buildTaxCard(cur)}
   </div>`;
   if(prefs.showDonut && cats.length){
@@ -1207,6 +1224,89 @@ function calcIR(revenuImposable){
   return {base, abattement, impotBrut:impot, decote, impotNet, detail};
 }
 
+
+function buildForecastCard(period, expenseSoFar, income, cur){
+  if(expenseSoFar === 0 && income === 0) return '';
+
+  const today = new Date();
+  const startDate = new Date(period.start);
+  const endDate = new Date(period.end);
+
+  // Days elapsed and total in period
+  const totalDays = Math.round((endDate - startDate) / (1000*60*60*24)) + 1;
+  const daysElapsed = Math.max(1, Math.round((today - startDate) / (1000*60*60*24)) + 1);
+  const daysLeft = Math.max(0, totalDays - daysElapsed);
+
+  if(daysElapsed < 2) return ''; // Not enough data yet
+
+  // Daily burn rate & projection
+  const dailyBurn = expenseSoFar / daysElapsed;
+  const projectedTotal = Math.round(dailyBurn * totalDays);
+  const projectedLeft = Math.round(dailyBurn * daysLeft);
+  const progressPct = Math.min(100, Math.round((daysElapsed / totalDays) * 100));
+
+  // Compare to income
+  const budgetRef = income > 0 ? income : null;
+  const overBudget = budgetRef && projectedTotal > budgetRef;
+  const ratio = budgetRef ? Math.min(projectedTotal / budgetRef, 1.5) : 0;
+  const barPct = budgetRef ? Math.min(Math.round(ratio * 100), 100) : progressPct;
+  const barColor = !budgetRef ? 'var(--accent)' : ratio > 1 ? 'var(--red)' : ratio > 0.85 ? 'var(--amber)' : 'var(--inc-t)';
+
+  let badge, badgeClass, tip;
+  if(!budgetRef){
+    badge = `${progressPct}% de la période`;
+    badgeClass = 'ok';
+    tip = `Tu dépenses en moyenne ${fmtAmt(Math.round(dailyBurn))} ${cur}/jour · Il te reste ${daysLeft} jours.`;
+  } else if(overBudget){
+    const over = projectedTotal - budgetRef;
+    badge = `⚠️ Dépassement prévu`;
+    badgeClass = 'over';
+    tip = `À ce rythme tu dépasseras tes revenus de ${fmtAmt(over)} ${cur}. Ralentis un peu !`;
+  } else if(ratio > 0.85){
+    badge = `Attention`;
+    badgeClass = 'warn';
+    tip = `Tu es sur la bonne voie mais surveille tes dépenses ces ${daysLeft} prochains jours.`;
+  } else {
+    const saving = budgetRef - projectedTotal;
+    badge = `✓ Dans les clous`;
+    badgeClass = 'ok';
+    tip = `Super ! Tu devrais terminer avec ${fmtAmt(saving)} ${cur} d'économisés cette période.`;
+  }
+
+  return `
+  <div class="sec-label">Prévision de fin de période</div>
+  <div class="glass-card forecast-card">
+    <div class="forecast-title">
+      <span>📈 Dans ${daysLeft} jours</span>
+      <span class="forecast-badge ${badgeClass}">${badge}</span>
+    </div>
+    <div class="forecast-bar-track">
+      <div class="forecast-bar-fill" style="width:${barPct}%;background:${barColor}"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:10px">
+      <span>${period.start.slice(8)}/${period.start.slice(5,7)}</span>
+      <span>${daysElapsed}j / ${totalDays}j</span>
+      <span>${period.end.slice(8)}/${period.end.slice(5,7)}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:0">
+      <div class="forecast-stat">
+        <div class="forecast-stat-val">${fmtAmt(Math.round(expenseSoFar))} ${cur}</div>
+        <div class="forecast-stat-label">Dépensé</div>
+      </div>
+      <div class="forecast-divider"></div>
+      <div class="forecast-stat">
+        <div class="forecast-stat-val" style="color:${barColor}">${fmtAmt(projectedTotal)} ${cur}</div>
+        <div class="forecast-stat-label">Projection finale</div>
+      </div>
+      <div class="forecast-divider"></div>
+      <div class="forecast-stat">
+        <div class="forecast-stat-val">${fmtAmt(Math.round(dailyBurn))} ${cur}</div>
+        <div class="forecast-stat-label">Moy./jour</div>
+      </div>
+    </div>
+    <div class="forecast-tip">${tip}</div>
+  </div>`;
+}
 function buildTaxCard(cur){
   // Collect all salary income from current year
   const year = new Date().getFullYear();
