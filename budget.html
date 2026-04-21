@@ -429,6 +429,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .theme-swatch:active{transform:scale(.95)}
 .theme-swatch-preview{width:36px;height:36px;border-radius:50%;margin:0 auto 6px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 .theme-swatch-name{font-size:11px;font-weight:500;color:var(--t2)}
+/* ─ PROFILE ─ */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 16px}
+.profile-opt{border-radius:14px;padding:12px 10px 10px;border:1.5px solid var(--glass-b);background:var(--surface);cursor:pointer;text-align:center;transition:var(--tr)}
+.profile-opt.sel{border-color:var(--accent);background:rgba(79,142,255,.08)}
+.profile-opt:active{transform:scale(.95)}
+.profile-opt-emoji{font-size:24px;display:block;margin-bottom:5px}
+.profile-opt-name{font-size:12px;font-weight:600;color:var(--text)}
+.profile-opt-desc{font-size:10px;color:var(--t2);margin-top:2px;line-height:1.3}
+.profile-tip{margin:0 16px 14px;padding:10px 12px;background:rgba(79,142,255,.08);border-radius:10px;font-size:12px;color:var(--t2);line-height:1.5;border:.5px solid rgba(79,142,255,.15)}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -668,8 +677,9 @@ const CATS={
   income:[
     {id:'salaire',l:'Salaire',e:'💼',c:'#4CAF50'},
     {id:'freelance',l:'Freelance',e:'💻',c:'#2196F3'},
+    {id:'prime_exo',l:'Prime exonérée',e:'⭐',c:'#FF9800',taxFree:true},
     {id:'remboursement',l:'Remboursement',e:'↩️',c:'#9C27B0'},
-    {id:'epargne',l:'Épargne',e:'🏦',c:'#FF9800'},
+    {id:'epargne',l:'Épargne retrait',e:'🏦',c:'#795548'},
     {id:'autre_revenu',l:'Autre revenu',e:'💰',c:'#607D8B'},
   ]
 };
@@ -707,6 +717,72 @@ const COLOR_THEMES=[
     grad:'linear-gradient(135deg,#fb7185,#be123c)'},
 ];
 
+
+const PROFILES = [
+  {
+    id:'militaire', name:'Militaire', emoji:'🎖️',
+    desc:'Solde imposable + primes exonérées (OPEX, ISS...)',
+    taxFreeNote:'Les primes catégorie "Prime exonérée" sont exclues du calcul IR.',
+    incomeCats:['salaire','prime_exo','remboursement','autre_revenu'],
+    tips:'Pense à catégoriser tes indemnités OPEX en "Prime exonérée" pour un calcul IR précis.'
+  },
+  {
+    id:'salarie', name:'Salarié', emoji:'👔',
+    desc:'CDI, CDD — abattement 10% frais pro automatique',
+    taxFreeNote:null,
+    incomeCats:['salaire','remboursement','epargne','autre_revenu'],
+    tips:'Ton employeur prélève l\'IR à la source chaque mois.'
+  },
+  {
+    id:'alternant', name:'Alternant', emoji:'🎓',
+    desc:'Salaire alternance (souvent exonéré d\'IR sous le SMIC)',
+    taxFreeNote:'Si ta rémunération est ≤ au SMIC annuel, tu n\'es pas imposable.',
+    incomeCats:['salaire','remboursement','autre_revenu'],
+    tips:'En alternance tu paies peu ou pas d\'impôt si tu restes sous le SMIC.'
+  },
+  {
+    id:'interim', name:'Intérimaire', emoji:'🔧',
+    desc:'Missions intérim avec indemnité de fin de mission',
+    taxFreeNote:'L\'IFM (10%) et les congés payés (10%) font partie du brut imposable.',
+    incomeCats:['salaire','remboursement','autre_revenu'],
+    tips:'Pense à déclarer l\'IFM — elle est imposable même si versée séparément.'
+  },
+  {
+    id:'independant', name:'Indépendant', emoji:'💻',
+    desc:'Auto-entrepreneur, freelance, micro-entreprise',
+    taxFreeNote:'Abattement forfaitaire selon activité (34%, 50% ou 71%) à la place des 10%.',
+    incomeCats:['freelance','remboursement','autre_revenu'],
+    tips:'En micro-entreprise, l\'abattement remplace les 10% salariés. Pense au VFL si éligible.'
+  },
+  {
+    id:'etudiant', name:'Étudiant', emoji:'📚',
+    desc:'Jobs étudiants, stages, petits boulots',
+    taxFreeNote:'Les revenus < 3 SMIC mensuels sont exonérés si tu es rattaché au foyer parental.',
+    incomeCats:['salaire','remboursement','autre_revenu'],
+    tips:'Si tes revenus annuels sont faibles, la décote peut annuler ton impôt.'
+  },
+  {
+    id:'fonctionnaire', name:'Fonctionnaire', emoji:'🏛️',
+    desc:'Titulaire de la fonction publique',
+    taxFreeNote:'Certaines indemnités sont exonérées (NBI, IFSE selon conditions).',
+    incomeCats:['salaire','prime_exo','remboursement','autre_revenu'],
+    tips:'Le prélèvement à la source est géré par ton employeur public.'
+  },
+  {
+    id:'medecin', name:'Médecin / Infirmier', emoji:'🏥',
+    desc:'Liberal, hospitalier ou salarie de sante',
+    taxFreeNote:'Gardes et astreintes hospitalières peuvent être exonérées sous conditions.',
+    incomeCats:['salaire','freelance','prime_exo','remboursement','autre_revenu'],
+    tips:'En liberal, pense aux 2G du BNC. En hospitalier, les heures de garde ont un regime special.'
+  },
+  {
+    id:'autre', name:'Autre', emoji:'👤',
+    desc:'Situation non listee',
+    taxFreeNote:null,
+    incomeCats:['salaire','freelance','remboursement','epargne','autre_revenu'],
+    tips:'L\'estimation IR est calculee sur le bareme standard. Consulte impots.gouv.fr pour ta situation.'
+  },
+];
 function getCat(id){return[...CATS.expense,...CATS.income].find(c=>c.id===id)||{l:id,e:'📦',c:'#888'}}
 function fmtAmt(v){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).format(v)}
 // Clamp day to last day of month (handles payDay 29/30/31 in short months)
@@ -1064,6 +1140,21 @@ function renderSettings(){
     </div>
 
     <div class="set-section">
+      <div class="set-title">Mon profil fiscal</div>
+      <div class="set-card">
+        <div class="profile-grid">
+          ${PROFILES.map(p=>`
+          <div class="profile-opt${(prefs.profile||'salarie')===p.id?' sel':''}" onclick="setProfile('${p.id}')">
+            <span class="profile-opt-emoji">${p.emoji}</span>
+            <div class="profile-opt-name">${p.name}</div>
+            <div class="profile-opt-desc">${p.desc.split('—')[0].trim()}</div>
+          </div>`).join('')}
+        </div>
+        ${(()=>{const p=PROFILES.find(x=>x.id===(prefs.profile||'salarie'))||PROFILES[0];return p.tips?`<div class="profile-tip">💡 ${p.tips}</div>`:''})()}
+      </div>
+    </div>
+
+    <div class="set-section">
       <div class="set-title">Tableau de bord</div>
       <div class="set-card">
         <div class="set-row">
@@ -1208,6 +1299,8 @@ function renderSettings(){
 }
 
 function setTheme(t){prefs.theme=t;savePrefs();renderSettings();toast(t==='auto'?'🌗 Mode auto':t==='dark'?'🌙 Mode sombre':'☀️ Mode clair')}
+function setProfile(id){prefs.profile=id;savePrefs();renderSettings();toast(PROFILES.find(p=>p.id===id)?.emoji+" Profil mis à jour !");}
+
 function setColorTheme(id){prefs.colorTheme=id;savePrefs();renderSettings();const t=COLOR_THEMES.find(t=>t.id===id);toast('🎨 Thème '+( t?t.name:'Défaut')+' !');}
 function setAccent(i){prefs.accentIdx=i;savePrefs();renderSettings();toast('🎨 Couleur mise à jour')}
 function togglePref(key,val){prefs[key]=val;savePrefs();toast(val?'✅ Activé':'Désactivé')}
@@ -1611,8 +1704,16 @@ function buildForecastCard(period, expenseSoFar, income, cur){
 function buildTaxCard(cur){
   // Collect all salary income from current year
   const year = new Date().getFullYear();
+  const profile = PROFILES.find(p=>p.id===(prefs.profile||'salarie')) || PROFILES[0];
+  const allCatsIncome = [...CATS.expense,...CATS.income];
   const yearTx = data.transactions.filter(t=>t.type==='income' && t.date.startsWith(year+''));
-  const yearIncome = yearTx.reduce((s,t)=>s+t.amount, 0);
+  // Exclude tax-free categories based on profile
+  const taxableTx = yearTx.filter(t=>{
+    const cat = allCatsIncome.find(c=>c.id===t.cat);
+    return !cat || !cat.taxFree;
+  });
+  const yearIncome = taxableTx.reduce((s,t)=>s+t.amount, 0);
+  const yearExo = yearTx.filter(t=>{const cat=allCatsIncome.find(c=>c.id===t.cat);return cat&&cat.taxFree}).reduce((s,t)=>s+t.amount,0);
   if(yearIncome === 0) return '';
 
   // How many months of data do we have this year?
@@ -1661,8 +1762,9 @@ function buildTaxCard(cur){
       ${result.decote > 0 ? `<div style="font-size:12px;color:var(--inc-t);margin-top:6px;padding-top:6px;border-top:.5px solid var(--sep)">Décote appliquée : -${fmtAmt(Math.round(result.decote))} ${cur}</div>` : ''}
     </div>` : ''}
 
+    ${yearExo>0?`<div style='font-size:12px;color:var(--inc-t);margin-bottom:8px;padding:8px 10px;background:rgba(26,158,92,.08);border-radius:8px'>⭐ ${fmtAmt(Math.round(yearExo))} ${cur} de primes exonérées non comptabilisées</div>`:''}
     <div style="font-size:11px;color:var(--t3);line-height:1.5;padding-top:10px;border-top:.5px solid var(--sep)">
-      📊 Basé sur ${fmtAmt(Math.round(yearIncome))} ${cur} de revenus sur ${monthsWithData} mois · Barème IR ${year} · 1 part · À titre indicatif
+      📊 Basé sur ${fmtAmt(Math.round(yearIncome))} ${cur} imposables · ${monthsWithData} mois · Profil : ${profile.name} · À titre indicatif
     </div>
   </div>`;
 }
