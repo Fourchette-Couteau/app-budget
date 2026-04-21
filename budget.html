@@ -764,7 +764,7 @@ function prevPeriods(n){
 }
 
 let data=JSON.parse(localStorage.getItem('budget_v4')||'{"transactions":[],"budgets":[{"cat":"food","limit":400},{"cat":"transport","limit":150},{"cat":"loisirs","limit":100},{"cat":"restaurants","limit":80}],"savings":[],"savingsGoals":[]}');
-let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"appName":"Mon Budget","currency":"€","payDay":25}');
+let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"appName":"Mon Budget","currency":"€","payDay":25,"appUrl":"","colorTheme":"default"}');
 let txType='expense';
 let donutChart=null;
 
@@ -1164,6 +1164,31 @@ function renderSettings(){
     </div>
 
     <div class="set-section">
+      <div class="set-title">Partager l'appli</div>
+      <div class="set-card">
+        <div class="set-row" onclick="shareApp()" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(79,142,255,.15)">🔗</div>
+          <div class="set-info"><div class="set-name">Copier le lien</div><div class="set-desc">Partage l'appli avec quelqu'un</div></div>
+          <span class="set-right" style="font-size:18px">⎘</span>
+        </div>
+        <div class="divider"></div>
+        <div class="set-row" onclick="nativeShare()" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(99,217,160,.15)">📤</div>
+          <div class="set-info"><div class="set-name">Partager via...</div><div class="set-desc">AirDrop, Messages, Mail...</div></div>
+          <span class="set-right" style="font-size:18px">›</span>
+        </div>
+        <div class="divider"></div>
+        <div class="set-row" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(156,39,176,.15)">✏️</div>
+          <div class="set-info"><div class="set-name">Lien GitHub</div><div class="set-desc" id="appUrlDisplay" style="word-break:break-all;font-size:11px">${prefs.appUrl||'Non configuré'}</div></div>
+        </div>
+        <div style="padding:0 16px 14px">
+          <input type="url" id="appUrlInput" placeholder="https://fourchette-couteau.github.io/app-budget/budget.html" value="${prefs.appUrl||''}" oninput="updateAppUrl(this.value)" style="margin-top:8px;font-size:13px">
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
       <div class="set-title">Zone danger</div>
       <div class="set-card">
         <div style="padding:16px">
@@ -1172,7 +1197,7 @@ function renderSettings(){
       </div>
     </div>
 
-    <div style="text-align:center;padding:8px;font-size:12px;color:var(--t3)">Mon Budget v2.5</div>
+    <div style="text-align:center;padding:8px;font-size:12px;color:var(--t3)">Mon Budget v4.3</div>
   </div>`;
 }
 
@@ -2168,6 +2193,53 @@ function calMove(dir){
   if(calMonth < 0){calMonth=11;calYear--;}
   calSelectedDay = null;
   renderCalendar();
+}
+
+/* ── PARTAGE ── */
+function updateAppUrl(v){
+  prefs.appUrl = v.trim();
+  savePrefs();
+  const el = document.getElementById('appUrlDisplay');
+  if(el) el.textContent = prefs.appUrl || 'Non configuré';
+}
+
+function shareApp(){
+  const url = prefs.appUrl || window.location.href;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>{
+      toast('🔗 Lien copié !');
+    }).catch(()=>fallbackCopy(url));
+  } else {
+    fallbackCopy(url);
+  }
+}
+
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); toast('🔗 Lien copié !'); }
+  catch(e){ toast('❌ Impossible de copier'); }
+  document.body.removeChild(ta);
+}
+
+function nativeShare(){
+  const url = prefs.appUrl || window.location.href;
+  const name = prefs.appName || 'Mon Budget';
+  if(navigator.share){
+    navigator.share({
+      title: name,
+      text: `Gère ton budget avec ${name} — une appli gratuite !`,
+      url: url
+    }).catch(()=>{});
+  } else {
+    shareApp(); // fallback to copy
+    toast('🔗 Lien copié (partage natif non dispo)');
+  }
 }
 // Init
 if(!prefs.payDay) prefs.payDay=25;
