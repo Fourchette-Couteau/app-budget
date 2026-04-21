@@ -369,7 +369,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* ─ EDIT TX MODAL ─ */
 .edit-modal-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .edit-modal-bg.show{opacity:1;pointer-events:all}
-.edit-modal{background:var(--bg2);border-radius:24px 24px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+24px);width:100%;max-width:500px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.edit-modal{background:var(--bg2);border-radius:24px 24px 0 0;padding:20px 24px calc(env(safe-area-inset-bottom,0px)+28px);width:100%;max-width:500px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
 .edit-modal-bg.show .edit-modal{transform:translateY(0)}
 .edit-modal-handle{width:36px;height:4px;border-radius:2px;background:var(--t3);margin:0 auto 16px}
 .edit-modal-title{font-size:17px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:10px}
@@ -529,12 +529,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 
 <div class="edit-modal-bg" id="editModalBg" onclick="closeEditModal(event)">
-  <div class="edit-modal">
-    <div class="edit-modal-handle"></div>
-    <div class="edit-modal-title">
-      <div class="edit-modal-icon" id="editModalIcon">📦</div>
-      Modifier la transaction
+  <div class="edit-modal" style="padding:0">
+    <div style="padding:20px 20px 0">
+      <div class="edit-modal-handle"></div>
+      <div class="edit-modal-title">
+        <div class="edit-modal-icon" id="editModalIcon">📦</div>
+        Modifier la transaction
+      </div>
     </div>
+    <div style="padding:0 20px 20px">
     <div class="f-group">
       <label class="f-label">Montant</label>
       <input type="number" id="edit-amount" inputmode="decimal" min="0" step="0.01">
@@ -553,19 +556,23 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <input type="date" id="edit-date">
       </div>
     </div>
-    <div class="edit-actions">
+    <div class="edit-actions" style="padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px)">
       <button class="btn-edit-save" onclick="saveEditTx()">Enregistrer</button>
       <button class="btn-edit-del" onclick="deleteEditTx()">🗑</button>
+    </div>
     </div>
   </div>
 </div>
 <div class="edit-modal-bg" id="editRecModalBg" onclick="closeEditRecModal(event)">
-  <div class="edit-modal">
-    <div class="edit-modal-handle"></div>
-    <div class="edit-modal-title">
-      <div class="edit-modal-icon" id="editRecIcon">🔁</div>
-      Modifier la récurrence
+  <div class="edit-modal" style="padding:0">
+    <div style="padding:20px 20px 0">
+      <div class="edit-modal-handle"></div>
+      <div class="edit-modal-title">
+        <div class="edit-modal-icon" id="editRecIcon">🔁</div>
+        Modifier la récurrence
+      </div>
     </div>
+    <div style="padding:0 20px 20px">
     <div class="type-toggle" style="margin-bottom:12px">
       <button class="type-btn active" id="editrec-btn-exp" onclick="setEditRecType('expense')">Dépense</button>
       <button class="type-btn" id="editrec-btn-inc" onclick="setEditRecType('income')">Revenu</button>
@@ -582,7 +589,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <div class="f-group">
         <label class="f-label">Jour du mois</label>
         <select id="editrec-day">
-          ${Array.from({length:28},(_,i)=>i+1).map(d=>`<option value="${d}">${d}</option>`).join('')}
+          ${Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}">${d}</option>`).join('')}
         </select>
       </div>
     </div>
@@ -590,9 +597,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <label class="f-label">Catégorie</label>
       <select id="editrec-cat"></select>
     </div>
-    <div class="edit-actions">
+    <div class="edit-actions" style="padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px)">
       <button class="btn-edit-save" onclick="saveEditRec()">Enregistrer</button>
       <button class="btn-edit-del" onclick="deleteEditRec()">🗑</button>
+    </div>
     </div>
   </div>
 </div>
@@ -828,15 +836,17 @@ function saveEditTx(){
 
 function deleteEditTx(){
   if(!editingTxId) return;
-  openModal('Supprimer la transaction','Cette action est irréversible.',()=>{
-    data.transactions = data.transactions.filter(t=>t.id!==editingTxId);
-    save();
-    document.getElementById('editModalBg').classList.remove('show');
-    renderDash();
-    renderHistory();
-    toast('🗑 Supprimée');
-    editingTxId = null;
-  });
+  document.getElementById('editModalBg').classList.remove('show');
+  setTimeout(()=>{
+    openModal('Supprimer la transaction','Cette action est irréversible.',()=>{
+      data.transactions = data.transactions.filter(t=>t.id!==editingTxId);
+      save();
+      renderDash();
+      renderHistory();
+      toast('🗑 Supprimée');
+      editingTxId = null;
+    });
+  }, 300);
 }
 function deleteTx(id){
   openModal('Supprimer la transaction','Cette action est irréversible.',()=>{
@@ -1930,14 +1940,16 @@ function saveEditRec(){
 
 function deleteEditRec(){
   if(editingRecIdx === null) return;
-  openModal('Supprimer cette récurrence','',()=>{
-    data.recurring.splice(editingRecIdx, 1);
-    save();
-    document.getElementById('editRecModalBg').classList.remove('show');
-    renderRecurring();
-    toast('🗑 Supprimée');
-    editingRecIdx = null;
-  });
+  document.getElementById('editRecModalBg').classList.remove('show');
+  setTimeout(()=>{
+    openModal('Supprimer cette récurrence','',()=>{
+      data.recurring.splice(editingRecIdx, 1);
+      save();
+      renderRecurring();
+      toast('🗑 Supprimée');
+      editingRecIdx = null;
+    });
+  }, 300);
 }
 
 /* ── CALENDRIER ── */
