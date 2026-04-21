@@ -582,18 +582,37 @@ const ACCENTS=[
 
 function getCat(id){return[...CATS.expense,...CATS.income].find(c=>c.id===id)||{l:id,e:'📦',c:'#888'}}
 function fmtAmt(v){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).format(v)}
+// Clamp day to last day of month (handles payDay 29/30/31 in short months)
+function clampDay(y, m, d){
+  const last = new Date(y, m+1, 0).getDate(); // last day of month m
+  return Math.min(d, last);
+}
+function payDate(y, m, pd){
+  // Returns a Date for payday pd in month m/y, clamped to last day
+  return new Date(y, m, clampDay(y, m, pd));
+}
+function fmtDate(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtLabel(d){
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
 function currentPeriod(){
   const n=new Date();
-  const day=n.getDate();
+  const today=fmtDate(n);
   const pd=prefs&&prefs.payDay?prefs.payDay:1;
   let y=n.getFullYear(), m=n.getMonth();
-  if(day<pd){ m--; if(m<0){m=11;y--} }
-  const start=new Date(y,m,pd);
-  const end=new Date(y,m+1,pd-1);
+  // Try payday this month
+  let start=payDate(y,m,pd);
+  if(fmtDate(start)>today){ m--; if(m<0){m=11;y--} start=payDate(y,m,pd); }
+  // End = day before next payday
+  let ny=y, nm=m+1; if(nm>11){nm=0;ny++}
+  const nextStart=payDate(ny,nm,pd);
+  const endD=new Date(nextStart); endD.setDate(endD.getDate()-1);
   return {
-    start:`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`,
-    end:`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`,
-    label:`${String(start.getDate()).padStart(2,'0')}/${String(start.getMonth()+1).padStart(2,'0')} → ${String(end.getDate()).padStart(2,'0')}/${String(end.getMonth()+1).padStart(2,'0')}`
+    start:fmtDate(start), end:fmtDate(endD),
+    label:`${fmtLabel(start)} → ${fmtLabel(endD)}`
   };
 }
 function inPeriod(date, p){return date>=p.start && date<=p.end}
@@ -601,19 +620,18 @@ function prevPeriods(n){
   const periods=[];
   const pd=prefs&&prefs.payDay?prefs.payDay:1;
   const now=new Date();
+  const today=fmtDate(now);
   let y=now.getFullYear(), m=now.getMonth();
-  const day=now.getDate();
-  if(day<pd){m--;if(m<0){m=11;y--}}
+  let start=payDate(y,m,pd);
+  if(fmtDate(start)>today){m--;if(m<0){m=11;y--}start=payDate(y,m,pd);}
+  // Go back n-1 periods from current
   for(let i=n-1;i>=0;i--){
-    let pm=m-i, py=y;
-    while(pm<0){pm+=12;py--}
-    const start=new Date(py,pm,pd);
-    const end=new Date(py,pm+1,pd-1);
-    periods.push({
-      start:`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`,
-      end:`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`,
-      label:`${String(start.getDate()).padStart(2,'0')}/${String(start.getMonth()+1).padStart(2,'0')}`
-    });
+    let py=y,pm=m-i; while(pm<0){pm+=12;py--}
+    const s=payDate(py,pm,pd);
+    let ny2=py,nm2=pm+1;if(nm2>11){nm2=0;ny2++}
+    const nextS=payDate(ny2,nm2,pd);
+    const e=new Date(nextS);e.setDate(e.getDate()-1);
+    periods.push({start:fmtDate(s),end:fmtDate(e),label:fmtLabel(s)});
   }
   return periods;
 }
@@ -959,7 +977,7 @@ function renderSettings(){
           <div class="set-icon" style="background:rgba(99,217,160,.15)">📅</div>
           <div class="set-info"><div class="set-name">Jour de paie</div><div class="set-desc">La période repart de ce jour chaque mois</div></div>
           <select onchange="setPayDay(parseInt(this.value))" style="width:auto;padding:8px 32px 8px 12px;font-size:14px;background:var(--surface2)">
-            ${Array.from({length:28},(_,i)=>i+1).map(d=>`<option value="${d}"${prefs.payDay===d?' selected':''}>${d}</option>`).join('')}
+            ${Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}"${prefs.payDay===d?' selected':''}>${d}${d===29?' (→ dernier si fév.)':d===30?' (→ dernier si fév./mars)':d===31?' (→ dernier du mois)':''}</option>`).join('')}
           </select>
         </div>
       </div>
