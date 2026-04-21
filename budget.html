@@ -410,6 +410,25 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .cal-sum-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);padding:10px 12px;box-shadow:var(--shadow);text-align:center}
 .cal-sum-val{font-size:16px;font-weight:500;margin-bottom:2px}
 .cal-sum-label{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
+/* ─ THEMES ─ */
+[data-color-theme="ocean"][data-theme="dark"],[data-color-theme="ocean"]:root:not([data-theme="light"]){--accent:#00b4d8;--accent2:#48cae4;--orb1:rgba(0,180,216,.2);--orb2:rgba(72,202,228,.12);--orb3:rgba(0,119,182,.15)}
+[data-color-theme="ocean"][data-theme="light"]{--accent:#0077b6;--accent2:#00b4d8;--orb1:rgba(0,119,182,.1);--orb2:rgba(0,180,216,.08);--orb3:rgba(72,202,228,.07)}
+[data-color-theme="forest"][data-theme="dark"],[data-color-theme="forest"]:root:not([data-theme="light"]){--accent:#52b788;--accent2:#74c69d;--orb1:rgba(82,183,136,.18);--orb2:rgba(116,198,157,.12);--orb3:rgba(45,106,79,.15)}
+[data-color-theme="forest"][data-theme="light"]{--accent:#2d6a4f;--accent2:#52b788;--orb1:rgba(45,106,79,.1);--orb2:rgba(82,183,136,.08);--orb3:rgba(116,198,157,.07)}
+[data-color-theme="sunset"][data-theme="dark"],[data-color-theme="sunset"]:root:not([data-theme="light"]){--accent:#f77f00;--accent2:#fcbf49;--orb1:rgba(247,127,0,.18);--orb2:rgba(252,191,73,.12);--orb3:rgba(214,40,40,.12)}
+[data-color-theme="sunset"][data-theme="light"]{--accent:#d62828;--accent2:#f77f00;--orb1:rgba(214,40,40,.1);--orb2:rgba(247,127,0,.08);--orb3:rgba(252,191,73,.07)}
+[data-color-theme="midnight"][data-theme="dark"],[data-color-theme="midnight"]:root:not([data-theme="light"]){--accent:#a78bfa;--accent2:#c4b5fd;--orb1:rgba(167,139,250,.18);--orb2:rgba(196,181,253,.1);--orb3:rgba(109,40,217,.15)}
+[data-color-theme="midnight"][data-theme="light"]{--accent:#7c3aed;--accent2:#a78bfa;--orb1:rgba(124,58,237,.1);--orb2:rgba(167,139,250,.08);--orb3:rgba(196,181,253,.07)}
+[data-color-theme="rose"][data-theme="dark"],[data-color-theme="rose"]:root:not([data-theme="light"]){--accent:#fb7185;--accent2:#fda4af;--orb1:rgba(251,113,133,.18);--orb2:rgba(253,164,175,.1);--orb3:rgba(190,18,60,.12)}
+[data-color-theme="rose"][data-theme="light"]{--accent:#be123c;--accent2:#fb7185;--orb1:rgba(190,18,60,.1);--orb2:rgba(251,113,133,.08);--orb3:rgba(253,164,175,.07)}
+
+/* Theme picker in settings */
+.theme-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 16px}
+.theme-swatch{border-radius:14px;padding:10px 6px 8px;border:2px solid transparent;cursor:pointer;text-align:center;transition:var(--tr);background:var(--surface)}
+.theme-swatch.sel{border-color:var(--accent);transform:scale(1.04)}
+.theme-swatch:active{transform:scale(.95)}
+.theme-swatch-preview{width:36px;height:36px;border-radius:50%;margin:0 auto 6px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.theme-swatch-name{font-size:11px;font-weight:500;color:var(--t2)}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -417,7 +436,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* confirm modal */
 .modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal-bg.show{opacity:1;pointer-events:all}
-.modal{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;padding:20px 20px calc(var(--safe-bottom)+20px);width:100%;max-width:500px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.modal{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;padding:24px 24px calc(env(safe-area-inset-bottom,0px)+28px);width:100%;max-width:500px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
 .modal-bg.show .modal{transform:translateY(0)}
 .modal-title{font-size:17px;font-weight:600;text-align:center;margin-bottom:8px}
 .modal-msg{font-size:14px;color:var(--t2);text-align:center;margin-bottom:20px}
@@ -657,6 +676,32 @@ const ACCENTS=[
   {name:'Vert',dark:'#34d399',light:'#059669'},
   {name:'Rose',dark:'#f472b6',light:'#db2777'},
   {name:'Orange',dark:'#fb923c',light:'#ea580c'},
+];
+const COLOR_THEMES=[
+  {id:'default',  name:'Défaut',
+    dark:  {accent:'#4f8eff',accent2:'#63d9a0',orb1:'rgba(79,142,255,.18)',orb2:'rgba(99,217,160,.12)',orb3:'rgba(255,95,95,.10)'},
+    light: {accent:'#2c6af6',accent2:'#1a9e5c',orb1:'rgba(44,106,246,.10)',orb2:'rgba(26,158,92,.07)',orb3:'rgba(224,52,43,.06)'},
+    grad:'linear-gradient(135deg,#4f8eff,#7b5ea7)'},
+  {id:'ocean',    name:'Océan',
+    dark:  {accent:'#00b4d8',accent2:'#48cae4',orb1:'rgba(0,180,216,.20)',orb2:'rgba(72,202,228,.13)',orb3:'rgba(0,119,182,.15)'},
+    light: {accent:'#0077b6',accent2:'#00b4d8',orb1:'rgba(0,119,182,.10)',orb2:'rgba(0,180,216,.08)',orb3:'rgba(72,202,228,.07)'},
+    grad:'linear-gradient(135deg,#00b4d8,#0077b6)'},
+  {id:'forest',   name:'Forêt',
+    dark:  {accent:'#52b788',accent2:'#74c69d',orb1:'rgba(82,183,136,.18)',orb2:'rgba(116,198,157,.12)',orb3:'rgba(45,106,79,.15)'},
+    light: {accent:'#2d6a4f',accent2:'#52b788',orb1:'rgba(45,106,79,.10)',orb2:'rgba(82,183,136,.08)',orb3:'rgba(116,198,157,.07)'},
+    grad:'linear-gradient(135deg,#52b788,#2d6a4f)'},
+  {id:'sunset',   name:'Coucher',
+    dark:  {accent:'#f77f00',accent2:'#fcbf49',orb1:'rgba(247,127,0,.18)',orb2:'rgba(252,191,73,.12)',orb3:'rgba(214,40,40,.12)'},
+    light: {accent:'#d62828',accent2:'#f77f00',orb1:'rgba(214,40,40,.10)',orb2:'rgba(247,127,0,.08)',orb3:'rgba(252,191,73,.07)'},
+    grad:'linear-gradient(135deg,#f77f00,#d62828)'},
+  {id:'midnight', name:'Minuit',
+    dark:  {accent:'#a78bfa',accent2:'#c4b5fd',orb1:'rgba(167,139,250,.18)',orb2:'rgba(196,181,253,.10)',orb3:'rgba(109,40,217,.15)'},
+    light: {accent:'#7c3aed',accent2:'#a78bfa',orb1:'rgba(124,58,237,.10)',orb2:'rgba(167,139,250,.08)',orb3:'rgba(196,181,253,.07)'},
+    grad:'linear-gradient(135deg,#a78bfa,#7c3aed)'},
+  {id:'rose',     name:'Rosé',
+    dark:  {accent:'#fb7185',accent2:'#fda4af',orb1:'rgba(251,113,133,.18)',orb2:'rgba(253,164,175,.10)',orb3:'rgba(190,18,60,.12)'},
+    light: {accent:'#be123c',accent2:'#fb7185',orb1:'rgba(190,18,60,.10)',orb2:'rgba(251,113,133,.08)',orb3:'rgba(253,164,175,.07)'},
+    grad:'linear-gradient(135deg,#fb7185,#be123c)'},
 ];
 
 function getCat(id){return[...CATS.expense,...CATS.income].find(c=>c.id===id)||{l:id,e:'📦',c:'#888'}}
@@ -992,13 +1037,26 @@ function renderSettings(){
           </div>`).join('')}
         </div>
         <div class="divider"></div>
-        <div class="set-row">
+        <div class="set-row" style="padding-bottom:4px">
           <div class="set-icon" style="background:rgba(79,142,255,.15)">🎨</div>
-          <div class="set-info"><div class="set-name">Couleur d'accentuation</div></div>
+          <div class="set-info"><div class="set-name">Thème de couleur</div><div class="set-desc">Change l'ambiance complète</div></div>
+        </div>
+        <div class="theme-picker">
+          ${COLOR_THEMES.map(t=>`
+          <div class="theme-swatch${(prefs.colorTheme||'default')===t.id?' sel':''}" onclick="setColorTheme('${t.id}')">
+            <div class="theme-swatch-preview" style="background:${t.grad}"></div>
+            <div class="theme-swatch-name">${t.name}</div>
+          </div>`).join('')}
+        </div>
+        ${(prefs.colorTheme==='default'||!prefs.colorTheme)?`
+        <div class="divider"></div>
+        <div class="set-row">
+          <div class="set-icon" style="background:rgba(79,142,255,.15)">✦</div>
+          <div class="set-info"><div class="set-name">Couleur d'accentuation</div><div class="set-desc">Pour le thème Défaut</div></div>
         </div>
         <div class="accent-row">
           ${ACCENTS.map((a,i)=>`<div class="accent-swatch${prefs.accentIdx===i?' sel':''}" style="background:${isDark?a.dark:a.light}" onclick="setAccent(${i})" title="${a.name}"></div>`).join('')}
-        </div>
+        </div>`:''}
       </div>
     </div>
 
@@ -1115,7 +1173,8 @@ function renderSettings(){
   </div>`;
 }
 
-function setTheme(t){prefs.theme=t;savePrefs();renderSettings();toast(t==='auto'?'🌗 Mode auto':'t'==='dark'?'🌙 Mode sombre':'☀️ Mode clair')}
+function setTheme(t){prefs.theme=t;savePrefs();renderSettings();toast(t==='auto'?'🌗 Mode auto':t==='dark'?'🌙 Mode sombre':'☀️ Mode clair')}
+function setColorTheme(id){prefs.colorTheme=id;savePrefs();renderSettings();const t=COLOR_THEMES.find(t=>t.id===id);toast('🎨 Thème '+( t?t.name:'Défaut')+' !');}
 function setAccent(i){prefs.accentIdx=i;savePrefs();renderSettings();toast('🎨 Couleur mise à jour')}
 function togglePref(key,val){prefs[key]=val;savePrefs();toast(val?'✅ Activé':'Désactivé')}
 function updateAppName(v){prefs.appName=v||'Mon Budget';savePrefs();const d=document.getElementById('appNameDesc');if(d)d.textContent=prefs.appName}
