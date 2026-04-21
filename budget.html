@@ -507,6 +507,32 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .notif-section-title{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px}
 .notif-actions{padding:12px 16px;border-top:.5px solid var(--sep);flex-shrink:0}
 .btn-clear-notifs{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--surface2);color:var(--t2);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);transition:var(--tr)}
+/* ─ GAMIFICATION ─ */
+.score-card{background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:var(--radius);padding:22px;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.score-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(79,142,255,.2),transparent 60%);pointer-events:none}
+[data-theme="light"] .score-card{background:linear-gradient(135deg,#1e3a5f,#2d5986)}
+.score-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.score-number{font-size:56px;font-weight:200;color:#fff;letter-spacing:-3px;line-height:1}
+.score-max{font-size:18px;font-weight:300;color:rgba(255,255,255,.4)}
+.score-bar-wrap{margin-top:14px}
+.score-bar-track{height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.score-grade{font-size:13px;color:rgba(255,255,255,.7);margin-top:6px;display:flex;justify-content:space-between;align-items:center}
+.score-grade-badge{padding:3px 12px;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:.5px}
+.streak-row{display:flex;gap:10px;margin-bottom:12px}
+.streak-card{flex:1;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);padding:14px;text-align:center;box-shadow:var(--shadow)}
+.streak-emoji{font-size:28px;margin-bottom:4px}
+.streak-val{font-size:24px;font-weight:300;letter-spacing:-1px}
+.streak-lbl{font-size:11px;color:var(--t2);margin-top:2px}
+.badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.badge-item{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);padding:14px 8px;text-align:center;box-shadow:var(--shadow);transition:var(--tr);position:relative}
+.badge-item.locked{opacity:.4;filter:grayscale(1)}
+.badge-item.new-unlock{border-color:var(--amber);box-shadow:0 0 16px rgba(255,179,64,.3)}
+.badge-emoji{font-size:32px;margin-bottom:6px}
+.badge-name{font-size:11px;font-weight:600;color:var(--text)}
+.badge-desc{font-size:10px;color:var(--t2);margin-top:2px;line-height:1.3}
+.badge-new-tag{position:absolute;top:-6px;right:-6px;background:var(--amber);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px}
+.gamif-screen-pad{padding:16px}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -617,6 +643,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div id="s-savings" class="screen"></div>
     <div id="s-calendar" class="screen"></div>
     <div id="s-stats" class="screen"></div>
+    <div id="s-gamif" class="screen"></div>
     <div id="s-recurring" class="screen"></div>
     <div id="s-settings" class="screen"></div>
   </div>
@@ -1084,6 +1111,7 @@ function nav(s){
   if(s==='recurring')renderRecurring();
   if(s==='calendar')renderCalendar();
   if(s==='stats')renderStats();
+  if(s==='gamif')renderGamif();
   if(s==='settings'){renderSettings();document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'))}
 }
 
@@ -1114,6 +1142,7 @@ function renderDash(){
         <div class="balance-mini"><div class="bm-label">Dépenses</div><div class="bm-val">-${fmtAmt(expense)} ${cur}</div></div>
       </div>
     </div>
+    <div style="display:flex;gap:10px;margin-bottom:12px" id="dashGamif"></div>
     ${prefs.showDonut && cats.length?`
     <div class="sec-label">Répartition</div>
     <div class="glass-card chart-card">
@@ -1137,6 +1166,34 @@ function renderDash(){
     ${buildForecastCard(period, expense, income, cur)}
     ${buildTaxCard(cur)}
   </div>`;
+  // Gamif mini widget
+  const _score = calcScore(data);
+  const _streak = getStreak(data);
+  const _grade = getScoreGrade(_score);
+  const _unlocked = getUnlockedBadges().length;
+  const dg = document.getElementById('dashGamif');
+  if(dg) dg.innerHTML = `
+    <div style="flex:2;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);padding:12px 14px;box-shadow:var(--shadow);cursor:pointer" onclick="nav('gamif')">
+      <div style="font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Score</div>
+      <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:6px">
+        <span style="font-size:24px;font-weight:300;letter-spacing:-1px">${_score}</span>
+        <span style="font-size:12px;color:var(--t3)">/100</span>
+        <span style="margin-left:auto;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;background:${_grade.bg};color:${_grade.color}">${_grade.grade}</span>
+      </div>
+      <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden"><div style="height:100%;width:${_score}%;background:${getScoreBarColor(_score)};border-radius:2px"></div></div>
+    </div>
+    <div style="flex:1;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);padding:12px 10px;text-align:center;box-shadow:var(--shadow);cursor:pointer" onclick="nav('gamif')">
+      <div style="font-size:22px;margin-bottom:2px">🔥</div>
+      <div style="font-size:18px;font-weight:300">${_streak}</div>
+      <div style="font-size:10px;color:var(--t2)">jours</div>
+    </div>
+    <div style="flex:1;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);padding:12px 10px;text-align:center;box-shadow:var(--shadow);cursor:pointer" onclick="nav('gamif')">
+      <div style="font-size:22px;margin-bottom:2px">🏅</div>
+      <div style="font-size:18px;font-weight:300">${_unlocked}</div>
+      <div style="font-size:10px;color:var(--t2)">badges</div>
+    </div>
+  \`;
+
   if(prefs.showDonut && cats.length){
     setTimeout(()=>{
       const ctx=document.getElementById('donut');if(!ctx)return;
@@ -1436,6 +1493,12 @@ function renderSettings(){
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           </div>
           <div class="set-info"><div class="set-name">Statistiques</div><div class="set-desc">Analyses détaillées de tes finances</div></div>
+          <span class="set-right">›</span>
+        </div>
+        <div class="divider"></div>
+        <div class="set-row" onclick="nav('gamif')" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(255,179,64,.15)">🏆</div>
+          <div class="set-info"><div class="set-name">Succès & Badges</div><div class="set-desc" id="badgeCount">Chargement...</div></div>
           <span class="set-right">›</span>
         </div>
       </div>
@@ -2929,6 +2992,205 @@ function updateNotifBadge(){
     bell.appendChild(badge);
   }
 }
+
+/* ── GAMIFICATION ── */
+const BADGES = [
+  // Premiers pas
+  {id:'first_tx',     emoji:'🌱', name:'Premier pas',      desc:'Première transaction enregistrée',        check:d=>d.transactions.length>=1},
+  {id:'first_savings',emoji:'🐣', name:'Épargnant',        desc:'Premier versement en épargne',             check:d=>(d.savings||[]).filter(s=>s.type==='deposit').length>=1},
+  {id:'first_budget', emoji:'📋', name:'Gestionnaire',     desc:'Premier budget créé',                      check:d=>d.budgets.length>=1},
+  // Volume
+  {id:'tx_10',        emoji:'⚡', name:'En route',          desc:'10 transactions enregistrées',             check:d=>d.transactions.length>=10},
+  {id:'tx_50',        emoji:'🔥', name:'Habitué',           desc:'50 transactions enregistrées',             check:d=>d.transactions.length>=50},
+  {id:'tx_100',       emoji:'💯', name:'Centenaire',        desc:'100 transactions enregistrées',            check:d=>d.transactions.length>=100},
+  // Épargne
+  {id:'sav_500',      emoji:'💰', name:'Économe',           desc:'500 € mis de côté',                        check:(d,cur)=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=500},
+  {id:'sav_2000',     emoji:'💎', name:'Investisseur',      desc:'2 000 € mis de côté',                      check:(d,cur)=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=2000},
+  {id:'sav_5000',     emoji:'🏦', name:'Banquier',          desc:'5 000 € mis de côté',                      check:(d,cur)=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=5000},
+  // Budget
+  {id:'budget_ok_1',  emoji:'✅', name:'Discipliné',        desc:'1 budget respecté sur une période',        check:d=>checkBudgetRespected(d,1)},
+  {id:'budget_ok_3',  emoji:'🎯', name:'Précis',            desc:'3 budgets respectés en même temps',        check:d=>checkBudgetRespected(d,3)},
+  // Streak
+  {id:'streak_7',     emoji:'📆', name:'Régulier',          desc:'7 jours consécutifs avec transactions',    check:d=>getStreak(d)>=7},
+  {id:'streak_30',    emoji:'🗓️', name:'Assidu',            desc:'30 jours consécutifs',                     check:d=>getStreak(d)>=30},
+  // Score
+  {id:'score_70',     emoji:'⭐', name:'Bonne gestion',     desc:'Score financier ≥ 70',                     check:d=>calcScore(d)>=70},
+  {id:'score_90',     emoji:'🌟', name:'Expert',            desc:'Score financier ≥ 90',                     check:d=>calcScore(d)>=90},
+  // Fun
+  {id:'no_resto_month',emoji:'🥗',name:'Cuisinier',         desc:'Zéro restaurant sur une période complète', check:d=>checkNoRestaurant(d)},
+  {id:'recurring_3',  emoji:'🔁', name:'Automatisé',        desc:'3 récurrences actives',                    check:d=>(d.recurring||[]).filter(r=>r.active).length>=3},
+];
+
+function checkBudgetRespected(d, count){
+  const period = currentPeriod();
+  const spent = {};
+  d.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense').forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
+  const ok = d.budgets.filter(b=>(spent[b.cat]||0)<=b.limit).length;
+  return ok >= count;
+}
+
+function checkNoRestaurant(d){
+  const periods = prevPeriods(3);
+  for(const p of periods){
+    const hasTx = d.transactions.some(t=>inPeriod(t.date,p));
+    const hasResto = d.transactions.some(t=>inPeriod(t.date,p)&&t.cat==='restaurants');
+    if(hasTx && !hasResto) return true;
+  }
+  return false;
+}
+
+function getStreak(d){
+  if(!d.transactions.length) return 0;
+  const dates = new Set(d.transactions.map(t=>t.date));
+  let streak = 0;
+  let day = new Date();
+  while(true){
+    const s = fmtDate(day);
+    if(dates.has(s)){ streak++; day.setDate(day.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+
+function calcScore(d){
+  let score = 0;
+  const period = currentPeriod();
+  const mTx = d.transactions.filter(t=>inPeriod(t.date,period));
+  const income = mTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+
+  // 30pts - savings rate
+  if(income>0){
+    const sr = (income-expense)/income;
+    score += Math.min(30, Math.round(sr*60));
+  }
+
+  // 25pts - budgets respected
+  if(d.budgets.length>0){
+    const spent={};
+    mTx.filter(t=>t.type==='expense').forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
+    const ok = d.budgets.filter(b=>(spent[b.cat]||0)<=b.limit).length;
+    score += Math.round((ok/d.budgets.length)*25);
+  } else score += 15;
+
+  // 20pts - has savings
+  const totalSav = (d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0);
+  if(totalSav>0) score += Math.min(20, Math.round(totalSav/100));
+
+  // 15pts - streak
+  const streak = getStreak(d);
+  score += Math.min(15, streak);
+
+  // 10pts - transactions this period
+  if(mTx.length>=5) score += 10;
+  else score += mTx.length*2;
+
+  return Math.min(100, Math.round(score));
+}
+
+function getScoreGrade(score){
+  if(score>=90) return {grade:'S', color:'#FFD700', bg:'rgba(255,215,0,.15)'};
+  if(score>=75) return {grade:'A', color:'#63d9a0', bg:'rgba(99,217,160,.15)'};
+  if(score>=60) return {grade:'B', color:'#4f8eff', bg:'rgba(79,142,255,.15)'};
+  if(score>=40) return {grade:'C', color:'#ffb340', bg:'rgba(255,179,64,.15)'};
+  return {grade:'D', color:'#ff8080', bg:'rgba(255,95,95,.15)'};
+}
+
+function getScoreBarColor(score){
+  if(score>=90) return 'linear-gradient(90deg,#FFD700,#FFA500)';
+  if(score>=75) return 'linear-gradient(90deg,#63d9a0,#2d9e6b)';
+  if(score>=60) return 'linear-gradient(90deg,#4f8eff,#7b5ea7)';
+  if(score>=40) return 'linear-gradient(90deg,#ffb340,#ff8c00)';
+  return 'linear-gradient(90deg,#ff8080,#ff4040)';
+}
+
+function getUnlockedBadges(){
+  return BADGES.filter(b=>{ try{ return b.check(data); }catch(e){ return false; }});
+}
+
+function checkNewBadges(){
+  const prev = JSON.parse(localStorage.getItem('budget_badges')||'[]');
+  const now = getUnlockedBadges().map(b=>b.id);
+  const newOnes = now.filter(id=>!prev.includes(id));
+  if(newOnes.length){
+    localStorage.setItem('budget_badges', JSON.stringify(now));
+    newOnes.forEach(id=>{
+      const b = BADGES.find(b=>b.id===id);
+      if(b) setTimeout(()=>toast(`${b.emoji} Nouveau badge : ${b.name} !`), 500);
+    });
+  } else {
+    localStorage.setItem('budget_badges', JSON.stringify(now));
+  }
+}
+
+function renderGamif(){
+  const cur = prefs.currency||'€';
+  const score = calcScore(data);
+  const grade = getScoreGrade(score);
+  const streak = getStreak(data);
+  const totalSav = Math.round((data.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0));
+  const unlocked = getUnlockedBadges().map(b=>b.id);
+  const prev = JSON.parse(localStorage.getItem('budget_badges')||'[]');
+  const isNew = id => unlocked.includes(id) && !prev.includes(id);
+
+  // Update settings count
+  const bc = document.getElementById('badgeCount');
+  if(bc) bc.textContent = `${unlocked.length}/${BADGES.length} badges débloqués`;
+
+  const el = document.getElementById('s-gamif');
+  el.innerHTML = `<div class="gamif-screen-pad">
+
+    <div class="score-card">
+      <div class="score-label">Score financier</div>
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <div class="score-number">${score}</div>
+        <div class="score-max">/100</div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:${score}%;background:${getScoreBarColor(score)}"></div></div>
+      </div>
+      <div class="score-grade">
+        <span style="color:rgba(255,255,255,.6);font-size:12px">Basé sur épargne, budgets, régularité</span>
+        <span class="score-grade-badge" style="background:${grade.bg};color:${grade.color}">Rang ${grade.grade}</span>
+      </div>
+    </div>
+
+    <div class="streak-row">
+      <div class="streak-card">
+        <div class="streak-emoji">🔥</div>
+        <div class="streak-val">${streak}</div>
+        <div class="streak-lbl">Jours de suite</div>
+      </div>
+      <div class="streak-card">
+        <div class="streak-emoji">💰</div>
+        <div class="streak-val">${fmtAmt(totalSav)}</div>
+        <div class="streak-lbl">${cur} épargnés</div>
+      </div>
+      <div class="streak-card">
+        <div class="streak-emoji">🏅</div>
+        <div class="streak-val">${unlocked.length}</div>
+        <div class="streak-lbl">Badges / ${BADGES.length}</div>
+      </div>
+    </div>
+
+    <div class="sec-label">Badges & succès</div>
+    <div class="badges-grid">
+      ${BADGES.map(b=>{
+        const ok = unlocked.includes(b.id);
+        const isnew = isNew(b.id);
+        return`<div class="badge-item${ok?'':' locked'}${isnew?' new-unlock':''}">
+          ${isnew?'<div class="badge-new-tag">NEW</div>':''}
+          <div class="badge-emoji">${b.emoji}</div>
+          <div class="badge-name">${b.name}</div>
+          <div class="badge-desc">${b.desc}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+
+  // Save current unlocked
+  localStorage.setItem('budget_badges', JSON.stringify(unlocked));
+}
 // Init
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
@@ -2936,6 +3198,7 @@ applyPrefs();
 processEndOfPeriodSavings();
 processDueRecurring();
 setTimeout(updateNotifBadge, 100);
+setTimeout(checkNewBadges, 500);
 showSplash();
 if(prefs.pinEnabled){ setTimeout(()=>showPinScreen("unlock"), 1900); }
 setType('expense');
