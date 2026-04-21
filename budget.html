@@ -438,6 +438,21 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .profile-opt-name{font-size:12px;font-weight:600;color:var(--text)}
 .profile-opt-desc{font-size:10px;color:var(--t2);margin-top:2px;line-height:1.3}
 .profile-tip{margin:0 16px 14px;padding:10px 12px;background:rgba(79,142,255,.08);border-radius:10px;font-size:12px;color:var(--t2);line-height:1.5;border:.5px solid rgba(79,142,255,.15)}
+/* ─ SEARCH & TAGS ─ */
+.search-bar-wrap{padding:12px 16px 8px;position:sticky;top:0;z-index:5;background:var(--bg);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.search-input-wrap{position:relative;margin-bottom:8px}
+.search-input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none}
+.search-input{width:100%;padding:10px 16px 10px 38px;border-radius:var(--radius-sm);border:.5px solid var(--glass-b);background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);color:var(--text);font-size:15px;font-family:var(--font);outline:none;-webkit-appearance:none}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,255,.12)}
+.search-input::placeholder{color:var(--t3)}
+.filter-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filter-chips::-webkit-scrollbar{display:none}
+.chip{padding:5px 12px;border-radius:20px;border:.5px solid var(--glass-b);background:var(--glass);font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;white-space:nowrap;transition:var(--tr);flex-shrink:0}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip:active{transform:scale(.95)}
+.tx-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;background:rgba(79,142,255,.12);color:var(--accent);margin-left:6px;vertical-align:middle}
+.search-empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:14px}
+.search-stats{font-size:12px;color:var(--t2);padding:0 16px 8px;display:flex;justify-content:space-between}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -549,8 +564,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="nav">
       <button class="nav-btn active" onclick="nav('dash')" data-s="dash"><span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="nav-lbl">Accueil</span></button>
       <button class="nav-btn" onclick="nav('add')" data-s="add"><span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span><span class="nav-lbl">Ajouter</span></button>
-      <button class="nav-btn" onclick="nav('savings')" data-s="savings"><span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12c0-4.4-3.6-8-8-8s-8 3.6-8 8c0 2.5 1.1 4.7 2.9 6.2V20h10.2v-1.8C18.9 16.7 20 14.5 20 12z"/><path d="M9 12h6M12 9v6"/><circle cx="17" cy="6" r="2" fill="currentColor" stroke="none" opacity=".4"/></svg></span><span class="nav-lbl">Épargne</span></button>
-      <button class="nav-btn" onclick="nav('calendar')" data-s="calendar"><span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/></svg></span><span class="nav-lbl">Calendrier</span></button>
+      <button class="nav-btn" onclick="nav('history')" data-s="history"><span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg></span><span class="nav-lbl">Historique</span></button>
+      <button class="nav-btn" onclick="nav('savings')" data-s="savings"><span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12c0-4.4-3.6-8-8-8s-8 3.6-8 8c0 2.5 1.1 4.7 2.9 6.2V20h10.2v-1.8C18.9 16.7 20 14.5 20 12z"/><path d="M9 12h6M12 9v6"/></svg></span><span class="nav-lbl">Épargne</span></button>
       <button class="nav-btn" onclick="nav('budget')" data-s="budget"><span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 7v5l3.5 3.5"/></svg></span><span class="nav-lbl">Budgets</span></button>
     </div>
   </nav>
@@ -584,6 +599,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <label class="f-label">Date</label>
         <input type="date" id="edit-date">
       </div>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Note / Tag (optionnel)</label>
+      <input type="text" id="edit-note" placeholder="Ex : #vacances, remboursement Paul...">
     </div>
     <div class="edit-actions" style="padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px)">
       <button class="btn-edit-save" onclick="saveEditTx()">Enregistrer</button>
@@ -923,6 +942,7 @@ function openEditTx(id){
   document.getElementById('edit-amount').value = tx.amount;
   document.getElementById('edit-desc').value = tx.desc;
   document.getElementById('edit-date').value = tx.date;
+  document.getElementById('edit-note').value = tx.note||'';
 
   // Fill category select with right type
   const sel = document.getElementById('edit-cat');
@@ -946,9 +966,10 @@ function saveEditTx(){
   const date = document.getElementById('edit-date').value;
   if(!amt||amt<=0){toast('💡 Montant invalide');return}
   if(!desc){toast('💡 Description vide');return}
+  const note = document.getElementById('edit-note').value.trim();
   const idx = data.transactions.findIndex(t=>t.id===editingTxId);
   if(idx > -1){
-    data.transactions[idx] = {...data.transactions[idx], amount:amt, desc, cat, date};
+    data.transactions[idx] = {...data.transactions[idx], amount:amt, desc, cat, date, note};
     save();
     document.getElementById('editModalBg').classList.remove('show');
     renderDash();
@@ -1052,19 +1073,75 @@ function renderDash(){
   }
 }
 
+let histSearch = '';
+let histFilter = 'all'; // all | expense | income | cat:xxx
+
 function renderHistory(){
-  const el=document.getElementById('s-history');
-  const cur=prefs.currency||'€';
-  const grouped={};
-  data.transactions.forEach(t=>{(grouped[t.date]||(grouped[t.date]=[])).push(t)});
-  const days=Object.keys(grouped).sort().reverse();
-  if(!days.length){el.innerHTML='<div class="empty">Aucune transaction.</div>';return}
-  el.innerHTML=days.map(day=>{
-    const [y,m,d]=day.split('-');
-    return`<div class="tx-gdate">${d}/${m}/${y}</div><div class="glass-card" style="margin:0 16px 10px;overflow:hidden">
-      ${grouped[day].map((t,i)=>{const c=getCat(t.cat);return`${i>0?'<div class="divider"></div>':''}<div class="tx-item" onclick="openEditTx(${t.id})" style="cursor:pointer"><div class="tx-icon">${c.e}</div><div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l}</div></div><div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div><span style="font-size:18px;color:var(--t3);padding:0 4px">›</span></div>`}).join('')}
-    </div>`;
-  }).join('');
+  const el = document.getElementById('s-history');
+  const cur = prefs.currency||'€';
+
+  // Filter transactions
+  let txs = [...data.transactions];
+  if(histSearch.trim()){
+    const q = histSearch.toLowerCase();
+    txs = txs.filter(t =>
+      t.desc.toLowerCase().includes(q) ||
+      (t.note&&t.note.toLowerCase().includes(q)) ||
+      getCat(t.cat).l.toLowerCase().includes(q)
+    );
+  }
+  if(histFilter === 'expense') txs = txs.filter(t=>t.type==='expense');
+  else if(histFilter === 'income') txs = txs.filter(t=>t.type==='income');
+  else if(histFilter.startsWith('cat:')) txs = txs.filter(t=>t.cat===histFilter.slice(4));
+
+  // Stats
+  const totalExp = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const totalInc = txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+
+  // Top cats for filter chips
+  const catCounts = {};
+  data.transactions.forEach(t=>{catCounts[t.cat]=(catCounts[t.cat]||0)+1});
+  const topCats = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  // Group by date
+  const grouped = {};
+  txs.forEach(t=>{(grouped[t.date]||(grouped[t.date]=[])).push(t)});
+  const days = Object.keys(grouped).sort().reverse();
+
+  el.innerHTML = `
+    <div class="search-bar-wrap">
+      <div class="search-input-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" type="text" placeholder="Rechercher..." value="${histSearch}"
+          oninput="histSearch=this.value;renderHistory()" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="filter-chips">
+        <div class="chip${histFilter==='all'?' active':''}" onclick="histFilter='all';renderHistory()">Tout</div>
+        <div class="chip${histFilter==='expense'?' active':''}" onclick="histFilter='expense';renderHistory()">Dépenses</div>
+        <div class="chip${histFilter==='income'?' active':''}" onclick="histFilter='income';renderHistory()">Revenus</div>
+        ${topCats.map(([id])=>{const c=getCat(id);return`<div class="chip${histFilter==='cat:'+id?' active':''}" onclick="histFilter='cat:${id}';renderHistory()">${c.e} ${c.l}</div>`}).join('')}
+      </div>
+    </div>
+    ${txs.length>0?`<div class="search-stats"><span>${txs.length} transaction${txs.length>1?'s':''}</span><span>${totalExp>0?'-'+fmtAmt(Math.round(totalExp))+' '+cur:''}${totalExp>0&&totalInc>0?' · ':''}${totalInc>0?'+'+fmtAmt(Math.round(totalInc))+' '+cur:''}</span></div>`:''}
+    ${days.length ? days.map(day=>{
+      const [y,m,d]=day.split('-');
+      return`<div class="tx-gdate">${d}/${m}/${y}</div><div class="glass-card" style="margin:0 16px 10px;overflow:hidden">
+        ${grouped[day].map((t,i)=>{
+          const c=getCat(t.cat);
+          const tag = t.note ? `<span class="tx-tag">${t.note.slice(0,20)}</span>` : '';
+          return`${i>0?'<div class="divider"></div>':''}<div class="tx-item" onclick="openEditTx(${t.id})" style="cursor:pointer">
+            <div class="tx-icon">${c.e}</div>
+            <div class="tx-info">
+              <div class="tx-name">${t.desc}${tag}</div>
+              <div class="tx-meta">${c.l}</div>
+            </div>
+            <div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div>
+            <span style="font-size:18px;color:var(--t3);padding:0 4px">›</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('') : `<div class="search-empty">${histSearch?'Aucun résultat pour "'+histSearch+'"':'Aucune transaction.'}</div>`}
+  `;
 }
 
 function renderBudget(){
@@ -1266,6 +1343,19 @@ function renderSettings(){
           <div class="set-icon" style="background:rgba(255,152,0,.15)">📊</div>
           <div class="set-info"><div class="set-name">Exporter en CSV</div><div class="set-desc">Pour Excel ou Google Sheets</div></div>
           <span class="set-right" style="font-size:18px">↗</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-title">Outils</div>
+      <div class="set-card">
+        <div class="set-row" onclick="nav('calendar')" style="cursor:pointer">
+          <div class="set-icon" style="background:rgba(79,142,255,.15)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <div class="set-info"><div class="set-name">Vue Calendrier</div><div class="set-desc">Dépenses jour par jour</div></div>
+          <span class="set-right">›</span>
         </div>
       </div>
     </div>
