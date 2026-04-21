@@ -1298,7 +1298,7 @@ function renderBudget(){
         <div style="display:flex;justify-content:space-between;align-items:flex-end">
           <div>
             <div class="bud-vals">${fmtAmt(s)} ${cur} / ${fmtAmt(b.limit)} ${cur}</div>
-            ${pct<100?`<div style="font-size:12px;margin-top:3px;color:${perDayColor};font-weight:500">${daysLeft>0?`${fmtAmt(perDay)} ${cur}/jour pendant ${daysLeft}j`:'Dernier jour !'}</div>`:`<div style="font-size:12px;margin-top:3px;color:var(--red);font-weight:500">Limite dépassée !</div>`}
+            ${pct<100?('<div style="font-size:12px;margin-top:3px;color:'+perDayColor+';font-weight:500">'+(daysLeft>0?(fmtAmt(perDay)+' '+cur+'/jour pendant '+daysLeft+'j'):'Dernier jour !')+'</div>'):('<div style="font-size:12px;margin-top:3px;color:var(--red);font-weight:500">Limite dépassée !</div>')}
           </div>
           <div style="font-size:13px;font-weight:600;color:${cls==='over'?'var(--red)':cls==='warn'?'var(--amber)':'var(--inc-t)'}">${pct}%</div>
         </div>
@@ -2856,7 +2856,7 @@ function generateNotifs(){
     const left = income - expense;
     notifs.push({id:'period_end_'+period.end, type:'info', emoji:'📅',
       title:`Fin de période dans ${daysLeft} jour${daysLeft>1?'s':''}`,
-      msg:left>=0?`Il te reste ${fmtAmt(Math.round(left))} ${cur} non dépensés`:`Tu es à -${fmtAmt(Math.round(Math.abs(left)))} ${cur}`,
+    msg:left>=0?('Il te reste '+fmtAmt(Math.round(left))+' '+cur+' non dépensés'):('Tu es à -'+fmtAmt(Math.round(Math.abs(left)))+' '+cur),
       date:today, read:false});
   }
 
@@ -2995,30 +2995,40 @@ function updateNotifBadge(){
 
 /* ── GAMIFICATION ── */
 const BADGES = [
-  // Premiers pas
-  {id:'first_tx',     emoji:'🌱', name:'Premier pas',      desc:'Première transaction enregistrée',        check:d=>d.transactions.length>=1},
-  {id:'first_savings',emoji:'🐣', name:'Épargnant',        desc:'Premier versement en épargne',             check:d=>(d.savings||[]).filter(s=>s.type==='deposit').length>=1},
-  {id:'first_budget', emoji:'📋', name:'Gestionnaire',     desc:'Premier budget créé',                      check:d=>d.budgets.length>=1},
-  // Volume
-  {id:'tx_10',        emoji:'⚡', name:'En route',          desc:'10 transactions enregistrées',             check:d=>d.transactions.length>=10},
-  {id:'tx_50',        emoji:'🔥', name:'Habitué',           desc:'50 transactions enregistrées',             check:d=>d.transactions.length>=50},
-  {id:'tx_100',       emoji:'💯', name:'Centenaire',        desc:'100 transactions enregistrées',            check:d=>d.transactions.length>=100},
-  // Épargne
-  {id:'sav_500',      emoji:'💰', name:'Économe',           desc:'500 € mis de côté',                        check:(d,cur)=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=500},
-  {id:'sav_2000',     emoji:'💎', name:'Investisseur',      desc:'2 000 € mis de côté',                      check:(d,cur)=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=2000},
-  {id:'sav_5000',     emoji:'🏦', name:'Banquier',          desc:'5 000 € mis de côté',                      check:(d,cur)=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=5000},
-  // Budget
-  {id:'budget_ok_1',  emoji:'✅', name:'Discipliné',        desc:'1 budget respecté sur une période',        check:d=>checkBudgetRespected(d,1)},
-  {id:'budget_ok_3',  emoji:'🎯', name:'Précis',            desc:'3 budgets respectés en même temps',        check:d=>checkBudgetRespected(d,3)},
-  // Streak
-  {id:'streak_7',     emoji:'📆', name:'Régulier',          desc:'7 jours consécutifs avec transactions',    check:d=>getStreak(d)>=7},
-  {id:'streak_30',    emoji:'🗓️', name:'Assidu',            desc:'30 jours consécutifs',                     check:d=>getStreak(d)>=30},
-  // Score
-  {id:'score_70',     emoji:'⭐', name:'Bonne gestion',     desc:'Score financier ≥ 70',                     check:d=>calcScore(d)>=70},
-  {id:'score_90',     emoji:'🌟', name:'Expert',            desc:'Score financier ≥ 90',                     check:d=>calcScore(d)>=90},
-  // Fun
-  {id:'no_resto_month',emoji:'🥗',name:'Cuisinier',         desc:'Zéro restaurant sur une période complète', check:d=>checkNoRestaurant(d)},
-  {id:'recurring_3',  emoji:'🔁', name:'Automatisé',        desc:'3 récurrences actives',                    check:d=>(d.recurring||[]).filter(r=>r.active).length>=3},
+  // 🌱 Premiers pas
+  {id:'first_tx',      cat:'debut',  emoji:'🌱', name:'Premier pas',       desc:'1ère transaction',          check:d=>d.transactions.length>=1},
+  {id:'first_savings', cat:'debut',  emoji:'🐣', name:'Épargnant',          desc:'1er versement épargne',     check:d=>(d.savings||[]).filter(s=>s.type==='deposit').length>=1},
+  {id:'first_budget',  cat:'debut',  emoji:'📋', name:'Gestionnaire',       desc:'1er budget créé',           check:d=>d.budgets.length>=1},
+  {id:'first_recurring',cat:'debut', emoji:'🔁', name:'Automatisé',         desc:'1ère récurrence active',    check:d=>(d.recurring||[]).filter(r=>r.active).length>=1},
+  // ⚡ Volume
+  {id:'tx_10',         cat:'volume', emoji:'⚡', name:'En route',            desc:'10 transactions',           check:d=>d.transactions.length>=10},
+  {id:'tx_50',         cat:'volume', emoji:'🔥', name:'Habitué',             desc:'50 transactions',           check:d=>d.transactions.length>=50},
+  {id:'tx_100',        cat:'volume', emoji:'💯', name:'Centenaire',          desc:'100 transactions',          check:d=>d.transactions.length>=100},
+  {id:'tx_365',        cat:'volume', emoji:'📚', name:'Archiviste',          desc:'365 transactions',          check:d=>d.transactions.length>=365},
+  // 💰 Épargne
+  {id:'sav_100',       cat:'epargne',emoji:'🌿', name:'Petit épargnant',    desc:'100 € de côté',             check:d=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=100},
+  {id:'sav_500',       cat:'epargne',emoji:'💰', name:'Économe',            desc:'500 € de côté',             check:d=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=500},
+  {id:'sav_2000',      cat:'epargne',emoji:'💎', name:'Investisseur',       desc:'2 000 € de côté',           check:d=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=2000},
+  {id:'sav_5000',      cat:'epargne',emoji:'🏦', name:'Banquier',           desc:'5 000 € de côté',           check:d=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=5000},
+  {id:'sav_10000',     cat:'epargne',emoji:'🚀', name:'Investisseur Pro',   desc:'10 000 € de côté',          check:d=>(d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0)>=10000},
+  // 🎯 Budget
+  {id:'budget_ok_1',   cat:'budget', emoji:'✅', name:'Discipliné',         desc:'1 budget respecté',         check:d=>checkBudgetRespected(d,1)},
+  {id:'budget_ok_3',   cat:'budget', emoji:'🎯', name:'Précis',             desc:'3 budgets respectés',       check:d=>checkBudgetRespected(d,3)},
+  {id:'budget_ok_all', cat:'budget', emoji:'🏆', name:'Parfait',            desc:'Tous les budgets OK',       check:d=>d.budgets.length>=2&&checkBudgetRespected(d,d.budgets.length)},
+  // 📆 Streak
+  {id:'streak_3',      cat:'streak', emoji:'🌤️', name:'Régulier',          desc:'3 jours de suite',          check:d=>getStreak(d)>=3},
+  {id:'streak_7',      cat:'streak', emoji:'📆', name:'Hebdo',              desc:'7 jours de suite',          check:d=>getStreak(d)>=7},
+  {id:'streak_30',     cat:'streak', emoji:'🗓️', name:'Assidu',            desc:'30 jours de suite',         check:d=>getStreak(d)>=30},
+  {id:'streak_100',    cat:'streak', emoji:'⚡', name:'Indestructible',     desc:'100 jours de suite',        check:d=>getStreak(d)>=100},
+  // ⭐ Score
+  {id:'score_50',      cat:'score',  emoji:'🌟', name:'Bonne route',        desc:'Score ≥ 50',                check:d=>calcScore(d)>=50},
+  {id:'score_70',      cat:'score',  emoji:'⭐', name:'Bonne gestion',      desc:'Score ≥ 70',                check:d=>calcScore(d)>=70},
+  {id:'score_90',      cat:'score',  emoji:'🥇', name:'Expert',             desc:'Score ≥ 90',                check:d=>calcScore(d)>=90},
+  // 🎭 Fun & Défi
+  {id:'no_resto_month',cat:'defi',   emoji:'🥗', name:'Cuisinier',          desc:'0 resto sur une période',   check:d=>checkNoRestaurant(d)},
+  {id:'sav_auto_3',    cat:'defi',   emoji:'🤖', name:'Automatique',        desc:'3 épargnes auto effectuées',check:d=>(d.savings||[]).filter(s=>s.auto).length>=3},
+  {id:'recurring_3',   cat:'defi',   emoji:'⚙️', name:'Pilote auto',       desc:'3 récurrences actives',     check:d=>(d.recurring||[]).filter(r=>r.active).length>=3},
+  {id:'no_expense_day',cat:'defi',   emoji:'🧘', name:'Journée zen',        desc:'Un jour sans dépense',      check:d=>{const dates=new Set(d.transactions.filter(t=>t.type==='expense').map(t=>t.date));const all=new Set(d.transactions.map(t=>t.date));return[...all].some(dt=>!dates.has(dt))}},
 ];
 
 function checkBudgetRespected(d, count){
@@ -3133,62 +3143,65 @@ function renderGamif(){
   const prev = JSON.parse(localStorage.getItem('budget_badges')||'[]');
   const isNew = id => unlocked.includes(id) && !prev.includes(id);
 
-  // Update settings count
   const bc = document.getElementById('badgeCount');
-  if(bc) bc.textContent = `${unlocked.length}/${BADGES.length} badges débloqués`;
+  if(bc) bc.textContent = unlocked.length+'/'+BADGES.length+' badges débloqués';
+
+  // Build badges HTML without nested template literals
+  const CATS_ORDER = [
+    {key:'debut',  label:'🌱 Premiers pas'},
+    {key:'volume', label:'⚡ Volume'},
+    {key:'epargne',label:'💰 Épargne'},
+    {key:'budget', label:'🎯 Budget'},
+    {key:'streak', label:'🔥 Streak'},
+    {key:'score',  label:'⭐ Score'},
+    {key:'defi',   label:'🎭 Défis'},
+  ];
+
+  let badgesHtml = '';
+  CATS_ORDER.forEach(function(cat){
+    const catBadges = BADGES.filter(function(b){return b.cat===cat.key;});
+    const catUnlocked = catBadges.filter(function(b){return unlocked.includes(b.id);}).length;
+    const allDone = catUnlocked===catBadges.length;
+    badgesHtml += '<div class="sec-label" style="font-size:11px;margin-top:14px">'+cat.label+' <span style="color:'+(allDone?'var(--inc-t)':'var(--t3)')+'">'+catUnlocked+'/'+catBadges.length+'</span></div>';
+    badgesHtml += '<div class="badges-grid">';
+    catBadges.forEach(function(b){
+      const ok = unlocked.includes(b.id);
+      const isnew = isNew(b.id);
+      badgesHtml += '<div class="badge-item'+(ok?'',' locked')+(isnew?' new-unlock':'')+'">';
+      if(isnew) badgesHtml += '<div class="badge-new-tag">NEW</div>';
+      badgesHtml += '<div class="badge-emoji">'+b.emoji+'</div>';
+      badgesHtml += '<div class="badge-name">'+b.name+'</div>';
+      badgesHtml += '<div class="badge-desc">'+b.desc+'</div>';
+      badgesHtml += ok
+        ? '<div style="font-size:9px;color:var(--inc-t);margin-top:3px;font-weight:600">✓ Débloqué</div>'
+        : '<div style="font-size:9px;color:var(--t3);margin-top:3px">🔒 Verrouillé</div>';
+      badgesHtml += '</div>';
+    });
+    badgesHtml += '</div>';
+  });
 
   const el = document.getElementById('s-gamif');
-  el.innerHTML = `<div class="gamif-screen-pad">
+  el.innerHTML = '<div class="gamif-screen-pad">'
+    + '<div class="score-card">'
+    + '<div class="score-label">Score financier</div>'
+    + '<div style="display:flex;align-items:baseline;gap:4px">'
+    + '<div class="score-number">'+score+'</div>'
+    + '<div class="score-max">/100</div>'
+    + '</div>'
+    + '<div class="score-bar-wrap"><div class="score-bar-track"><div class="score-bar-fill" style="width:'+score+'%;background:'+getScoreBarColor(score)+'"></div></div></div>'
+    + '<div class="score-grade">'
+    + '<span style="color:rgba(255,255,255,.6);font-size:12px">Épargne, budgets, régularité</span>'
+    + '<span class="score-grade-badge" style="background:'+grade.bg+';color:'+grade.color+'">Rang '+grade.grade+'</span>'
+    + '</div></div>'
+    + '<div class="streak-row">'
+    + '<div class="streak-card"><div class="streak-emoji">🔥</div><div class="streak-val">'+streak+'</div><div class="streak-lbl">Jours de suite</div></div>'
+    + '<div class="streak-card"><div class="streak-emoji">💰</div><div class="streak-val">'+fmtAmt(totalSav)+'</div><div class="streak-lbl">'+cur+' épargnés</div></div>'
+    + '<div class="streak-card"><div class="streak-emoji">🏅</div><div class="streak-val">'+unlocked.length+'</div><div class="streak-lbl">Badges / '+BADGES.length+'</div></div>'
+    + '</div>'
+    + '<div class="sec-label">Badges &amp; succès</div>'
+    + badgesHtml
+    + '</div>';
 
-    <div class="score-card">
-      <div class="score-label">Score financier</div>
-      <div style="display:flex;align-items:baseline;gap:4px">
-        <div class="score-number">${score}</div>
-        <div class="score-max">/100</div>
-      </div>
-      <div class="score-bar-wrap">
-        <div class="score-bar-track"><div class="score-bar-fill" style="width:${score}%;background:${getScoreBarColor(score)}"></div></div>
-      </div>
-      <div class="score-grade">
-        <span style="color:rgba(255,255,255,.6);font-size:12px">Basé sur épargne, budgets, régularité</span>
-        <span class="score-grade-badge" style="background:${grade.bg};color:${grade.color}">Rang ${grade.grade}</span>
-      </div>
-    </div>
-
-    <div class="streak-row">
-      <div class="streak-card">
-        <div class="streak-emoji">🔥</div>
-        <div class="streak-val">${streak}</div>
-        <div class="streak-lbl">Jours de suite</div>
-      </div>
-      <div class="streak-card">
-        <div class="streak-emoji">💰</div>
-        <div class="streak-val">${fmtAmt(totalSav)}</div>
-        <div class="streak-lbl">${cur} épargnés</div>
-      </div>
-      <div class="streak-card">
-        <div class="streak-emoji">🏅</div>
-        <div class="streak-val">${unlocked.length}</div>
-        <div class="streak-lbl">Badges / ${BADGES.length}</div>
-      </div>
-    </div>
-
-    <div class="sec-label">Badges & succès</div>
-    <div class="badges-grid">
-      ${BADGES.map(b=>{
-        const ok = unlocked.includes(b.id);
-        const isnew = isNew(b.id);
-        return`<div class="badge-item${ok?'':' locked'}${isnew?' new-unlock':''}">
-          ${isnew?'<div class="badge-new-tag">NEW</div>':''}
-          <div class="badge-emoji">${b.emoji}</div>
-          <div class="badge-name">${b.name}</div>
-          <div class="badge-desc">${b.desc}</div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>`;
-
-  // Save current unlocked
   localStorage.setItem('budget_badges', JSON.stringify(unlocked));
 }
 // Init
