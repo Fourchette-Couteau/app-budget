@@ -1071,13 +1071,31 @@ function renderBudget(){
   const period=currentPeriod();const spent={};
   const cur=prefs.currency||'€';
   data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense').forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
+  // Days remaining in period
+  const today=fmtDate(new Date());
+  const endDate=new Date(period.end);
+  const todayDate=new Date(today);
+  const daysLeft=Math.max(0,Math.round((endDate-todayDate)/(1000*60*60*24))+1);
   const el=document.getElementById('s-budget');
   el.innerHTML=`<div class="bud-pad">
     <div class="sec-label">Limites du mois</div>
     ${data.budgets.length?data.budgets.map((b,i)=>{
       const c=getCat(b.cat);const s=spent[b.cat]||0;const pct=Math.min(Math.round((s/b.limit)*100),100);
       const cls=pct>=100?'over':pct>=75?'warn':'ok';
-      return`<div class="glass-card bud-item"><div class="bud-header"><div class="bud-name">${c.e} ${c.l}</div><button class="tx-del" onclick="deleteBudget(${i})">×</button></div><div class="bud-bar"><div class="bud-fill ${cls}" style="width:${pct}%"></div></div><div style="display:flex;justify-content:space-between"><div class="bud-vals">${fmtAmt(s)} ${cur} sur ${fmtAmt(b.limit)} ${cur}</div><div style="font-size:12px;font-weight:500;color:${cls==='over'?'var(--red)':cls==='warn'?'var(--amber)':'var(--inc-t)'}">${pct}%</div></div></div>`;
+      const remaining=Math.max(0,b.limit-s);
+      const perDay=daysLeft>0?Math.floor(remaining/daysLeft):0;
+      const perDayColor=pct>=100?'var(--red)':pct>=75?'var(--amber)':'var(--inc-t)';
+      return`<div class="glass-card bud-item">
+        <div class="bud-header"><div class="bud-name">${c.e} ${c.l}</div><button class="tx-del" onclick="deleteBudget(${i})">×</button></div>
+        <div class="bud-bar"><div class="bud-fill ${cls}" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end">
+          <div>
+            <div class="bud-vals">${fmtAmt(s)} ${cur} / ${fmtAmt(b.limit)} ${cur}</div>
+            ${pct<100?`<div style="font-size:12px;margin-top:3px;color:${perDayColor};font-weight:500">${daysLeft>0?`${fmtAmt(perDay)} ${cur}/jour pendant ${daysLeft}j`:'Dernier jour !'}</div>`:`<div style="font-size:12px;margin-top:3px;color:var(--red);font-weight:500">Limite dépassée !</div>`}
+          </div>
+          <div style="font-size:13px;font-weight:600;color:${cls==='over'?'var(--red)':cls==='warn'?'var(--amber)':'var(--inc-t)'}">${pct}%</div>
+        </div>
+      </div>`;
     }).join(''):'<div class="empty" style="padding:20px">Aucun budget défini.</div>'}
     <div class="glass-card add-bud-card">
       <div style="font-size:15px;font-weight:600;margin-bottom:14px">Ajouter une limite</div>
