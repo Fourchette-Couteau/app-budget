@@ -482,6 +482,31 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .stats-year-toggle{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .stats-year-btn{padding:6px 14px;border-radius:20px;border:.5px solid var(--glass-b);background:var(--glass);font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;transition:var(--tr)}
 .stats-year-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+/* ─ NOTIFICATIONS ─ */
+.notif-panel-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.notif-panel-bg.show{opacity:1;pointer-events:all}
+.notif-panel{position:absolute;top:0;right:0;width:min(340px,100vw);height:100%;background:var(--bg2);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.3)}
+.notif-panel-bg.show .notif-panel{transform:translateX(0)}
+.notif-header{padding:calc(var(--safe-top,44px) + 12px) 20px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--sep);flex-shrink:0}
+.notif-header-title{font-size:17px;font-weight:600}
+.notif-close{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:16px;color:var(--t2);display:flex;align-items:center;justify-content:center}
+.notif-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px}
+.notif-item{display:flex;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:8px;background:var(--glass);border:.5px solid var(--glass-b);cursor:pointer;transition:var(--tr)}
+.notif-item:active{opacity:.8}
+.notif-item.unread{border-left:3px solid var(--accent)}
+.notif-item.unread-warn{border-left:3px solid var(--amber)}
+.notif-item.unread-danger{border-left:3px solid var(--red)}
+.notif-dot{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.notif-info{flex:1;min-width:0}
+.notif-title{font-size:14px;font-weight:500;margin-bottom:2px}
+.notif-msg{font-size:12px;color:var(--t2);line-height:1.4}
+.notif-time{font-size:10px;color:var(--t3);margin-top:3px}
+.notif-empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px}
+.notif-bell{position:relative;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
+.notif-badge{position:absolute;top:0;right:0;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.notif-section-title{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px}
+.notif-actions{padding:12px 16px;border-top:.5px solid var(--sep);flex-shrink:0}
+.btn-clear-notifs{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--surface2);color:var(--t2);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);transition:var(--tr)}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -549,7 +574,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="header">
     <div class="header-top">
       <div><div class="header-title" id="hTitle">Mon Budget</div><div class="month-label" id="monthLabel"></div></div>
-      <div class="header-avatar" id="avatarBtn" onclick="nav('settings')">💰</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="notif-bell" id="notifBell" onclick="openNotifPanel()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div class="header-avatar" id="avatarBtn" onclick="nav('settings')">💰</div>
+      </div>
     </div>
   </div>
   <div class="scroll">
@@ -679,6 +709,18 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <button class="btn-edit-save" onclick="saveEditRec()">Enregistrer</button>
       <button class="btn-edit-del" onclick="deleteEditRec()">🗑</button>
     </div>
+    </div>
+  </div>
+</div>
+<div class="notif-panel-bg" id="notifBg" onclick="closeNotifPanel(event)">
+  <div class="notif-panel">
+    <div class="notif-header">
+      <div class="notif-header-title">Notifications</div>
+      <button class="notif-close" onclick="closeNotifPanel()">×</button>
+    </div>
+    <div class="notif-scroll" id="notifList"></div>
+    <div class="notif-actions">
+      <button class="btn-clear-notifs" onclick="clearNotifs()">Tout marquer comme lu</button>
     </div>
   </div>
 </div>
@@ -1431,6 +1473,35 @@ function renderSettings(){
         </div>
         <div style="padding:0 16px 14px">
           <input type="url" id="appUrlInput" placeholder="https://fourchette-couteau.github.io/app-budget/budget.html" value="${prefs.appUrl||''}" oninput="updateAppUrl(this.value)" style="margin-top:8px;font-size:13px">
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-title">Alertes & notifications</div>
+      <div class="set-card">
+        <div class="set-row">
+          <div class="set-icon" style="background:rgba(255,95,95,.12)">🚨</div>
+          <div class="set-info"><div class="set-name">Dépassement de budget</div><div class="set-desc">Alerte quand 100% atteint</div></div>
+          <label class="toggle"><input type="checkbox" ${prefs.notifBudgetOver!==false?'checked':''} onchange="togglePref('notifBudgetOver',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div class="divider"></div>
+        <div class="set-row">
+          <div class="set-icon" style="background:rgba(255,179,64,.12)">⚠️</div>
+          <div class="set-info"><div class="set-name">Budget à 80%</div><div class="set-desc">Avertissement préventif</div></div>
+          <label class="toggle"><input type="checkbox" ${prefs.notifBudgetWarn!==false?'checked':''} onchange="togglePref('notifBudgetWarn',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div class="divider"></div>
+        <div class="set-row">
+          <div class="set-icon" style="background:rgba(79,142,255,.12)">📅</div>
+          <div class="set-info"><div class="set-name">Fin de période</div><div class="set-desc">Rappel 3 jours avant</div></div>
+          <label class="toggle"><input type="checkbox" ${prefs.notifPeriodEnd!==false?'checked':''} onchange="togglePref('notifPeriodEnd',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div class="divider"></div>
+        <div class="set-row">
+          <div class="set-icon" style="background:rgba(99,217,160,.12)">📊</div>
+          <div class="set-info"><div class="set-name">Récap quotidien</div><div class="set-desc">Résumé des dépenses du jour</div></div>
+          <label class="toggle"><input type="checkbox" ${prefs.notifDaily!==false?'checked':''} onchange="togglePref('notifDaily',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
         </div>
       </div>
     </div>
@@ -2683,12 +2754,188 @@ function renderStats(){
     ${!yearTx.length?'<div class="empty">Aucune donnée pour cette année.<br>Ajoute des transactions pour voir tes stats !</div>':''}
   </div>`;
 }
+
+/* ── NOTIFICATIONS ── */
+function generateNotifs(){
+  const notifs = [];
+  const now = new Date();
+  const today = fmtDate(now);
+  const cur = prefs.currency||'€';
+  const period = currentPeriod();
+
+  // 1. Budget alerts
+  const spent = {};
+  data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense')
+    .forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
+  data.budgets.forEach(b=>{
+    const s = spent[b.cat]||0;
+    const pct = Math.round((s/b.limit)*100);
+    const c = getCat(b.cat);
+    if(pct>=100){
+      notifs.push({id:'budget_over_'+b.cat, type:'danger', emoji:'🚨',
+        title:`Budget ${c.l} dépassé !`,
+        msg:`Tu as dépensé ${fmtAmt(Math.round(s))} ${cur} sur ${fmtAmt(b.limit)} ${cur} (${pct}%)`,
+        date:today, read:false});
+    } else if(pct>=80){
+      notifs.push({id:'budget_warn_'+b.cat, type:'warn', emoji:'⚠️',
+        title:`Budget ${c.l} bientôt atteint`,
+        msg:`${pct}% utilisé — il te reste ${fmtAmt(Math.round(b.limit-s))} ${cur}`,
+        date:today, read:false});
+    }
+  });
+
+  // 2. End of period reminder (last 3 days)
+  const endDate = new Date(period.end);
+  const daysLeft = Math.round((endDate - now)/(1000*60*60*24));
+  if(daysLeft >= 0 && daysLeft <= 3){
+    const income = data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const expense = data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const left = income - expense;
+    notifs.push({id:'period_end_'+period.end, type:'info', emoji:'📅',
+      title:`Fin de période dans ${daysLeft} jour${daysLeft>1?'s':''}`,
+      msg:left>=0?`Il te reste ${fmtAmt(Math.round(left))} ${cur} non dépensés`:`Tu es à -${fmtAmt(Math.round(Math.abs(left)))} ${cur}`,
+      date:today, read:false});
+  }
+
+  // 3. Recurring due today
+  const todayDay = now.getDate();
+  const dueToday = (data.recurring||[]).filter(r=>r.active&&r.freq==='monthly'&&r.day===todayDay);
+  if(dueToday.length){
+    notifs.push({id:'recurring_'+today, type:'info', emoji:'🔁',
+      title:`${dueToday.length} récurrence${dueToday.length>1?'s':''} aujourd\'hui`,
+      msg:dueToday.map(r=>r.desc).join(', '),
+      date:today, read:false});
+  }
+
+  // 4. Daily recap (if has transactions today)
+  const todayTx = data.transactions.filter(t=>t.date===today);
+  if(todayTx.length>0){
+    const todayExp = todayTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    if(todayExp>0){
+      notifs.push({id:'daily_'+today, type:'ok', emoji:'📊',
+        title:`Récap du jour`,
+        msg:`Tu as dépensé ${fmtAmt(Math.round(todayExp))} ${cur} aujourd\'hui en ${todayTx.filter(t=>t.type==='expense').length} transaction${todayTx.filter(t=>t.type==='expense').length>1?'s':''}`,
+        date:today, read:false});
+    }
+  }
+
+  // 5. Savings auto transfer
+  const lastSavAuto = (data.savings||[]).filter(s=>s.auto).slice(-1)[0];
+  if(lastSavAuto && lastSavAuto.date===today){
+    notifs.push({id:'savings_auto_'+today, type:'ok', emoji:'💰',
+      title:'Épargne automatique effectuée',
+      msg:`${fmtAmt(lastSavAuto.amount)} ${cur} transférés depuis le reliquat de la période précédente`,
+      date:today, read:false});
+  }
+
+  return notifs;
+}
+
+function getStoredNotifs(){
+  const stored = JSON.parse(localStorage.getItem('budget_notifs')||'[]');
+  const fresh = generateNotifs();
+  // Merge: keep stored read status, add new ones
+  const merged = [];
+  fresh.forEach(n=>{
+    const existing = stored.find(s=>s.id===n.id);
+    merged.push(existing ? {...n, read:existing.read} : n);
+  });
+  // Keep old read notifs from last 7 days
+  const week = new Date(); week.setDate(week.getDate()-7);
+  stored.filter(s=>s.read && s.date >= fmtDate(week) && !merged.find(m=>m.id===s.id))
+        .forEach(s=>merged.push(s));
+  merged.sort((a,b)=>b.date.localeCompare(a.date));
+  return merged;
+}
+
+function saveNotifs(notifs){
+  localStorage.setItem('budget_notifs', JSON.stringify(notifs));
+}
+
+function openNotifPanel(){
+  const notifs = getStoredNotifs();
+  saveNotifs(notifs);
+  renderNotifList(notifs);
+  document.getElementById('notifBg').classList.add('show');
+}
+
+function closeNotifPanel(e){
+  if(!e||e.target===document.getElementById('notifBg'))
+    document.getElementById('notifBg').classList.remove('show');
+  updateNotifBadge();
+}
+
+function renderNotifList(notifs){
+  const el = document.getElementById('notifList');
+  if(!notifs.length){
+    el.innerHTML='<div class="notif-empty">🎉 Tout est bon !<br>Aucune alerte pour le moment.</div>';
+    return;
+  }
+  const unread = notifs.filter(n=>!n.read);
+  const read = notifs.filter(n=>n.read);
+  let html = '';
+  if(unread.length){
+    html += `<div class="notif-section-title">Nouvelles (${unread.length})</div>`;
+    html += unread.map(n=>notifItemHtml(n)).join('');
+  }
+  if(read.length){
+    html += `<div class="notif-section-title">Déjà lues</div>`;
+    html += read.map(n=>notifItemHtml(n)).join('');
+  }
+  el.innerHTML = html;
+}
+
+function notifItemHtml(n){
+  const typeClass = n.type==='danger'?'unread-danger':n.type==='warn'?'unread-warn':'unread';
+  const bgColor = n.type==='danger'?'rgba(255,95,95,.12)':n.type==='warn'?'rgba(255,179,64,.12)':n.type==='ok'?'rgba(26,158,92,.12)':'rgba(79,142,255,.12)';
+  return`<div class="notif-item${!n.read?' '+typeClass:''}" onclick="markRead('${n.id}')">
+    <div class="notif-dot" style="background:${bgColor}">${n.emoji}</div>
+    <div class="notif-info">
+      <div class="notif-title">${n.title}</div>
+      <div class="notif-msg">${n.msg}</div>
+      <div class="notif-time">${n.date===fmtDate(new Date())?"Aujourd'hui":n.date.split('-').reverse().join('/')}</div>
+    </div>
+  </div>`;
+}
+
+function markRead(id){
+  const notifs = getStoredNotifs();
+  const n = notifs.find(n=>n.id===id);
+  if(n) n.read = true;
+  saveNotifs(notifs);
+  renderNotifList(notifs);
+  updateNotifBadge();
+}
+
+function clearNotifs(){
+  const notifs = getStoredNotifs().map(n=>({...n,read:true}));
+  saveNotifs(notifs);
+  renderNotifList(notifs);
+  updateNotifBadge();
+}
+
+function updateNotifBadge(){
+  const notifs = getStoredNotifs();
+  const unread = notifs.filter(n=>!n.read).length;
+  const bell = document.getElementById('notifBell');
+  if(!bell) return;
+  // Remove old badge
+  const old = bell.querySelector('.notif-badge');
+  if(old) old.remove();
+  if(unread>0){
+    const badge = document.createElement('div');
+    badge.className='notif-badge';
+    badge.textContent = unread>9?'9+':unread;
+    bell.appendChild(badge);
+  }
+}
 // Init
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
 applyPrefs();
 processEndOfPeriodSavings();
 processDueRecurring();
+setTimeout(updateNotifBadge, 100);
 showSplash();
 if(prefs.pinEnabled){ setTimeout(()=>showPinScreen("unlock"), 1900); }
 setType('expense');
