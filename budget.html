@@ -525,6 +525,43 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
   </div>
 </div>
+<div class="edit-modal-bg" id="editRecModalBg" onclick="closeEditRecModal(event)">
+  <div class="edit-modal">
+    <div class="edit-modal-handle"></div>
+    <div class="edit-modal-title">
+      <div class="edit-modal-icon" id="editRecIcon">🔁</div>
+      Modifier la récurrence
+    </div>
+    <div class="type-toggle" style="margin-bottom:12px">
+      <button class="type-btn active" id="editrec-btn-exp" onclick="setEditRecType('expense')">Dépense</button>
+      <button class="type-btn" id="editrec-btn-inc" onclick="setEditRecType('income')">Revenu</button>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Description</label>
+      <input type="text" id="editrec-desc">
+    </div>
+    <div class="f-row">
+      <div class="f-group">
+        <label class="f-label">Montant</label>
+        <input type="number" id="editrec-amount" inputmode="decimal" min="0" step="0.01">
+      </div>
+      <div class="f-group">
+        <label class="f-label">Jour du mois</label>
+        <select id="editrec-day">
+          ${Array.from({length:28},(_,i)=>i+1).map(d=>`<option value="${d}">${d}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Catégorie</label>
+      <select id="editrec-cat"></select>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-edit-save" onclick="saveEditRec()">Enregistrer</button>
+      <button class="btn-edit-del" onclick="deleteEditRec()">🗑</button>
+    </div>
+  </div>
+</div>
 <div class="photo-modal-bg" id="photoModalBg" onclick="closePhotoModal(event)">
   <div class="photo-modal">
     <div class="photo-modal-handle"></div>
@@ -1589,7 +1626,7 @@ function renderRecurring(){
         const c = getCat(r.cat);
         const next = getNextDate(r);
         return `${i>0?'<div class="divider"></div>':''}
-        <div class="rec-item">
+        <div class="rec-item" onclick="openEditRec(${i})" style="cursor:pointer">
           <div class="rec-icon">${c.e}</div>
           <div class="rec-info">
             <div class="rec-name">${r.desc}</div>
@@ -1597,14 +1634,14 @@ function renderRecurring(){
           </div>
           <div class="rec-right">
             <div class="rec-amt ${r.type==='expense'?'exp':'inc'}">${r.type==='expense'?'-':'+'}${fmtAmt(r.amount)} ${cur}</div>
-            <div style="display:flex;gap:6px;align-items:center">
+            <div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">
               <div class="rec-next">le ${r.day}</div>
               <label style="position:relative;width:36px;height:20px;flex-shrink:0">
                 <input type="checkbox" ${r.active?'checked':''} onchange="toggleRecurring(${i},this.checked)" style="opacity:0;position:absolute;inset:0">
                 <div style="position:absolute;inset:0;border-radius:10px;background:${r.active?'var(--accent)':'var(--surface2)'};transition:.2s"></div>
                 <div style="position:absolute;top:2px;left:${r.active?'18':'2'}px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
               </label>
-              <button class="tx-del" onclick="deleteRecurring(${i})">×</button>
+              <span style="font-size:16px;color:var(--t3)">›</span>
             </div>
           </div>
         </div>`;
@@ -1793,6 +1830,80 @@ function tryFaceID(){
   if(fb) fb.textContent = '⊙';
 }
 
+
+/* ── MODIFIER RÉCURRENCE ── */
+let editingRecIdx = null;
+let editRecType = 'expense';
+
+function openEditRec(i){
+  const r = data.recurring[i];
+  if(!r) return;
+  editingRecIdx = i;
+  editRecType = r.type;
+
+  // Icon
+  document.getElementById('editRecIcon').textContent = getCat(r.cat).e;
+
+  // Type toggle
+  document.getElementById('editrec-btn-exp').classList.toggle('active', r.type==='expense');
+  document.getElementById('editrec-btn-inc').classList.toggle('active', r.type==='income');
+
+  // Fields
+  document.getElementById('editrec-desc').value = r.desc;
+  document.getElementById('editrec-amount').value = r.amount;
+
+  // Day selector
+  const daySel = document.getElementById('editrec-day');
+  daySel.innerHTML = Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}"${d===r.day?' selected':''}>${d}</option>`).join('');
+
+  // Cat selector
+  const catSel = document.getElementById('editrec-cat');
+  catSel.innerHTML = [...CATS.expense,...CATS.income].map(c=>`<option value="${c.id}"${c.id===r.cat?' selected':''}>${c.e} ${c.l}</option>`).join('');
+
+  document.getElementById('editRecModalBg').classList.add('show');
+}
+
+function setEditRecType(t){
+  editRecType = t;
+  document.getElementById('editrec-btn-exp').classList.toggle('active', t==='expense');
+  document.getElementById('editrec-btn-inc').classList.toggle('active', t==='income');
+}
+
+function closeEditRecModal(e){
+  if(!e || e.target===document.getElementById('editRecModalBg'))
+    document.getElementById('editRecModalBg').classList.remove('show');
+}
+
+function saveEditRec(){
+  if(editingRecIdx === null) return;
+  const desc = document.getElementById('editrec-desc').value.trim();
+  const amount = parseFloat(document.getElementById('editrec-amount').value);
+  const day = parseInt(document.getElementById('editrec-day').value);
+  const cat = document.getElementById('editrec-cat').value;
+  if(!desc){toast('💡 Entre une description');return}
+  if(!amount||amount<=0){toast('💡 Entre un montant');return}
+  data.recurring[editingRecIdx] = {
+    ...data.recurring[editingRecIdx],
+    type: editRecType, desc, amount, day, cat
+  };
+  save();
+  document.getElementById('editRecModalBg').classList.remove('show');
+  renderRecurring();
+  toast('✅ Récurrence modifiée !');
+  editingRecIdx = null;
+}
+
+function deleteEditRec(){
+  if(editingRecIdx === null) return;
+  openModal('Supprimer cette récurrence','',()=>{
+    data.recurring.splice(editingRecIdx, 1);
+    save();
+    document.getElementById('editRecModalBg').classList.remove('show');
+    renderRecurring();
+    toast('🗑 Supprimée');
+    editingRecIdx = null;
+  });
+}
 // Init
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
