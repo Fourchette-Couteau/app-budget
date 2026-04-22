@@ -592,6 +592,56 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .defi-stats{display:flex;justify-content:space-between;font-size:12px;color:var(--t2)}
 .defi-success{background:linear-gradient(135deg,rgba(26,158,92,.15),rgba(99,217,160,.08));border-color:rgba(26,158,92,.3)}
 .defi-success .defi-fill{background:linear-gradient(90deg,#1a9e5c,#63d9a0)}
+/* ─ MULTI-COMPTES ─ */
+.accounts-bar{padding:12px 16px 0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:10;background:var(--bg);-webkit-backdrop-filter:var(--blur)}
+.accounts-bar::-webkit-scrollbar{display:none}
+.account-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:.5px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:var(--tr);font-size:13px;font-weight:500;color:var(--t2)}
+.account-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.account-chip:active{transform:scale(.95)}
+.account-chip-emoji{font-size:15px}
+.account-total-bar{padding:8px 16px 4px;display:flex;align-items:center;justify-content:space-between}
+.account-total-label{font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.account-total-val{font-size:15px;font-weight:600}
+
+/* Modal nouveau compte */
+.account-modal-bg{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end}
+.account-modal-bg.show{opacity:1;pointer-events:all}
+.account-modal{width:100%;background:var(--bg2);border-radius:28px 28px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+24px);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:85vh;overflow-y:auto}
+.account-modal-bg.show .account-modal{transform:translateY(0)}
+.account-type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.account-type-btn{padding:14px;border-radius:14px;border:.5px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:var(--tr);text-align:left}
+.account-type-btn.selected{border-color:var(--accent);background:rgba(79,142,255,.1)}
+.account-type-btn:active{transform:scale(.97)}
+.account-type-emoji{font-size:24px;margin-bottom:6px}
+.account-type-name{font-size:13px;font-weight:600}
+.account-type-rate{font-size:11px;color:var(--accent);margin-top:2px}
+.account-type-cap{font-size:10px;color:var(--t3)}
+
+/* Écran compte */
+.account-hero{background:linear-gradient(135deg,var(--accent),var(--accent2,#7b5ea7));border-radius:var(--radius);padding:20px;margin-bottom:12px;color:#fff}
+.account-hero-name{font-size:13px;font-weight:600;opacity:.8;margin-bottom:4px}
+.account-hero-bal{font-size:40px;font-weight:200;letter-spacing:-2px;margin-bottom:8px}
+.account-hero-sub{font-size:12px;opacity:.7}
+.account-cap-bar{height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden;margin-top:8px}
+.account-cap-fill{height:100%;background:rgba(255,255,255,.8);border-radius:3px;transition:width .6s}
+.account-interest-card{background:rgba(99,217,160,.1);border:.5px solid rgba(99,217,160,.3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+/* ─ PLACEMENTS ÉPARGNE ─ */
+.placement-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius);padding:16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.placement-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.placement-emoji{font-size:28px;width:44px;height:44px;border-radius:14px;background:var(--surface2);display:flex;align-items:center;justify-content:center}
+.placement-info{flex:1}
+.placement-name{font-size:15px;font-weight:600}
+.placement-type{font-size:11px;color:var(--t2);margin-top:1px}
+.placement-bal{font-size:20px;font-weight:300;letter-spacing:-1px}
+.placement-rate-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(99,217,160,.12);color:var(--inc-t)}
+.placement-progress{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin:8px 0 4px}
+.placement-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--inc-t));transition:width .6s}
+.placement-footer{display:flex;justify-content:space-between;font-size:11px;color:var(--t3)}
+.placement-interest{background:rgba(99,217,160,.08);border:.5px solid rgba(99,217,160,.2);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--inc-t);font-weight:500;text-align:center;margin-top:8px}
+.placement-type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.placement-type-btn{padding:12px;border-radius:12px;border:.5px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:var(--tr)}
+.placement-type-btn.selected{border-color:var(--accent);background:rgba(79,142,255,.1)}
+.placement-type-btn:active{transform:scale(.97)}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -812,6 +862,44 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
   </div>
 </div>
+<div class="account-modal-bg" id="placementModalBg" onclick="closePlacementModal(event)">
+  <div class="account-modal">
+    <div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:14px">Nouveau placement</div>
+    <div class="placement-type-grid" id="placementTypeGrid"></div>
+    <div class="f-group" style="margin-bottom:10px">
+      <label class="f-label">Nom (optionnel)</label>
+      <input type="text" id="placementNameInput" placeholder="Ex : Mon Livret A">
+    </div>
+    <div class="f-row" style="margin-bottom:14px">
+      <div class="f-group" style="margin-bottom:0">
+        <label class="f-label">Solde actuel</label>
+        <input type="number" id="placementBalInput" placeholder="0" inputmode="decimal">
+      </div>
+      <div class="f-group" style="margin-bottom:0">
+        <label class="f-label">Taux % (si différent)</label>
+        <input type="number" id="placementRateInput" placeholder="Auto" inputmode="decimal" step="0.01">
+      </div>
+    </div>
+    <button class="btn-save" onclick="savePlacement()" style="width:100%">Ajouter le placement</button>
+  </div>
+</div>
+<div class="account-modal-bg" id="accountModalBg" onclick="closeAccountModal(event)">
+  <div class="account-modal">
+    <div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:14px" id="accountModalTitle">Nouveau compte</div>
+    <div class="account-type-grid" id="accountTypeGrid"></div>
+    <div class="f-group" style="margin-bottom:12px">
+      <label class="f-label">Nom du compte</label>
+      <input type="text" id="accountNameInput" placeholder="Ex : Mon Livret A">
+    </div>
+    <div class="f-group" style="margin-bottom:16px">
+      <label class="f-label">Solde initial (optionnel)</label>
+      <input type="number" id="accountBalInput" placeholder="0" inputmode="decimal">
+    </div>
+    <button class="btn-save" onclick="saveAccount()" style="width:100%">Créer le compte</button>
+  </div>
+</div>
 <div class="quick-modal-bg" id="quickModalBg" onclick="closeQuickModal(event)">
   <div class="quick-modal">
     <div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>
@@ -1029,7 +1117,7 @@ function prevPeriods(n){
 }
 
 let data=JSON.parse(localStorage.getItem('budget_v4')||'{"transactions":[],"budgets":[{"cat":"food","limit":400},{"cat":"transport","limit":150},{"cat":"loisirs","limit":100},{"cat":"restaurants","limit":80}],"savings":[],"savingsGoals":[]}');
-let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"showDefi":true,"showForecast":true,"showTax":true,"showGamif":true,"showQuickBtn":false,"appName":"Mon Budget","currency":"€","payDay":25,"appUrl":"","colorTheme":"default","navOrder":["dash","add","history","savings","budget"],"favCats":[]}');
+let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"showDefi":true,"showForecast":true,"showTax":true,"showGamif":true,"showQuickBtn":false,"multiAccounts":false,"appName":"Mon Budget","currency":"€","payDay":25,"appUrl":"","colorTheme":"default","navOrder":["dash","add","history","savings","budget"],"favCats":[]}');
 let txType='expense';
 let donutChart=null;
 
@@ -1119,7 +1207,7 @@ function addTransaction(){
   const date=document.getElementById('txdate').value||new Date().toISOString().split('T')[0];
   if(!amt||amt<=0){toast('💡 Entre un montant valide');return}
   if(!desc){toast('💡 Ajoute une description');return}
-  data.transactions.unshift({id:Date.now(),type:txType,amount:amt,desc:desc,cat:cat,date:date});
+  data.transactions.unshift({id:Date.now(),type:txType,amount:amt,desc:desc,cat:cat,date:date,accountId:prefs.multiAccounts?currentAccountId:'main'});
   save();
   document.getElementById('amount').value='';
   document.getElementById('desc').value='';
@@ -1221,7 +1309,8 @@ function nav(s){
 
 function renderDash(){
   var period=currentPeriod();
-  var mTx=data.transactions.filter(function(t){return inPeriod(t.date,period);});
+  var allTx = prefs.multiAccounts ? getAccountTxs(currentAccountId) : data.transactions;
+  var mTx=allTx.filter(function(t){return inPeriod(t.date,period);});
   var income=mTx.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
   var expense=mTx.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
   var balance=income-expense;
@@ -1232,13 +1321,14 @@ function renderDash(){
   var periods=prevPeriods(6);
   var mExp=periods.map(function(p){return data.transactions.filter(function(t){return inPeriod(t.date,p)&&t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);});
   var maxE=Math.max.apply(null,mExp.concat([1]));
-  var recent=data.transactions.slice(0,5);
+  var recent=(prefs.multiAccounts ? getAccountTxs(currentAccountId) : data.transactions).slice(0,5);
   var cur=prefs.currency||'€';
   var el=document.getElementById('s-dash');
   document.getElementById('monthLabel').textContent=period.label;
 
   var html='<div class="dash-pad">';
   // Balance card
+  html+=buildAccountHero(cur);
   html+='<div class="balance-card">';
   html+='<div class="balance-label">Période en cours</div>';
   html+='<div class="balance-amount">'+(balance>=0?'':'-')+fmtAmt(Math.abs(balance))+' '+cur+'</div>';
@@ -1296,6 +1386,7 @@ function renderDash(){
   if(prefs.showTax!==false) html+=buildTaxCard(cur);
   html+='</div>';
   el.innerHTML=html;
+  if(prefs.multiAccounts) renderAccountsBar();
 
   // Gamif mini widget
   if(prefs.showGamif!==false){
@@ -1616,6 +1707,324 @@ function buildDefiCard(){
     +'<div class="defi-stats"><span>'+result.detail+'</span><span>'+result.progress+'%</span></div>'
     +'</div>';
 }
+
+/* ── MULTI-COMPTES ── */
+// Comptes courants (multi-comptes accueil)
+const ACCOUNT_TYPES = [
+  {id:'courant', emoji:'💳', name:'Compte courant', desc:'Compte principal'},
+  {id:'joint',   emoji:'👥', name:'Compte joint',   desc:'Dépenses partagées'},
+  {id:'pro',     emoji:'💼', name:'Compte pro',     desc:'Activité professionnelle'},
+  {id:'custom',  emoji:'✏️', name:'Personnalisé',   desc:'Nom libre'},
+];
+
+// Placements épargne
+const SAVINGS_ACCOUNTS = [
+  {id:'livreta', emoji:'🏦', name:'Livret A',       rate:3.0,  cap:22950,  desc:'Livret réglementé'},
+  {id:'ldds',    emoji:'♻️', name:'LDDS',            rate:3.0,  cap:12000,  desc:'Développement durable'},
+  {id:'pel',     emoji:'🏠', name:'PEL',             rate:2.25, cap:61200,  desc:'Plan épargne logement'},
+  {id:'cel',     emoji:'🔑', name:'CEL',             rate:2.0,  cap:15300,  desc:'Compte épargne logement'},
+  {id:'livretj', emoji:'🎓', name:'Livret Jeune',    rate:4.0,  cap:1600,   desc:'Pour les -25 ans'},
+  {id:'assvie',  emoji:'📈', name:'Assurance-vie',   rate:3.5,  cap:0,      desc:'Fonds euros moyen'},
+  {id:'csl',     emoji:'💰', name:'Compte sur livret',rate:1.5, cap:0,      desc:'Livret bancaire classique'},
+  {id:'savpro',  emoji:'🏢', name:'Épargne salariale',rate:0,   cap:0,      desc:'PEE, PERCO...'},
+  {id:'savcustom',emoji:'✏️',name:'Autre placement', rate:0,   cap:0,      desc:'Personnalisé'},
+];
+
+var currentAccountId = 'main';
+var selectedAccountType = 'courant';
+
+function getAccounts(){
+  if(!data.accounts) data.accounts = [{id:'main', type:'courant', emoji:'💳', name:'Compte courant', createdAt:new Date().toISOString()}];
+  return data.accounts;
+}
+
+function getCurrentAccount(){
+  var accounts = getAccounts();
+  return accounts.find(function(a){return a.id===currentAccountId;}) || accounts[0];
+}
+
+function getAccountTxs(accountId){
+  var id = accountId || currentAccountId;
+  return data.transactions.filter(function(t){return (t.accountId||'main')===id;});
+}
+
+function getAccountBalance(accountId){
+  var id = accountId || currentAccountId;
+  var txs = getAccountTxs(id);
+  var acc = getAccounts().find(function(a){return a.id===id;});
+  var initialBal = acc ? (acc.initialBal||0) : 0;
+  var income = txs.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+  var expense = txs.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+  return initialBal + income - expense;
+}
+
+function getTotalBalance(){
+  return getAccounts().reduce(function(sum, acc){return sum + getAccountBalance(acc.id);}, 0);
+}
+
+function getAccountInterest(accountId){
+  var acc = getAccounts().find(function(a){return a.id===accountId;});
+  if(!acc || !acc.type) return 0;
+  var type = ACCOUNT_TYPES.find(function(t){return t.id===acc.type;});
+  if(!type || !type.rate) return 0;
+  var bal = getAccountBalance(accountId);
+  return Math.round(bal * (type.rate/100) * 100) / 100;
+}
+
+function switchAccount(id){
+  currentAccountId = id;
+  renderDash();
+  renderAccountsBar();
+}
+
+function renderAccountsBar(){
+  if(!prefs.multiAccounts) return;
+  var accounts = getAccounts();
+  var cur = prefs.currency||'€';
+  var total = getTotalBalance();
+
+  // Insert bar above dashboard content if not there
+  var bar = document.getElementById('accountsBar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'accountsBar';
+    var sDash = document.getElementById('s-dash');
+    if(sDash) sDash.insertBefore(bar, sDash.firstChild);
+  }
+
+  var html = '<div class="accounts-bar">';
+  accounts.forEach(function(acc){
+    html += '<div class="account-chip'+(acc.id===currentAccountId?' active':'')+'" onclick="switchAccount(\''+acc.id+'\')">';
+    html += '<span class="account-chip-emoji">'+acc.emoji+'</span>';
+    html += '<span>'+acc.name+'</span>';
+    html += '</div>';
+  });
+  html += '<div class="account-chip" onclick="openAccountModal()" style="border-style:dashed">+ Compte</div>';
+  html += '</div>';
+  html += '<div class="account-total-bar"><span class="account-total-label">Total tous comptes</span><span class="account-total-val">'+(total>=0?'':'-')+fmtAmt(Math.abs(Math.round(total)))+' '+cur+'</span></div>';
+  bar.innerHTML = html;
+}
+
+function openAccountModal(editId){
+  selectedAccountType = 'courant';
+  var grid = document.getElementById('accountTypeGrid');
+  if(grid){
+    grid.innerHTML = ACCOUNT_TYPES.map(function(t){
+      return '<div class="account-type-btn'+(selectedAccountType===t.id?' selected':'')+'" onclick="selectAccountType(\''+t.id+'\')">'+
+        '<div class="account-type-emoji">'+t.emoji+'</div>'+
+        '<div class="account-type-name">'+t.name+'</div>'+
+        '<div class="account-type-rate">'+(t.rate>0?'Taux '+t.rate+'%':'')+'</div>'+
+        '<div class="account-type-cap">'+(t.cap>0?'Plafond '+fmtAmt(t.cap)+' €':'')+'</div>'+
+        '</div>';
+    }).join('');
+  }
+  var nameInput = document.getElementById('accountNameInput');
+  if(nameInput) nameInput.value = '';
+  var balInput = document.getElementById('accountBalInput');
+  if(balInput) balInput.value = '';
+  document.getElementById('accountModalBg').classList.add('show');
+}
+
+function closeAccountModal(e){
+  if(!e || e.target===document.getElementById('accountModalBg'))
+    document.getElementById('accountModalBg').classList.remove('show');
+}
+
+function selectAccountType(id){
+  selectedAccountType = id;
+  var type = ACCOUNT_TYPES.find(function(t){return t.id===id;});
+  var nameInput = document.getElementById('accountNameInput');
+  if(nameInput && type && !nameInput.value) nameInput.value = type.name;
+  document.querySelectorAll('.account-type-btn').forEach(function(btn, i){
+    btn.classList.toggle('selected', ACCOUNT_TYPES[i] && ACCOUNT_TYPES[i].id===id);
+  });
+}
+
+function saveAccount(){
+  var name = document.getElementById('accountNameInput').value.trim();
+  var bal = parseFloat(document.getElementById('accountBalInput').value)||0;
+  var type = ACCOUNT_TYPES.find(function(t){return t.id===selectedAccountType;})||ACCOUNT_TYPES[0];
+  if(!name){ toast('💡 Entre un nom'); return; }
+  if(!data.accounts) data.accounts = [];
+  var newAcc = {id:'acc_'+Date.now(), type:selectedAccountType, emoji:type.emoji, name:name, initialBal:bal, createdAt:new Date().toISOString()};
+  data.accounts.push(newAcc);
+  save();
+  document.getElementById('accountModalBg').classList.remove('show');
+  currentAccountId = newAcc.id;
+  renderDash();
+  renderAccountsBar();
+  toast('✅ Compte "'+name+'" créé !');
+}
+
+function deleteAccount(id){
+  if(id==='main'){ toast('❌ Impossible de supprimer le compte principal'); return; }
+  openModal('Supprimer ce compte ?', 'Les transactions associées seront perdues.', function(){
+    data.accounts = (data.accounts||[]).filter(function(a){return a.id!==id;});
+    data.transactions = data.transactions.filter(function(t){return (t.accountId||'main')!==id;});
+    currentAccountId = 'main';
+    save();
+    renderDash();
+    renderAccountsBar();
+    toast('🗑 Compte supprimé');
+  });
+}
+
+function buildAccountHero(cur){
+  if(!prefs.multiAccounts) return '';
+  var acc = getCurrentAccount();
+  var bal = getAccountBalance(acc.id);
+  var type = ACCOUNT_TYPES.find(function(t){return t.id===acc.type;})||ACCOUNT_TYPES[0];
+  var interest = getAccountInterest(acc.id);
+  var capPct = type.cap>0 ? Math.min(100, Math.round((bal/type.cap)*100)) : 0;
+
+  var html = '<div class="account-hero">';
+  html += '<div class="account-hero-name">'+acc.emoji+' '+acc.name+'</div>';
+  html += '<div class="account-hero-bal">'+(bal>=0?'':'-')+fmtAmt(Math.abs(Math.round(bal)))+' '+cur+'</div>';
+  if(type.rate>0){
+    html += '<div class="account-hero-sub">Taux '+type.rate+'% · Intérêts estimés : ~'+fmtAmt(interest)+' '+cur+'/an</div>';
+    if(type.cap>0){
+      html += '<div class="account-cap-bar"><div class="account-cap-fill" style="width:'+capPct+'%"></div></div>';
+      html += '<div style="font-size:10px;opacity:.6;margin-top:4px">'+capPct+'% du plafond ('+fmtAmt(type.cap)+' '+cur+')</div>';
+    }
+  } else if(acc.id!=='main'){
+    html += '<div class="account-hero-sub">'+type.desc+'</div>';
+  }
+  if(acc.id!=='main') html += '<div style="font-size:11px;opacity:.5;margin-top:6px;cursor:pointer" onclick="deleteAccount(\''+acc.id+'\')">Supprimer ce compte</div>';
+  html += '</div>';
+  return html;
+}
+
+/* ── PLACEMENTS ÉPARGNE MULTIPLES ── */
+var selectedPlacementType = 'livreta';
+
+function getPlacements(){
+  if(!data.placements) data.placements = [];
+  return data.placements;
+}
+
+function getPlacementTotal(){
+  return getPlacements().reduce(function(s,p){return s+p.balance;},0);
+}
+
+function openPlacementModal(){
+  selectedPlacementType = 'livreta';
+  renderPlacementTypeGrid();
+  document.getElementById('placementNameInput').value = '';
+  document.getElementById('placementBalInput').value = '';
+  document.getElementById('placementRateInput').value = '';
+  document.getElementById('placementModalBg').classList.add('show');
+}
+
+function closePlacementModal(e){
+  if(!e||e.target===document.getElementById('placementModalBg'))
+    document.getElementById('placementModalBg').classList.remove('show');
+}
+
+function renderPlacementTypeGrid(){
+  var grid = document.getElementById('placementTypeGrid');
+  if(!grid) return;
+  grid.innerHTML = SAVINGS_ACCOUNTS.map(function(t){
+    return '<div class="placement-type-btn'+(selectedPlacementType===t.id?' selected':'')+'" onclick="selectPlacementType(\''+t.id+'\')">'
+      +'<div style="font-size:20px;margin-bottom:4px">'+t.emoji+'</div>'
+      +'<div style="font-size:12px;font-weight:600">'+t.name+'</div>'
+      +'<div style="font-size:10px;color:'+(t.rate>0?'var(--inc-t)':'var(--t3)')+';">'+(t.rate>0?'Taux '+t.rate+'%':t.desc)+'</div>'
+      +(t.cap>0?'<div style="font-size:9px;color:var(--t3)">Plafond '+fmtAmt(t.cap)+' €</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+function selectPlacementType(id){
+  selectedPlacementType = id;
+  var type = SAVINGS_ACCOUNTS.find(function(t){return t.id===id;});
+  var nameInput = document.getElementById('placementNameInput');
+  if(nameInput && type && !nameInput.value) nameInput.value = type.name;
+  var rateInput = document.getElementById('placementRateInput');
+  if(rateInput && type) rateInput.placeholder = type.rate>0?type.rate+' (auto)':'Manuel';
+  renderPlacementTypeGrid();
+}
+
+function savePlacement(){
+  var type = SAVINGS_ACCOUNTS.find(function(t){return t.id===selectedPlacementType;})||SAVINGS_ACCOUNTS[0];
+  var name = document.getElementById('placementNameInput').value.trim() || type.name;
+  var balance = parseFloat(document.getElementById('placementBalInput').value)||0;
+  var customRate = parseFloat(document.getElementById('placementRateInput').value);
+  var rate = !isNaN(customRate) && customRate>0 ? customRate : type.rate;
+  if(!data.placements) data.placements = [];
+  data.placements.push({
+    id:'pl_'+Date.now(), type:selectedPlacementType,
+    emoji:type.emoji, name:name, balance:balance,
+    rate:rate, cap:type.cap, createdAt:new Date().toISOString()
+  });
+  save();
+  document.getElementById('placementModalBg').classList.remove('show');
+  renderSavings();
+  toast('✅ '+name+' ajouté !');
+}
+
+function updatePlacementBalance(id, newBal){
+  var p = getPlacements().find(function(p){return p.id===id;});
+  if(p){p.balance = parseFloat(newBal)||0; save(); renderSavings();}
+}
+
+function deletePlacement(id){
+  openModal('Supprimer ce placement ?','', function(){
+    data.placements = (data.placements||[]).filter(function(p){return p.id!==id;});
+    save(); renderSavings(); toast('🗑 Placement supprimé');
+  });
+}
+
+function buildPlacementsSection(cur){
+  var placements = getPlacements();
+  var total = getPlacementTotal();
+  var totalInterest = placements.reduce(function(s,p){return s+(p.balance*(p.rate/100));},0);
+
+  var html = '<div class="sec-label" style="display:flex;justify-content:space-between;align-items:center">';
+  html += '<span>Mes placements</span>';
+  html += '<button onclick="openPlacementModal()" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">+ Ajouter</button>';
+  html += '</div>';
+
+  if(placements.length > 0){
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
+    html += '<div class="glass-card" style="padding:12px;text-align:center"><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Total placé</div><div style="font-size:20px;font-weight:300">'+fmtAmt(Math.round(total))+' '+cur+'</div></div>';
+    html += '<div class="glass-card" style="padding:12px;text-align:center"><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Intérêts/an ~</div><div style="font-size:20px;font-weight:300;color:var(--inc-t)">+'+fmtAmt(Math.round(totalInterest))+' '+cur+'</div></div>';
+    html += '</div>';
+
+    placements.forEach(function(p){
+      var capPct = p.cap>0 ? Math.min(100,Math.round((p.balance/p.cap)*100)) : 0;
+      var annualInterest = Math.round(p.balance*(p.rate/100));
+      var monthlyInterest = Math.round(annualInterest/12);
+      html += '<div class="placement-card">';
+      html += '<div class="placement-header">';
+      html += '<div class="placement-emoji">'+p.emoji+'</div>';
+      html += '<div class="placement-info"><div class="placement-name">'+p.name+'</div>';
+      html += '<div class="placement-type">'+p.type.toUpperCase()+(p.rate>0?' · Taux '+p.rate+'%':'')+'</div></div>';
+      if(p.rate>0) html += '<span class="placement-rate-badge">'+p.rate+'%</span>';
+      html += '</div>';
+      html += '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:8px">';
+      html += '<div class="placement-bal">'+fmtAmt(Math.round(p.balance))+' '+cur+'</div>';
+      html += '</div>';
+      if(p.cap>0){
+        html += '<div class="placement-progress"><div class="placement-progress-fill" style="width:'+capPct+'%"></div></div>';
+        html += '<div class="placement-footer"><span>'+capPct+'% du plafond</span><span>Plafond '+fmtAmt(p.cap)+' '+cur+'</span></div>';
+      }
+      if(p.rate>0){
+        html += '<div class="placement-interest">💰 ~'+fmtAmt(annualInterest)+' '+cur+'/an · '+fmtAmt(monthlyInterest)+' '+cur+'/mois</div>';
+      }
+      html += '<div style="display:flex;gap:8px;margin-top:10px">';
+      html += '<input type="number" placeholder="Nouveau solde" inputmode="decimal" style="flex:1;font-size:13px;padding:8px 12px;border-radius:10px;border:.5px solid var(--glass-b);background:var(--surface2);color:var(--text);font-family:var(--font)" onchange="updatePlacementBalance(\''+p.id+'\',this.value)">';
+      html += '<button onclick="deletePlacement(\''+p.id+'\')" style="padding:8px 12px;border-radius:10px;background:rgba(255,95,95,.1);color:var(--red);border:none;cursor:pointer;font-size:14px">🗑</button>';
+      html += '</div>';
+      html += '</div>';
+    });
+  } else {
+    html += '<div class="glass-card" style="padding:24px;text-align:center;color:var(--t3)">';
+    html += '<div style="font-size:32px;margin-bottom:8px">🏦</div>';
+    html += '<div style="font-size:14px;font-weight:500;margin-bottom:4px">Aucun placement</div>';
+    html += '<div style="font-size:12px">Ajoute ton Livret A, PEL, assurance-vie...</div>';
+    html += '</div>';
+  }
+  return html;
+}
 // Init swipe on all tx items
   document.querySelectorAll('.tx-swipe-wrap').forEach(function(wrap){
     var id = parseInt(wrap.id.replace('swipe-',''));
@@ -1735,6 +2144,11 @@ function renderSettings(){
   html+='</div></div>';
 
   // 5. GÉNÉRAL
+  html+='<div class="set-section"><div class="set-title">Comptes</div><div class="set-card">';
+  html+='<div class="set-row"><div class="set-icon" style="background:rgba(79,142,255,.15)">🏦</div>';
+  html+='<div class="set-info"><div class="set-name">Multi-comptes</div><div class="set-desc">Gérer plusieurs comptes (courant, Livret A, PEL...)</div></div>';
+  html+='<label class="toggle"><input type="checkbox" '+(prefs.multiAccounts?'checked':'')+' onchange="toggleMultiAccounts(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+  html+='</div></div>';
   html+='<div class="set-section"><div class="set-title">Général</div><div class="set-card">';
   var avatarIconContent=prefs.avatarPhoto?('<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover">'):(prefs.avatarEmoji||'💰');
   html+='<div class="set-row" onclick="openPhotoModal()" style="cursor:pointer"><div class="set-icon" style="background:linear-gradient(135deg,var(--accent),#7b5ea7);overflow:hidden" id="settingsAvatarIcon">'+avatarIconContent+'</div>';
@@ -2024,8 +2438,9 @@ function renderSavings(){
   html+='<div class="f-group"><label class="f-label">Nom (ex: Vacances)</label><input type="text" id="goal-name" placeholder="Mon objectif" value="'+(goal?goal.name:'')+'"></div>';
   html+='<div class="f-group"><label class="f-label">Montant cible ('+cur+')</label><input type="number" id="goal-amount" placeholder="5000" inputmode="decimal" value="'+(goalAmt||'')+'"></div>';
   html+='</div><button class="sav-btn" style="width:100%" onclick="saveGoal()">Enregistrer l\'objectif</button></div>';
+  html+=buildPlacementsSection(cur);
   if(data.savings.length){
-    html+='<div class="sec-label">Historique</div><div class="glass-card" style="overflow:hidden">';
+    html+='<div class="sec-label">Historique des mouvements</div><div class="glass-card" style="overflow:hidden">';
     var reversed=data.savings.slice().reverse();
     reversed.forEach(function(e,i){
       var realIdx=data.savings.length-1-i;
@@ -3422,6 +3837,18 @@ function renderPerso(){
   el.innerHTML = html;
 }
 
+function toggleMultiAccounts(val){
+  prefs.multiAccounts = val;
+  if(val && (!data.accounts || !data.accounts.length)){
+    data.accounts = [{id:'main', type:'courant', emoji:'💳', name:'Compte courant', initialBal:0, createdAt:new Date().toISOString()}];
+    save();
+  }
+  savePrefs();
+  renderDash();
+  if(val) setTimeout(renderAccountsBar, 100);
+  toast(val ? '🏦 Multi-comptes activé !' : 'Multi-comptes désactivé');
+}
+
 function togglePerso(key, val){
   prefs[key] = val;
   savePrefs();
@@ -3760,6 +4187,324 @@ function buildDefiCard(){
     +'<div class="defi-progress"><div class="defi-fill" style="width:'+result.progress+'%"></div></div>'
     +'<div class="defi-stats"><span>'+result.detail+'</span><span>'+result.progress+'%</span></div>'
     +'</div>';
+}
+
+/* ── MULTI-COMPTES ── */
+// Comptes courants (multi-comptes accueil)
+const ACCOUNT_TYPES = [
+  {id:'courant', emoji:'💳', name:'Compte courant', desc:'Compte principal'},
+  {id:'joint',   emoji:'👥', name:'Compte joint',   desc:'Dépenses partagées'},
+  {id:'pro',     emoji:'💼', name:'Compte pro',     desc:'Activité professionnelle'},
+  {id:'custom',  emoji:'✏️', name:'Personnalisé',   desc:'Nom libre'},
+];
+
+// Placements épargne
+const SAVINGS_ACCOUNTS = [
+  {id:'livreta', emoji:'🏦', name:'Livret A',       rate:3.0,  cap:22950,  desc:'Livret réglementé'},
+  {id:'ldds',    emoji:'♻️', name:'LDDS',            rate:3.0,  cap:12000,  desc:'Développement durable'},
+  {id:'pel',     emoji:'🏠', name:'PEL',             rate:2.25, cap:61200,  desc:'Plan épargne logement'},
+  {id:'cel',     emoji:'🔑', name:'CEL',             rate:2.0,  cap:15300,  desc:'Compte épargne logement'},
+  {id:'livretj', emoji:'🎓', name:'Livret Jeune',    rate:4.0,  cap:1600,   desc:'Pour les -25 ans'},
+  {id:'assvie',  emoji:'📈', name:'Assurance-vie',   rate:3.5,  cap:0,      desc:'Fonds euros moyen'},
+  {id:'csl',     emoji:'💰', name:'Compte sur livret',rate:1.5, cap:0,      desc:'Livret bancaire classique'},
+  {id:'savpro',  emoji:'🏢', name:'Épargne salariale',rate:0,   cap:0,      desc:'PEE, PERCO...'},
+  {id:'savcustom',emoji:'✏️',name:'Autre placement', rate:0,   cap:0,      desc:'Personnalisé'},
+];
+
+var currentAccountId = 'main';
+var selectedAccountType = 'courant';
+
+function getAccounts(){
+  if(!data.accounts) data.accounts = [{id:'main', type:'courant', emoji:'💳', name:'Compte courant', createdAt:new Date().toISOString()}];
+  return data.accounts;
+}
+
+function getCurrentAccount(){
+  var accounts = getAccounts();
+  return accounts.find(function(a){return a.id===currentAccountId;}) || accounts[0];
+}
+
+function getAccountTxs(accountId){
+  var id = accountId || currentAccountId;
+  return data.transactions.filter(function(t){return (t.accountId||'main')===id;});
+}
+
+function getAccountBalance(accountId){
+  var id = accountId || currentAccountId;
+  var txs = getAccountTxs(id);
+  var acc = getAccounts().find(function(a){return a.id===id;});
+  var initialBal = acc ? (acc.initialBal||0) : 0;
+  var income = txs.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+  var expense = txs.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+  return initialBal + income - expense;
+}
+
+function getTotalBalance(){
+  return getAccounts().reduce(function(sum, acc){return sum + getAccountBalance(acc.id);}, 0);
+}
+
+function getAccountInterest(accountId){
+  var acc = getAccounts().find(function(a){return a.id===accountId;});
+  if(!acc || !acc.type) return 0;
+  var type = ACCOUNT_TYPES.find(function(t){return t.id===acc.type;});
+  if(!type || !type.rate) return 0;
+  var bal = getAccountBalance(accountId);
+  return Math.round(bal * (type.rate/100) * 100) / 100;
+}
+
+function switchAccount(id){
+  currentAccountId = id;
+  renderDash();
+  renderAccountsBar();
+}
+
+function renderAccountsBar(){
+  if(!prefs.multiAccounts) return;
+  var accounts = getAccounts();
+  var cur = prefs.currency||'€';
+  var total = getTotalBalance();
+
+  // Insert bar above dashboard content if not there
+  var bar = document.getElementById('accountsBar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'accountsBar';
+    var sDash = document.getElementById('s-dash');
+    if(sDash) sDash.insertBefore(bar, sDash.firstChild);
+  }
+
+  var html = '<div class="accounts-bar">';
+  accounts.forEach(function(acc){
+    html += '<div class="account-chip'+(acc.id===currentAccountId?' active':'')+'" onclick="switchAccount(\''+acc.id+'\')">';
+    html += '<span class="account-chip-emoji">'+acc.emoji+'</span>';
+    html += '<span>'+acc.name+'</span>';
+    html += '</div>';
+  });
+  html += '<div class="account-chip" onclick="openAccountModal()" style="border-style:dashed">+ Compte</div>';
+  html += '</div>';
+  html += '<div class="account-total-bar"><span class="account-total-label">Total tous comptes</span><span class="account-total-val">'+(total>=0?'':'-')+fmtAmt(Math.abs(Math.round(total)))+' '+cur+'</span></div>';
+  bar.innerHTML = html;
+}
+
+function openAccountModal(editId){
+  selectedAccountType = 'courant';
+  var grid = document.getElementById('accountTypeGrid');
+  if(grid){
+    grid.innerHTML = ACCOUNT_TYPES.map(function(t){
+      return '<div class="account-type-btn'+(selectedAccountType===t.id?' selected':'')+'" onclick="selectAccountType(\''+t.id+'\')">'+
+        '<div class="account-type-emoji">'+t.emoji+'</div>'+
+        '<div class="account-type-name">'+t.name+'</div>'+
+        '<div class="account-type-rate">'+(t.rate>0?'Taux '+t.rate+'%':'')+'</div>'+
+        '<div class="account-type-cap">'+(t.cap>0?'Plafond '+fmtAmt(t.cap)+' €':'')+'</div>'+
+        '</div>';
+    }).join('');
+  }
+  var nameInput = document.getElementById('accountNameInput');
+  if(nameInput) nameInput.value = '';
+  var balInput = document.getElementById('accountBalInput');
+  if(balInput) balInput.value = '';
+  document.getElementById('accountModalBg').classList.add('show');
+}
+
+function closeAccountModal(e){
+  if(!e || e.target===document.getElementById('accountModalBg'))
+    document.getElementById('accountModalBg').classList.remove('show');
+}
+
+function selectAccountType(id){
+  selectedAccountType = id;
+  var type = ACCOUNT_TYPES.find(function(t){return t.id===id;});
+  var nameInput = document.getElementById('accountNameInput');
+  if(nameInput && type && !nameInput.value) nameInput.value = type.name;
+  document.querySelectorAll('.account-type-btn').forEach(function(btn, i){
+    btn.classList.toggle('selected', ACCOUNT_TYPES[i] && ACCOUNT_TYPES[i].id===id);
+  });
+}
+
+function saveAccount(){
+  var name = document.getElementById('accountNameInput').value.trim();
+  var bal = parseFloat(document.getElementById('accountBalInput').value)||0;
+  var type = ACCOUNT_TYPES.find(function(t){return t.id===selectedAccountType;})||ACCOUNT_TYPES[0];
+  if(!name){ toast('💡 Entre un nom'); return; }
+  if(!data.accounts) data.accounts = [];
+  var newAcc = {id:'acc_'+Date.now(), type:selectedAccountType, emoji:type.emoji, name:name, initialBal:bal, createdAt:new Date().toISOString()};
+  data.accounts.push(newAcc);
+  save();
+  document.getElementById('accountModalBg').classList.remove('show');
+  currentAccountId = newAcc.id;
+  renderDash();
+  renderAccountsBar();
+  toast('✅ Compte "'+name+'" créé !');
+}
+
+function deleteAccount(id){
+  if(id==='main'){ toast('❌ Impossible de supprimer le compte principal'); return; }
+  openModal('Supprimer ce compte ?', 'Les transactions associées seront perdues.', function(){
+    data.accounts = (data.accounts||[]).filter(function(a){return a.id!==id;});
+    data.transactions = data.transactions.filter(function(t){return (t.accountId||'main')!==id;});
+    currentAccountId = 'main';
+    save();
+    renderDash();
+    renderAccountsBar();
+    toast('🗑 Compte supprimé');
+  });
+}
+
+function buildAccountHero(cur){
+  if(!prefs.multiAccounts) return '';
+  var acc = getCurrentAccount();
+  var bal = getAccountBalance(acc.id);
+  var type = ACCOUNT_TYPES.find(function(t){return t.id===acc.type;})||ACCOUNT_TYPES[0];
+  var interest = getAccountInterest(acc.id);
+  var capPct = type.cap>0 ? Math.min(100, Math.round((bal/type.cap)*100)) : 0;
+
+  var html = '<div class="account-hero">';
+  html += '<div class="account-hero-name">'+acc.emoji+' '+acc.name+'</div>';
+  html += '<div class="account-hero-bal">'+(bal>=0?'':'-')+fmtAmt(Math.abs(Math.round(bal)))+' '+cur+'</div>';
+  if(type.rate>0){
+    html += '<div class="account-hero-sub">Taux '+type.rate+'% · Intérêts estimés : ~'+fmtAmt(interest)+' '+cur+'/an</div>';
+    if(type.cap>0){
+      html += '<div class="account-cap-bar"><div class="account-cap-fill" style="width:'+capPct+'%"></div></div>';
+      html += '<div style="font-size:10px;opacity:.6;margin-top:4px">'+capPct+'% du plafond ('+fmtAmt(type.cap)+' '+cur+')</div>';
+    }
+  } else if(acc.id!=='main'){
+    html += '<div class="account-hero-sub">'+type.desc+'</div>';
+  }
+  if(acc.id!=='main') html += '<div style="font-size:11px;opacity:.5;margin-top:6px;cursor:pointer" onclick="deleteAccount(\''+acc.id+'\')">Supprimer ce compte</div>';
+  html += '</div>';
+  return html;
+}
+
+/* ── PLACEMENTS ÉPARGNE MULTIPLES ── */
+var selectedPlacementType = 'livreta';
+
+function getPlacements(){
+  if(!data.placements) data.placements = [];
+  return data.placements;
+}
+
+function getPlacementTotal(){
+  return getPlacements().reduce(function(s,p){return s+p.balance;},0);
+}
+
+function openPlacementModal(){
+  selectedPlacementType = 'livreta';
+  renderPlacementTypeGrid();
+  document.getElementById('placementNameInput').value = '';
+  document.getElementById('placementBalInput').value = '';
+  document.getElementById('placementRateInput').value = '';
+  document.getElementById('placementModalBg').classList.add('show');
+}
+
+function closePlacementModal(e){
+  if(!e||e.target===document.getElementById('placementModalBg'))
+    document.getElementById('placementModalBg').classList.remove('show');
+}
+
+function renderPlacementTypeGrid(){
+  var grid = document.getElementById('placementTypeGrid');
+  if(!grid) return;
+  grid.innerHTML = SAVINGS_ACCOUNTS.map(function(t){
+    return '<div class="placement-type-btn'+(selectedPlacementType===t.id?' selected':'')+'" onclick="selectPlacementType(\''+t.id+'\')">'
+      +'<div style="font-size:20px;margin-bottom:4px">'+t.emoji+'</div>'
+      +'<div style="font-size:12px;font-weight:600">'+t.name+'</div>'
+      +'<div style="font-size:10px;color:'+(t.rate>0?'var(--inc-t)':'var(--t3)')+';">'+(t.rate>0?'Taux '+t.rate+'%':t.desc)+'</div>'
+      +(t.cap>0?'<div style="font-size:9px;color:var(--t3)">Plafond '+fmtAmt(t.cap)+' €</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+function selectPlacementType(id){
+  selectedPlacementType = id;
+  var type = SAVINGS_ACCOUNTS.find(function(t){return t.id===id;});
+  var nameInput = document.getElementById('placementNameInput');
+  if(nameInput && type && !nameInput.value) nameInput.value = type.name;
+  var rateInput = document.getElementById('placementRateInput');
+  if(rateInput && type) rateInput.placeholder = type.rate>0?type.rate+' (auto)':'Manuel';
+  renderPlacementTypeGrid();
+}
+
+function savePlacement(){
+  var type = SAVINGS_ACCOUNTS.find(function(t){return t.id===selectedPlacementType;})||SAVINGS_ACCOUNTS[0];
+  var name = document.getElementById('placementNameInput').value.trim() || type.name;
+  var balance = parseFloat(document.getElementById('placementBalInput').value)||0;
+  var customRate = parseFloat(document.getElementById('placementRateInput').value);
+  var rate = !isNaN(customRate) && customRate>0 ? customRate : type.rate;
+  if(!data.placements) data.placements = [];
+  data.placements.push({
+    id:'pl_'+Date.now(), type:selectedPlacementType,
+    emoji:type.emoji, name:name, balance:balance,
+    rate:rate, cap:type.cap, createdAt:new Date().toISOString()
+  });
+  save();
+  document.getElementById('placementModalBg').classList.remove('show');
+  renderSavings();
+  toast('✅ '+name+' ajouté !');
+}
+
+function updatePlacementBalance(id, newBal){
+  var p = getPlacements().find(function(p){return p.id===id;});
+  if(p){p.balance = parseFloat(newBal)||0; save(); renderSavings();}
+}
+
+function deletePlacement(id){
+  openModal('Supprimer ce placement ?','', function(){
+    data.placements = (data.placements||[]).filter(function(p){return p.id!==id;});
+    save(); renderSavings(); toast('🗑 Placement supprimé');
+  });
+}
+
+function buildPlacementsSection(cur){
+  var placements = getPlacements();
+  var total = getPlacementTotal();
+  var totalInterest = placements.reduce(function(s,p){return s+(p.balance*(p.rate/100));},0);
+
+  var html = '<div class="sec-label" style="display:flex;justify-content:space-between;align-items:center">';
+  html += '<span>Mes placements</span>';
+  html += '<button onclick="openPlacementModal()" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">+ Ajouter</button>';
+  html += '</div>';
+
+  if(placements.length > 0){
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
+    html += '<div class="glass-card" style="padding:12px;text-align:center"><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Total placé</div><div style="font-size:20px;font-weight:300">'+fmtAmt(Math.round(total))+' '+cur+'</div></div>';
+    html += '<div class="glass-card" style="padding:12px;text-align:center"><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Intérêts/an ~</div><div style="font-size:20px;font-weight:300;color:var(--inc-t)">+'+fmtAmt(Math.round(totalInterest))+' '+cur+'</div></div>';
+    html += '</div>';
+
+    placements.forEach(function(p){
+      var capPct = p.cap>0 ? Math.min(100,Math.round((p.balance/p.cap)*100)) : 0;
+      var annualInterest = Math.round(p.balance*(p.rate/100));
+      var monthlyInterest = Math.round(annualInterest/12);
+      html += '<div class="placement-card">';
+      html += '<div class="placement-header">';
+      html += '<div class="placement-emoji">'+p.emoji+'</div>';
+      html += '<div class="placement-info"><div class="placement-name">'+p.name+'</div>';
+      html += '<div class="placement-type">'+p.type.toUpperCase()+(p.rate>0?' · Taux '+p.rate+'%':'')+'</div></div>';
+      if(p.rate>0) html += '<span class="placement-rate-badge">'+p.rate+'%</span>';
+      html += '</div>';
+      html += '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:8px">';
+      html += '<div class="placement-bal">'+fmtAmt(Math.round(p.balance))+' '+cur+'</div>';
+      html += '</div>';
+      if(p.cap>0){
+        html += '<div class="placement-progress"><div class="placement-progress-fill" style="width:'+capPct+'%"></div></div>';
+        html += '<div class="placement-footer"><span>'+capPct+'% du plafond</span><span>Plafond '+fmtAmt(p.cap)+' '+cur+'</span></div>';
+      }
+      if(p.rate>0){
+        html += '<div class="placement-interest">💰 ~'+fmtAmt(annualInterest)+' '+cur+'/an · '+fmtAmt(monthlyInterest)+' '+cur+'/mois</div>';
+      }
+      html += '<div style="display:flex;gap:8px;margin-top:10px">';
+      html += '<input type="number" placeholder="Nouveau solde" inputmode="decimal" style="flex:1;font-size:13px;padding:8px 12px;border-radius:10px;border:.5px solid var(--glass-b);background:var(--surface2);color:var(--text);font-family:var(--font)" onchange="updatePlacementBalance(\''+p.id+'\',this.value)">';
+      html += '<button onclick="deletePlacement(\''+p.id+'\')" style="padding:8px 12px;border-radius:10px;background:rgba(255,95,95,.1);color:var(--red);border:none;cursor:pointer;font-size:14px">🗑</button>';
+      html += '</div>';
+      html += '</div>';
+    });
+  } else {
+    html += '<div class="glass-card" style="padding:24px;text-align:center;color:var(--t3)">';
+    html += '<div style="font-size:32px;margin-bottom:8px">🏦</div>';
+    html += '<div style="font-size:14px;font-weight:500;margin-bottom:4px">Aucun placement</div>';
+    html += '<div style="font-size:12px">Ajoute ton Livret A, PEL, assurance-vie...</div>';
+    html += '</div>';
+  }
+  return html;
 }
 // Init
 if(!prefs.payDay) prefs.payDay=25;
