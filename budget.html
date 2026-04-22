@@ -559,6 +559,39 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tx-swipe-content{transition:transform .2s cubic-bezier(.4,0,.2,1);background:var(--bg2);position:relative;z-index:1}
 .tx-swipe-content.swiped-full{transform:translateX(-136px)}
 .tx-swipe-content.swiped-half{transform:translateX(-68px)}
+/* ─ TRANSACTION RAPIDE ─ */
+.quick-modal-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end}
+.quick-modal-bg.show{opacity:1;pointer-events:all}
+.quick-modal{width:100%;background:var(--bg2);border-radius:28px 28px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+20px);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.quick-modal-bg.show .quick-modal{transform:translateY(0)}
+.quick-amount-display{font-size:52px;font-weight:200;letter-spacing:-3px;text-align:center;padding:10px 0 4px;min-height:72px;color:var(--text)}
+.quick-amount-display.has-val{color:var(--exp-t)}
+.quick-cats-scroll{display:flex;gap:8px;overflow-x:auto;padding:8px 0;scrollbar-width:none;margin-bottom:12px}
+.quick-cats-scroll::-webkit-scrollbar{display:none}
+.quick-cat-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:14px;border:.5px solid var(--glass-b);background:var(--glass);cursor:pointer;flex-shrink:0;transition:var(--tr);min-width:56px}
+.quick-cat-btn.active{background:var(--accent);border-color:var(--accent)}
+.quick-cat-btn.active .quick-cat-lbl{color:#fff}
+.quick-cat-emoji{font-size:22px}
+.quick-cat-lbl{font-size:10px;font-weight:500;color:var(--t2);text-align:center}
+.quick-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.quick-key{height:58px;border-radius:16px;background:var(--surface2);border:none;font-size:22px;font-weight:400;color:var(--text);cursor:pointer;font-family:var(--font);transition:var(--tr);display:flex;align-items:center;justify-content:center}
+.quick-key:active{transform:scale(.93);opacity:.8}
+.quick-key.del{font-size:18px;background:var(--surface2)}
+.quick-key.zero{grid-column:span 1}
+.quick-add-btn{width:100%;height:52px;border-radius:16px;background:var(--accent);border:none;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--font);transition:var(--tr)}
+.quick-add-btn:active{transform:scale(.97)}
+
+/* ─ DÉFI MENSUEL ─ */
+.defi-card{background:linear-gradient(135deg,rgba(255,179,64,.15),rgba(255,95,95,.08));border:.5px solid rgba(255,179,64,.3);border-radius:var(--radius);padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
+.defi-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.defi-emoji{font-size:28px}
+.defi-title{font-size:16px;font-weight:600}
+.defi-subtitle{font-size:12px;color:var(--t2);margin-top:1px}
+.defi-progress{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-bottom:8px}
+.defi-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,#ffb340,#ff6b35)}
+.defi-stats{display:flex;justify-content:space-between;font-size:12px;color:var(--t2)}
+.defi-success{background:linear-gradient(135deg,rgba(26,158,92,.15),rgba(99,217,160,.08));border-color:rgba(26,158,92,.3)}
+.defi-success .defi-fill{background:linear-gradient(90deg,#1a9e5c,#63d9a0)}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -779,6 +812,16 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
   </div>
 </div>
+<div class="quick-modal-bg" id="quickModalBg" onclick="closeQuickModal(event)">
+  <div class="quick-modal">
+    <div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>
+    <div style="font-size:13px;font-weight:600;color:var(--t2);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">Dépense rapide</div>
+    <div class="quick-amount-display" id="quickDisplay">0</div>
+    <div class="quick-cats-scroll" id="quickCats"></div>
+    <div class="quick-numpad" id="quickNumpad"></div>
+    <button class="quick-add-btn" onclick="quickAddTx()">Ajouter</button>
+  </div>
+</div>
 <div class="photo-modal-bg" id="photoModalBg" onclick="closePhotoModal(event)">
   <div class="photo-modal">
     <div class="photo-modal-handle"></div>
@@ -986,7 +1029,7 @@ function prevPeriods(n){
 }
 
 let data=JSON.parse(localStorage.getItem('budget_v4')||'{"transactions":[],"budgets":[{"cat":"food","limit":400},{"cat":"transport","limit":150},{"cat":"loisirs","limit":100},{"cat":"restaurants","limit":80}],"savings":[],"savingsGoals":[]}');
-let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"appName":"Mon Budget","currency":"€","payDay":25,"appUrl":"","colorTheme":"default","navOrder":["dash","add","history","savings","budget"],"favCats":[]}');
+let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"showDefi":true,"showForecast":true,"showTax":true,"showGamif":true,"showQuickBtn":false,"appName":"Mon Budget","currency":"€","payDay":25,"appUrl":"","colorTheme":"default","navOrder":["dash","add","history","savings","budget"],"favCats":[]}');
 let txType='expense';
 let donutChart=null;
 
@@ -1206,6 +1249,7 @@ function renderDash(){
   html+='</div></div>';
   // Gamif placeholder
   html+='<div style="display:flex;gap:10px;margin-bottom:12px" id="dashGamif"></div>';
+  if(prefs.showQuickBtn!==false) html+='<button onclick="openQuickModal()" style="width:100%;padding:11px;border-radius:var(--radius-sm);border:.5px solid var(--glass-b);background:linear-gradient(135deg,var(--accent),#7b5ea7);color:#fff;font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:6px"><span>⚡</span>Transaction rapide</button>';
   html+='<button onclick="generateRapport()" style="width:100%;padding:11px;border-radius:var(--radius-sm);border:.5px solid var(--glass-b);background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);color:var(--text);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:6px"><span>📊</span>Partager le rapport du mois</button>';
   // Donut
   if(prefs.showDonut && cats.length){
@@ -1247,12 +1291,14 @@ function renderDash(){
     html+='</div>';
   }
   if(!cats.length) html+='<div class="empty">Aucune transaction cette période.<br>Appuie sur ⊕ pour commencer !</div>';
-  html+=buildForecastCard(period,expense,income,cur);
-  html+=buildTaxCard(cur);
+  if(prefs.showDefi!==false) html+=buildDefiCard();
+  if(prefs.showForecast!==false) html+=buildForecastCard(period,expense,income,cur);
+  if(prefs.showTax!==false) html+=buildTaxCard(cur);
   html+='</div>';
   el.innerHTML=html;
 
   // Gamif mini widget
+  if(prefs.showGamif!==false){
   var _score=calcScore(data);
   var _streak=getStreak(data);
   var _grade=getScoreGrade(_score);
@@ -1273,6 +1319,7 @@ function renderDash(){
     _gb.innerHTML='<div style="font-size:22px;margin-bottom:2px">🏅</div><div style="font-size:18px;font-weight:300">'+_unlocked+'</div><div style="font-size:10px;color:var(--t2)">badges</div>';
     dg.appendChild(_gw);dg.appendChild(_gs);dg.appendChild(_gb);
   }
+  } // end showGamif
   // Donut chart
   if(prefs.showDonut && cats.length){
     setTimeout(function(){
@@ -1416,6 +1463,158 @@ function generateRapport(){
       toast('📊 ' + text.slice(0,60) + '...');
     });
   }
+}
+
+/* ── TRANSACTION RAPIDE ── */
+var quickAmount = '';
+var quickCat = 'food';
+
+function openQuickModal(){
+  quickAmount = '';
+  quickCat = prefs.favCats && prefs.favCats.length ? prefs.favCats[0] : 'food';
+  renderQuickModal();
+  document.getElementById('quickModalBg').classList.add('show');
+}
+
+function closeQuickModal(e){
+  if(!e || e.target === document.getElementById('quickModalBg'))
+    document.getElementById('quickModalBg').classList.remove('show');
+}
+
+function renderQuickModal(){
+  // Display
+  var disp = document.getElementById('quickDisplay');
+  if(disp){
+    disp.textContent = quickAmount || '0';
+    disp.className = 'quick-amount-display' + (quickAmount ? ' has-val' : '');
+  }
+  // Categories - favs first
+  var favCats = prefs.favCats || [];
+  var cats = CATS.expense.slice().sort(function(a,b){
+    return (favCats.indexOf(b.id)!==-1?1:0) - (favCats.indexOf(a.id)!==-1?1:0);
+  }).slice(0,8);
+  var catsEl = document.getElementById('quickCats');
+  if(catsEl){
+    catsEl.innerHTML = cats.map(function(c){
+      return '<div class="quick-cat-btn'+(quickCat===c.id?' active':'')+'" onclick="quickSetCat(\''+c.id+'\')">'
+        +'<span class="quick-cat-emoji">'+c.e+'</span>'
+        +'<span class="quick-cat-lbl">'+c.l+'</span></div>';
+    }).join('');
+  }
+  // Numpad
+  var pad = document.getElementById('quickNumpad');
+  if(pad){
+    var keys = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
+    pad.innerHTML = keys.map(function(k){
+      return '<button class="quick-key'+(k==='⌫'?' del':'')+'" onclick="quickKey(\''+k+'\')">'+k+'</button>';
+    }).join('');
+  }
+}
+
+function quickSetCat(id){
+  quickCat = id;
+  renderQuickModal();
+}
+
+function quickKey(k){
+  if(k === '⌫'){
+    quickAmount = quickAmount.slice(0,-1);
+  } else if(k === '.'){
+    if(quickAmount.indexOf('.') === -1) quickAmount += '.';
+  } else {
+    if(quickAmount.length >= 7) return;
+    quickAmount += k;
+  }
+  var disp = document.getElementById('quickDisplay');
+  if(disp){
+    disp.textContent = quickAmount || '0';
+    disp.className = 'quick-amount-display' + (quickAmount ? ' has-val' : '');
+  }
+}
+
+function quickAddTx(){
+  var amt = parseFloat(quickAmount);
+  if(!amt || amt <= 0){ toast('💡 Entre un montant'); return; }
+  var c = getCat(quickCat);
+  data.transactions.unshift({id:Date.now(), type:'expense', amount:amt, desc:c.l, cat:quickCat, date:fmtDate(new Date()), note:''});
+  save();
+  document.getElementById('quickModalBg').classList.remove('show');
+  toast('✅ '+c.e+' '+fmtAmt(amt)+' '+(prefs.currency||'€')+' ajouté !');
+  renderDash();
+  checkNewBadges();
+  updateNotifBadge();
+}
+
+/* ── DÉFI MENSUEL ── */
+const DEFIS = [
+  {id:'no_restaurant', emoji:'🍳', title:'Chef à domicile', desc:'Zéro restaurant ce mois', check:function(d,p){
+    var mTx=d.transactions.filter(function(t){return inPeriod(t.date,currentPeriod())&&t.type==='expense';});
+    var resto=mTx.filter(function(t){return t.cat==='restaurants';});
+    return {progress:0, success:resto.length===0, detail:resto.length===0?'Réussi ! 🎉':''+resto.length+' visite(s) au resto'};
+  }},
+  {id:'save_10pct', emoji:'💰', title:'Épargnant 10%', desc:'Épargner 10% des revenus', check:function(d,p){
+    var period=currentPeriod();
+    var inc=d.transactions.filter(function(t){return inPeriod(t.date,period)&&t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+    var savMonth=d.savings.filter(function(s){return inPeriod(s.date,period)&&s.type==='deposit';}).reduce(function(s,e){return s+e.amount;},0);
+    var pct=inc>0?Math.round((savMonth/inc)*100):0;
+    return {progress:Math.min(100,pct*10), success:pct>=10, detail:pct+'% épargné'+(pct>=10?' 🎉':'')};
+  }},
+  {id:'budget_all', emoji:'🎯', title:'Budget parfait', desc:'Respecter tous les budgets', check:function(d,p){
+    var period=currentPeriod();
+    var spent={};
+    d.transactions.filter(function(t){return inPeriod(t.date,period)&&t.type==='expense';}).forEach(function(t){spent[t.cat]=(spent[t.cat]||0)+t.amount;});
+    var total=d.budgets.length;
+    var ok=d.budgets.filter(function(b){return (spent[b.cat]||0)<=b.limit;}).length;
+    var pct=total>0?Math.round((ok/total)*100):100;
+    return {progress:pct, success:pct===100&&total>0, detail:ok+'/'+total+' budgets OK'+(pct===100?' 🎉':'')};
+  }},
+  {id:'streak_7', emoji:'🔥', title:'Assidu', desc:'7 jours de transactions de suite', check:function(d,p){
+    var s=getStreak(d);
+    return {progress:Math.min(100,Math.round((s/7)*100)), success:s>=7, detail:s+'/7 jours'+(s>=7?' 🎉':'')};
+  }},
+  {id:'no_impulse', emoji:'🧘', title:'Zen', desc:'Moins de 5 achats shopping', check:function(d,p){
+    var period=currentPeriod();
+    var shop=d.transactions.filter(function(t){return inPeriod(t.date,period)&&t.cat==='shopping';}).length;
+    return {progress:Math.max(0,Math.round(((5-shop)/5)*100)), success:shop<5, detail:shop+'/5 achats shopping'+(shop<5?' 🎉':'')};
+  }},
+];
+
+function getActiveDefi(){
+  var stored = JSON.parse(localStorage.getItem('budget_defi')||'null');
+  var monthKey = new Date().toISOString().slice(0,7);
+  if(!stored || stored.month !== monthKey){
+    // Pick random defi for this month
+    var idx = Math.abs(monthKey.replace('-','') | 0) % DEFIS.length;
+    stored = {month:monthKey, defiId:DEFIS[idx].id};
+    localStorage.setItem('budget_defi', JSON.stringify(stored));
+  }
+  return DEFIS.find(function(d){return d.id===stored.defiId;}) || DEFIS[0];
+}
+
+function changeDefi(){
+  var monthKey = new Date().toISOString().slice(0,7);
+  var current = JSON.parse(localStorage.getItem('budget_defi')||'{}');
+  var currentIdx = DEFIS.findIndex(function(d){return d.id===current.defiId;});
+  var nextIdx = (currentIdx + 1) % DEFIS.length;
+  localStorage.setItem('budget_defi', JSON.stringify({month:monthKey, defiId:DEFIS[nextIdx].id}));
+  renderDash();
+  toast('🎯 Nouveau défi !');
+}
+
+function buildDefiCard(){
+  var defi = getActiveDefi();
+  var result = defi.check(data, prefs);
+  var isSuccess = result.success;
+  return '<div class="defi-card'+(isSuccess?' defi-success':'')+'">'
+    +'<div class="defi-header">'
+    +'<span class="defi-emoji">'+defi.emoji+'</span>'
+    +'<div><div class="defi-title">Défi : '+defi.title+'</div>'
+    +'<div class="defi-subtitle">'+defi.desc+'</div></div>'
+    +'<button onclick="changeDefi()" style="margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;color:var(--t3)">⟳</button>'
+    +'</div>'
+    +'<div class="defi-progress"><div class="defi-fill" style="width:'+result.progress+'%"></div></div>'
+    +'<div class="defi-stats"><span>'+result.detail+'</span><span>'+result.progress+'%</span></div>'
+    +'</div>';
 }
 // Init swipe on all tx items
   document.querySelectorAll('.tx-swipe-wrap').forEach(function(wrap){
@@ -3165,10 +3364,31 @@ function renderPerso(){
 
   var html = '<div class="perso-pad">';
 
+  // Accueil toggles
+  html += '<div class="sec-label">Accueil</div>';
+  html += '<div class="glass-card" style="margin-bottom:12px">';
+  var dashToggles = [
+    {key:'showGamif',    icon:'🏅', name:'Score & Badges',       desc:'Widget score, streak et badges'},
+    {key:'showDonut',    icon:'🍩', name:'Graphique donut',       desc:'Répartition des dépenses'},
+    {key:'showBars',     icon:'📊', name:'Graphique en barres',   desc:'6 dernières périodes'},
+    {key:'showRecent',   icon:'🕐', name:'Dernières transactions',desc:'5 dernières opérations'},
+    {key:'showDefi',     icon:'🎯', name:'Défi mensuel',          desc:'Challenge du mois en cours'},
+    {key:'showForecast', icon:'🔮', name:'Prévision fin de mois', desc:'Projection des dépenses'},
+    {key:'showTax',      icon:'🧾', name:'Estimation impôts',     desc:'Calcul IR automatique'},
+    {key:'showQuickBtn', icon:'⚡', name:'Bouton transaction rapide', desc:'Raccourci saisie en 2 taps'},
+  ];
+  dashToggles.forEach(function(t, i){
+    if(i > 0) html += '<div class="divider"></div>';
+    html += '<div class="set-row"><div class="set-icon" style="background:var(--surface2);font-size:16px">'+t.icon+'</div>';
+    html += '<div class="set-info"><div class="set-name">'+t.name+'</div><div class="set-desc">'+t.desc+'</div></div>';
+    html += '<label class="toggle"><input type="checkbox" '+(prefs[t.key]!==false?'checked':'')+' onchange="togglePerso(\''+t.key+'\',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+  });
+  html += '</div>';
+
   // Nav order
   html += '<div class="sec-label">Ordre des onglets</div>';
   html += '<div class="glass-card" style="padding:12px;margin-bottom:12px">';
-  html += '<div style="font-size:12px;color:var(--t2);margin-bottom:10px">Appuie et glisse pour réordonner</div>';
+  html += '<div style="font-size:12px;color:var(--t2);margin-bottom:10px">Glisse pour réordonner</div>';
   html += '<div class="nav-order-list" id="navOrderList">';
   order.forEach(function(id, i){
     var item = NAV_ITEMS.find(function(n){return n.id===id;});
@@ -3200,6 +3420,12 @@ function renderPerso(){
 
   html += '</div>';
   el.innerHTML = html;
+}
+
+function togglePerso(key, val){
+  prefs[key] = val;
+  savePrefs();
+  renderDash();
 }
 
 function navDragStart(e, idx){
@@ -3382,6 +3608,158 @@ function generateRapport(){
       toast('📊 ' + text.slice(0,60) + '...');
     });
   }
+}
+
+/* ── TRANSACTION RAPIDE ── */
+var quickAmount = '';
+var quickCat = 'food';
+
+function openQuickModal(){
+  quickAmount = '';
+  quickCat = prefs.favCats && prefs.favCats.length ? prefs.favCats[0] : 'food';
+  renderQuickModal();
+  document.getElementById('quickModalBg').classList.add('show');
+}
+
+function closeQuickModal(e){
+  if(!e || e.target === document.getElementById('quickModalBg'))
+    document.getElementById('quickModalBg').classList.remove('show');
+}
+
+function renderQuickModal(){
+  // Display
+  var disp = document.getElementById('quickDisplay');
+  if(disp){
+    disp.textContent = quickAmount || '0';
+    disp.className = 'quick-amount-display' + (quickAmount ? ' has-val' : '');
+  }
+  // Categories - favs first
+  var favCats = prefs.favCats || [];
+  var cats = CATS.expense.slice().sort(function(a,b){
+    return (favCats.indexOf(b.id)!==-1?1:0) - (favCats.indexOf(a.id)!==-1?1:0);
+  }).slice(0,8);
+  var catsEl = document.getElementById('quickCats');
+  if(catsEl){
+    catsEl.innerHTML = cats.map(function(c){
+      return '<div class="quick-cat-btn'+(quickCat===c.id?' active':'')+'" onclick="quickSetCat(\''+c.id+'\')">'
+        +'<span class="quick-cat-emoji">'+c.e+'</span>'
+        +'<span class="quick-cat-lbl">'+c.l+'</span></div>';
+    }).join('');
+  }
+  // Numpad
+  var pad = document.getElementById('quickNumpad');
+  if(pad){
+    var keys = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
+    pad.innerHTML = keys.map(function(k){
+      return '<button class="quick-key'+(k==='⌫'?' del':'')+'" onclick="quickKey(\''+k+'\')">'+k+'</button>';
+    }).join('');
+  }
+}
+
+function quickSetCat(id){
+  quickCat = id;
+  renderQuickModal();
+}
+
+function quickKey(k){
+  if(k === '⌫'){
+    quickAmount = quickAmount.slice(0,-1);
+  } else if(k === '.'){
+    if(quickAmount.indexOf('.') === -1) quickAmount += '.';
+  } else {
+    if(quickAmount.length >= 7) return;
+    quickAmount += k;
+  }
+  var disp = document.getElementById('quickDisplay');
+  if(disp){
+    disp.textContent = quickAmount || '0';
+    disp.className = 'quick-amount-display' + (quickAmount ? ' has-val' : '');
+  }
+}
+
+function quickAddTx(){
+  var amt = parseFloat(quickAmount);
+  if(!amt || amt <= 0){ toast('💡 Entre un montant'); return; }
+  var c = getCat(quickCat);
+  data.transactions.unshift({id:Date.now(), type:'expense', amount:amt, desc:c.l, cat:quickCat, date:fmtDate(new Date()), note:''});
+  save();
+  document.getElementById('quickModalBg').classList.remove('show');
+  toast('✅ '+c.e+' '+fmtAmt(amt)+' '+(prefs.currency||'€')+' ajouté !');
+  renderDash();
+  checkNewBadges();
+  updateNotifBadge();
+}
+
+/* ── DÉFI MENSUEL ── */
+const DEFIS = [
+  {id:'no_restaurant', emoji:'🍳', title:'Chef à domicile', desc:'Zéro restaurant ce mois', check:function(d,p){
+    var mTx=d.transactions.filter(function(t){return inPeriod(t.date,currentPeriod())&&t.type==='expense';});
+    var resto=mTx.filter(function(t){return t.cat==='restaurants';});
+    return {progress:0, success:resto.length===0, detail:resto.length===0?'Réussi ! 🎉':''+resto.length+' visite(s) au resto'};
+  }},
+  {id:'save_10pct', emoji:'💰', title:'Épargnant 10%', desc:'Épargner 10% des revenus', check:function(d,p){
+    var period=currentPeriod();
+    var inc=d.transactions.filter(function(t){return inPeriod(t.date,period)&&t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+    var savMonth=d.savings.filter(function(s){return inPeriod(s.date,period)&&s.type==='deposit';}).reduce(function(s,e){return s+e.amount;},0);
+    var pct=inc>0?Math.round((savMonth/inc)*100):0;
+    return {progress:Math.min(100,pct*10), success:pct>=10, detail:pct+'% épargné'+(pct>=10?' 🎉':'')};
+  }},
+  {id:'budget_all', emoji:'🎯', title:'Budget parfait', desc:'Respecter tous les budgets', check:function(d,p){
+    var period=currentPeriod();
+    var spent={};
+    d.transactions.filter(function(t){return inPeriod(t.date,period)&&t.type==='expense';}).forEach(function(t){spent[t.cat]=(spent[t.cat]||0)+t.amount;});
+    var total=d.budgets.length;
+    var ok=d.budgets.filter(function(b){return (spent[b.cat]||0)<=b.limit;}).length;
+    var pct=total>0?Math.round((ok/total)*100):100;
+    return {progress:pct, success:pct===100&&total>0, detail:ok+'/'+total+' budgets OK'+(pct===100?' 🎉':'')};
+  }},
+  {id:'streak_7', emoji:'🔥', title:'Assidu', desc:'7 jours de transactions de suite', check:function(d,p){
+    var s=getStreak(d);
+    return {progress:Math.min(100,Math.round((s/7)*100)), success:s>=7, detail:s+'/7 jours'+(s>=7?' 🎉':'')};
+  }},
+  {id:'no_impulse', emoji:'🧘', title:'Zen', desc:'Moins de 5 achats shopping', check:function(d,p){
+    var period=currentPeriod();
+    var shop=d.transactions.filter(function(t){return inPeriod(t.date,period)&&t.cat==='shopping';}).length;
+    return {progress:Math.max(0,Math.round(((5-shop)/5)*100)), success:shop<5, detail:shop+'/5 achats shopping'+(shop<5?' 🎉':'')};
+  }},
+];
+
+function getActiveDefi(){
+  var stored = JSON.parse(localStorage.getItem('budget_defi')||'null');
+  var monthKey = new Date().toISOString().slice(0,7);
+  if(!stored || stored.month !== monthKey){
+    // Pick random defi for this month
+    var idx = Math.abs(monthKey.replace('-','') | 0) % DEFIS.length;
+    stored = {month:monthKey, defiId:DEFIS[idx].id};
+    localStorage.setItem('budget_defi', JSON.stringify(stored));
+  }
+  return DEFIS.find(function(d){return d.id===stored.defiId;}) || DEFIS[0];
+}
+
+function changeDefi(){
+  var monthKey = new Date().toISOString().slice(0,7);
+  var current = JSON.parse(localStorage.getItem('budget_defi')||'{}');
+  var currentIdx = DEFIS.findIndex(function(d){return d.id===current.defiId;});
+  var nextIdx = (currentIdx + 1) % DEFIS.length;
+  localStorage.setItem('budget_defi', JSON.stringify({month:monthKey, defiId:DEFIS[nextIdx].id}));
+  renderDash();
+  toast('🎯 Nouveau défi !');
+}
+
+function buildDefiCard(){
+  var defi = getActiveDefi();
+  var result = defi.check(data, prefs);
+  var isSuccess = result.success;
+  return '<div class="defi-card'+(isSuccess?' defi-success':'')+'">'
+    +'<div class="defi-header">'
+    +'<span class="defi-emoji">'+defi.emoji+'</span>'
+    +'<div><div class="defi-title">Défi : '+defi.title+'</div>'
+    +'<div class="defi-subtitle">'+defi.desc+'</div></div>'
+    +'<button onclick="changeDefi()" style="margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;color:var(--t3)">⟳</button>'
+    +'</div>'
+    +'<div class="defi-progress"><div class="defi-fill" style="width:'+result.progress+'%"></div></div>'
+    +'<div class="defi-stats"><span>'+result.detail+'</span><span>'+result.progress+'%</span></div>'
+    +'</div>';
 }
 // Init
 if(!prefs.payDay) prefs.payDay=25;
