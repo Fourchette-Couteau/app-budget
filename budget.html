@@ -1352,274 +1352,161 @@ function addBudget(){
 }
 
 function renderSettings(){
-  const el=document.getElementById('s-settings');
-  const isDark=prefs.theme==='dark'||(prefs.theme==='auto'&&window.matchMedia('(prefers-color-scheme:dark)').matches);
-  const avatarContent = prefs.avatarPhoto
-    ? '<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
-    : (prefs.avatarEmoji||'💰');
-  el.innerHTML=`<div class="set-pad">
-    <div class="profile-avatar" id="avatarLarge" onclick="openPhotoModal()">${avatarContent}</div>
-    <div class="profile-name" id="appNameDisplay">${prefs.appName||'Mon Budget'}</div>
+  var el=document.getElementById('s-settings');
+  var isDark=prefs.theme==='dark'||(prefs.theme==='auto'&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+  var avatarContent=prefs.avatarPhoto?('<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'):(prefs.avatarEmoji||'💰');
 
-    <div class="set-section" style="margin-top:20px">
-      <div class="set-title">Apparence</div>
-      <div class="set-card">
-        <div class="theme-row">
-          ${[{v:'auto',i:'🌗',l:'Auto'},{v:'light',i:'☀️',l:'Clair'},{v:'dark',i:'🌙',l:'Sombre'}].map(t=>`
-          <div class="theme-opt${prefs.theme===t.v?' sel':''}" onclick="setTheme('${t.v}')">
-            <span class="theme-opt-icon">${t.i}</span>${t.l}
-          </div>`).join('')}
-        </div>
-        <div class="divider"></div>
-        <div class="set-row" style="padding-bottom:4px">
-          <div class="set-icon" style="background:rgba(79,142,255,.15)">🎨</div>
-          <div class="set-info"><div class="set-name">Thème de couleur</div><div class="set-desc">Change l'ambiance complète</div></div>
-        </div>
-        <div class="theme-picker">
-          ${COLOR_THEMES.map(t=>`
-          <div class="theme-swatch${(prefs.colorTheme||'default')===t.id?' sel':''}" onclick="setColorTheme('${t.id}')">
-            <div class="theme-swatch-preview" style="background:${t.grad}"></div>
-            <div class="theme-swatch-name">${t.name}</div>
-          </div>`).join('')}
-        </div>
-        ${(prefs.colorTheme==='default'||!prefs.colorTheme)?`
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(79,142,255,.15)">✦</div>
-          <div class="set-info"><div class="set-name">Couleur d'accentuation</div><div class="set-desc">Pour le thème Défaut</div></div>
-        </div>
-        <div class="accent-row">
-          ${ACCENTS.map((a,i)=>`<div class="accent-swatch${prefs.accentIdx===i?' sel':''}" style="background:${isDark?a.dark:a.light}" onclick="setAccent(${i})" title="${a.name}"></div>`).join('')}
-        </div>`:''}
-      </div>
-    </div>
+  var html='<div class="set-pad">';
+  html+='<div class="profile-avatar" id="avatarLarge" onclick="openPhotoModal()">'+avatarContent+'</div>';
+  html+='<div class="profile-name" id="appNameDisplay">'+(prefs.appName||'Mon Budget')+'</div>';
 
-    <div class="set-section">
-      <div class="set-title">Mon profil fiscal</div>
-      <div class="set-card">
-        <div class="profile-grid">
-          ${PROFILES.map(p=>`
-          <div class="profile-opt${(prefs.profile||'salarie')===p.id?' sel':''}" onclick="setProfile('${p.id}')">
-            <span class="profile-opt-emoji">${p.emoji}</span>
-            <div class="profile-opt-name">${p.name}</div>
-            <div class="profile-opt-desc">${p.desc.split('—')[0].trim()}</div>
-          </div>`).join('')}
-        </div>
-        ${(()=>{const p=PROFILES.find(x=>x.id===(prefs.profile||'salarie'))||PROFILES[0];return p.tips?'<div class="profile-tip">💡 '+p.tips+'</div>':'';})()}
-      </div>
-    </div>
+  // Apparence
+  html+='<div class="set-section" style="margin-top:20px"><div class="set-title">Apparence</div><div class="set-card">';
+  html+='<div class="theme-row">';
+  [{v:'auto',i:'🌗',l:'Auto'},{v:'light',i:'☀️',l:'Clair'},{v:'dark',i:'🌙',l:'Sombre'}].forEach(function(t){
+    html+='<div class="theme-opt'+(prefs.theme===t.v?' sel':'')+'" onclick="setTheme(\''+t.v+'\')"><span class="theme-opt-icon">'+t.i+'</span>'+t.l+'</div>';
+  });
+  html+='</div><div class="divider"></div>';
+  html+='<div class="set-row" style="padding-bottom:4px"><div class="set-icon" style="background:rgba(79,142,255,.15)">🎨</div>';
+  html+='<div class="set-info"><div class="set-name">Thème de couleur</div><div class="set-desc">Change l\'ambiance complète</div></div></div>';
+  html+='<div class="theme-picker">';
+  COLOR_THEMES.forEach(function(t){
+    html+='<div class="theme-swatch'+((prefs.colorTheme||'default')===t.id?' sel':'')+'" onclick="setColorTheme(\''+t.id+'\')"><div class="theme-swatch-preview" style="background:'+t.grad+'"></div><div class="theme-swatch-name">'+t.name+'</div></div>';
+  });
+  html+='</div>';
+  if(prefs.colorTheme==='default'||!prefs.colorTheme){
+    html+='<div class="divider"></div><div class="set-row"><div class="set-icon" style="background:rgba(79,142,255,.15)">✦</div>';
+    html+='<div class="set-info"><div class="set-name">Couleur d\'accentuation</div><div class="set-desc">Pour le thème Défaut</div></div></div>';
+    html+='<div class="accent-row">';
+    ACCENTS.forEach(function(a,i){
+      html+='<div class="accent-swatch'+(prefs.accentIdx===i?' sel':'')+'" style="background:'+(isDark?a.dark:a.light)+'" onclick="setAccent('+i+')" title="'+a.name+'"></div>';
+    });
+    html+='</div>';
+  }
+  html+='</div></div>';
 
-    <div class="set-section">
-      <div class="set-title">Tableau de bord</div>
-      <div class="set-card">
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(255,152,0,.15)">🍩</div>
-          <div class="set-info"><div class="set-name">Graphique donut</div><div class="set-desc">Répartition des dépenses</div></div>
-          <label class="toggle"><input type="checkbox" ${prefs.showDonut?'checked':''} onchange="togglePref('showDonut',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(33,150,243,.15)">📊</div>
-          <div class="set-info"><div class="set-name">Graphique en barres</div><div class="set-desc">6 derniers mois</div></div>
-          <label class="toggle"><input type="checkbox" ${prefs.showBars?'checked':''} onchange="togglePref('showBars',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(76,175,80,.15)">🕐</div>
-          <div class="set-info"><div class="set-name">Dernières transactions</div><div class="set-desc">Aperçu sur l'accueil</div></div>
-          <label class="toggle"><input type="checkbox" ${prefs.showRecent?'checked':''} onchange="togglePref('showRecent',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(99,217,160,.15)">💰</div>
-          <div class="set-info"><div class="set-name">Épargne automatique</div><div class="set-desc">Vire le solde restant en épargne à chaque nouvelle période</div></div>
-          <label class="toggle"><input type="checkbox" ${prefs.autoSavings!==false?'checked':''} onchange="togglePref('autoSavings',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-      </div>
-    </div>
+  // Profil fiscal
+  html+='<div class="set-section"><div class="set-title">Mon profil fiscal</div><div class="set-card"><div class="profile-grid">';
+  PROFILES.forEach(function(p){
+    html+='<div class="profile-opt'+((prefs.profile||'salarie')===p.id?' sel':'')+'" onclick="setProfile(\''+p.id+'\')"><span class="profile-opt-emoji">'+p.emoji+'</span><div class="profile-opt-name">'+p.name+'</div><div class="profile-opt-desc">'+p.desc.split('—')[0].trim()+'</div></div>';
+  });
+  html+='</div>';
+  var curProfile=PROFILES.find(function(x){return x.id===(prefs.profile||'salarie');})||PROFILES[0];
+  if(curProfile.tips) html+='<div class="profile-tip">💡 '+curProfile.tips+'</div>';
+  html+='</div></div>';
 
-    <div class="set-section">
-      <div class="set-title">Général</div>
-      <div class="set-card">
-        <div class="set-row" onclick="openPhotoModal()" style="cursor:pointer">
-          <div class="set-icon" style="background:linear-gradient(135deg,var(--accent),#7b5ea7);overflow:hidden" id="settingsAvatarIcon">${prefs.avatarPhoto?'<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover">': (prefs.avatarEmoji||'💰')}</div>
-          <div class="set-info"><div class="set-name">Photo de profil</div><div class="set-desc">Emoji ou image depuis ta galerie</div></div>
-          <span class="set-right">›</span>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(156,39,176,.15)">✏️</div>
-          <div class="set-info"><div class="set-name">Nom de l'appli</div><div class="set-desc" id="appNameDesc">${prefs.appName||'Mon Budget'}</div></div>
-          <span class="set-right">›</span>
-        </div>
-        <div style="padding:0 16px 14px"><input type="text" id="appNameInput" placeholder="Mon Budget" value="${prefs.appName||''}" oninput="updateAppName(this.value)" style="margin-top:8px"></div>
-        <div class="divider"></div>
-        <div class="set-row" onclick="openPinSetup()" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(255,59,48,.12)">🔒</div>
-          <div class="set-info"><div class="set-name">Code PIN</div><div class="set-desc" id="pinStatusDesc">${prefs.pinEnabled?'Activé · Appuie pour modifier':'Désactivé'}</div></div>
-          <span class="set-right" style="font-size:13px;font-weight:500;color:${prefs.pinEnabled?'var(--inc-t)':'var(--t2)'}">${prefs.pinEnabled?'ON':'OFF'}</span>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(255,193,7,.15)">💱</div>
-          <div class="set-info"><div class="set-name">Devise</div></div>
-          <select onchange="setCurrency(this.value)" style="width:auto;padding:8px 32px 8px 12px;font-size:14px;background:var(--surface2)">
-            ${['€','$','£','CHF','¥'].map(c=>`<option${prefs.currency===c?' selected':''}>${c}</option>`).join('')}
-          </select>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(99,217,160,.15)">📅</div>
-          <div class="set-info"><div class="set-name">Jour de paie</div><div class="set-desc">La période repart de ce jour chaque mois</div></div>
-          <select onchange="setPayDay(parseInt(this.value))" style="width:auto;padding:8px 32px 8px 12px;font-size:14px;background:var(--surface2)">
-            ${Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}"${prefs.payDay===d?' selected':''}>${d}${d===29?' (→ dernier si fév.)':d===30?' (→ dernier si fév./mars)':d===31?' (→ dernier du mois)':''}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-    </div>
+  // Tableau de bord toggles
+  html+='<div class="set-section"><div class="set-title">Tableau de bord</div><div class="set-card">';
+  var toggles=[
+    {icon:'🍩',bg:'rgba(255,152,0,.15)',name:'Graphique donut',desc:'Répartition des dépenses',key:'showDonut',val:prefs.showDonut},
+    {icon:'📊',bg:'rgba(33,150,243,.15)',name:'Graphique en barres',desc:'6 derniers mois',key:'showBars',val:prefs.showBars},
+    {icon:'🕐',bg:'rgba(76,175,80,.15)',name:'Dernières transactions',desc:'Aperçu sur l\'accueil',key:'showRecent',val:prefs.showRecent},
+    {icon:'💰',bg:'rgba(99,217,160,.15)',name:'Épargne automatique',desc:'Vire le solde restant en épargne',key:'autoSavings',val:prefs.autoSavings!==false}
+  ];
+  toggles.forEach(function(t,i){
+    if(i>0) html+='<div class="divider"></div>';
+    html+='<div class="set-row"><div class="set-icon" style="background:'+t.bg+'">'+t.icon+'</div>';
+    html+='<div class="set-info"><div class="set-name">'+t.name+'</div><div class="set-desc">'+t.desc+'</div></div>';
+    html+='<label class="toggle"><input type="checkbox" '+(t.val?'checked':'')+' onchange="togglePref(\''+t.key+'\',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+  });
+  html+='</div></div>';
 
-    <div class="set-section">
-      <div class="set-title">Données & Sauvegarde</div>
-      <div class="set-card">
-        <div class="set-row" onclick="exportBackup()" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(79,142,255,.15)">💾</div>
-          <div class="set-info"><div class="set-name">Sauvegarder mes données</div><div class="set-desc">${data.transactions.length} transactions · ${(data.savings||[]).length} épargnes</div></div>
-          <span class="set-right" style="font-size:18px">↗</span>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(99,217,160,.15)">📥</div>
-          <div class="set-info"><div class="set-name">Restaurer une sauvegarde</div><div class="set-desc">Importer un fichier .json</div></div>
-          <label style="cursor:pointer;color:var(--accent);font-size:13px;font-weight:500">
-            Choisir
-            <input type="file" accept=".json" style="display:none" onchange="importBackup(event)">
-          </label>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row" onclick="exportCSV()" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(255,152,0,.15)">📊</div>
-          <div class="set-info"><div class="set-name">Exporter en CSV</div><div class="set-desc">Pour Excel ou Google Sheets</div></div>
-          <span class="set-right" style="font-size:18px">↗</span>
-        </div>
-      </div>
-    </div>
+  // Général
+  html+='<div class="set-section"><div class="set-title">Général</div><div class="set-card">';
+  var avatarIconContent=prefs.avatarPhoto?('<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover">'):(prefs.avatarEmoji||'💰');
+  html+='<div class="set-row" onclick="openPhotoModal()" style="cursor:pointer"><div class="set-icon" style="background:linear-gradient(135deg,var(--accent),#7b5ea7);overflow:hidden" id="settingsAvatarIcon">'+avatarIconContent+'</div>';
+  html+='<div class="set-info"><div class="set-name">Photo de profil</div><div class="set-desc">Emoji ou image depuis ta galerie</div></div><span class="set-right">›</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row"><div class="set-icon" style="background:rgba(156,39,176,.15)">✏️</div>';
+  html+='<div class="set-info"><div class="set-name">Nom de l\'appli</div><div class="set-desc" id="appNameDesc">'+(prefs.appName||'Mon Budget')+'</div></div><span class="set-right">›</span></div>';
+  html+='<div style="padding:0 16px 14px"><input type="text" id="appNameInput" placeholder="Mon Budget" value="'+(prefs.appName||'')+'" oninput="updateAppName(this.value)" style="margin-top:8px"></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" onclick="openPinSetup()" style="cursor:pointer"><div class="set-icon" style="background:rgba(255,59,48,.12)">🔒</div>';
+  html+='<div class="set-info"><div class="set-name">Code PIN</div><div class="set-desc" id="pinStatusDesc">'+(prefs.pinEnabled?'Activé · Appuie pour modifier':'Désactivé')+'</div></div>';
+  html+='<span class="set-right" style="font-size:13px;font-weight:500;color:'+(prefs.pinEnabled?'var(--inc-t)':'var(--t2)')+'>">'+(prefs.pinEnabled?'ON':'OFF')+'</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row"><div class="set-icon" style="background:rgba(255,193,7,.15)">💱</div><div class="set-info"><div class="set-name">Devise</div></div>';
+  html+='<select onchange="setCurrency(this.value)" style="width:auto;padding:8px 32px 8px 12px;font-size:14px;background:var(--surface2)">';
+  ['€','$','£','CHF','¥'].forEach(function(c){html+='<option'+(prefs.currency===c?' selected':'')+'>'+c+'</option>';});
+  html+='</select></div><div class="divider"></div>';
+  html+='<div class="set-row"><div class="set-icon" style="background:rgba(99,217,160,.15)">📅</div>';
+  html+='<div class="set-info"><div class="set-name">Jour de paie</div><div class="set-desc">La période repart de ce jour chaque mois</div></div>';
+  html+='<select onchange="setPayDay(parseInt(this.value))" style="width:auto;padding:8px 32px 8px 12px;font-size:14px;background:var(--surface2)">';
+  for(var d=1;d<=31;d++){
+    var dLabel=d+(d===29?' (→ dernier si fév.)':d===30?' (→ dernier si fév./mars)':d===31?' (→ dernier du mois)':'');
+    html+='<option value="'+d+'"'+(prefs.payDay===d?' selected':'')+'>'+dLabel+'</option>';
+  }
+  html+='</select></div></div></div>';
 
-    <div class="set-section">
-      <div class="set-title">Outils</div>
-      <div class="set-card">
-        <div class="set-row" onclick="nav('calendar')" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(79,142,255,.15)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/></svg>
-          </div>
-          <div class="set-info"><div class="set-name">Vue Calendrier</div><div class="set-desc">Dépenses jour par jour</div></div>
-          <span class="set-right">›</span>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row" onclick="nav('stats')" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(99,217,160,.15)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          </div>
-          <div class="set-info"><div class="set-name">Statistiques</div><div class="set-desc">Analyses détaillées de tes finances</div></div>
-          <span class="set-right">›</span>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row" onclick="nav('gamif')" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(255,179,64,.15)">🏆</div>
-          <div class="set-info"><div class="set-name">Succès & Badges</div><div class="set-desc" id="badgeCount">Chargement...</div></div>
-          <span class="set-right">›</span>
-        </div>
-      </div>
-    </div>
+  // Données
+  html+='<div class="set-section"><div class="set-title">Données &amp; Sauvegarde</div><div class="set-card">';
+  html+='<div class="set-row" onclick="exportBackup()" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)">💾</div>';
+  html+='<div class="set-info"><div class="set-name">Sauvegarder mes données</div><div class="set-desc">'+data.transactions.length+' transactions · '+(data.savings||[]).length+' épargnes</div></div><span class="set-right" style="font-size:18px">↗</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" style="cursor:pointer"><div class="set-icon" style="background:rgba(99,217,160,.15)">📥</div>';
+  html+='<div class="set-info"><div class="set-name">Restaurer une sauvegarde</div><div class="set-desc">Importer un fichier .json</div></div>';
+  html+='<label style="cursor:pointer;color:var(--accent);font-size:13px;font-weight:500">Choisir<input type="file" accept=".json" style="display:none" onchange="importBackup(event)"></label></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" onclick="exportCSV()" style="cursor:pointer"><div class="set-icon" style="background:rgba(255,152,0,.15)">📊</div>';
+  html+='<div class="set-info"><div class="set-name">Exporter en CSV</div><div class="set-desc">Pour Excel ou Google Sheets</div></div><span class="set-right" style="font-size:18px">↗</span></div>';
+  html+='</div></div>';
 
-    <div class="set-section">
-      <div class="set-title">Transactions récurrentes</div>
-      <div class="set-card">
-        <div class="set-row" onclick="nav('recurring')" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(79,142,255,.15)">🔁</div>
-          <div class="set-info"><div class="set-name">Gérer les récurrences</div><div class="set-desc" id="recCount">Chargement...</div></div>
-          <span class="set-right">›</span>
-        </div>
-      </div>
-    </div>
+  // Outils
+  html+='<div class="set-section"><div class="set-title">Outils</div><div class="set-card">';
+  html+='<div class="set-row" onclick="nav(\'calendar\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/></svg></div>';
+  html+='<div class="set-info"><div class="set-name">Vue Calendrier</div><div class="set-desc">Dépenses jour par jour</div></div><span class="set-right">›</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" onclick="nav(\'stats\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(99,217,160,.15)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>';
+  html+='<div class="set-info"><div class="set-name">Statistiques</div><div class="set-desc">Analyses détaillées de tes finances</div></div><span class="set-right">›</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" onclick="nav(\'gamif\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(255,179,64,.15)">🏆</div>';
+  html+='<div class="set-info"><div class="set-name">Succès &amp; Badges</div><div class="set-desc" id="badgeCount">'+getUnlockedBadges().length+'/'+BADGES.length+' badges débloqués</div></div><span class="set-right">›</span></div>';
+  html+='</div></div>';
 
-    <div class="set-section">
-      <div class="set-title">Partager l'appli</div>
-      <div class="set-card">
-        <div class="set-row" onclick="shareApp()" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(79,142,255,.15)">🔗</div>
-          <div class="set-info"><div class="set-name">Copier le lien</div><div class="set-desc">Partage l'appli avec quelqu'un</div></div>
-          <span class="set-right" style="font-size:18px">⎘</span>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row" onclick="nativeShare()" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(99,217,160,.15)">📤</div>
-          <div class="set-info"><div class="set-name">Partager via...</div><div class="set-desc">AirDrop, Messages, Mail...</div></div>
-          <span class="set-right" style="font-size:18px">›</span>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row" style="cursor:pointer">
-          <div class="set-icon" style="background:rgba(156,39,176,.15)">✏️</div>
-          <div class="set-info"><div class="set-name">Lien GitHub</div><div class="set-desc" id="appUrlDisplay" style="word-break:break-all;font-size:11px">${prefs.appUrl||'Non configuré'}</div></div>
-        </div>
-        <div style="padding:0 16px 14px">
-          <input type="url" id="appUrlInput" placeholder="https://fourchette-couteau.github.io/app-budget/budget.html" value="${prefs.appUrl||''}" oninput="updateAppUrl(this.value)" style="margin-top:8px;font-size:13px">
-        </div>
-      </div>
-    </div>
+  // Récurrences
+  html+='<div class="set-section"><div class="set-title">Transactions récurrentes</div><div class="set-card">';
+  html+='<div class="set-row" onclick="nav(\'recurring\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)">🔁</div>';
+  html+='<div class="set-info"><div class="set-name">Gérer les récurrences</div><div class="set-desc" id="recCount">'+((data.recurring||[]).filter(function(r){return r.active;}).length)+' récurrence(s) active(s)</div></div><span class="set-right">›</span></div>';
+  html+='</div></div>';
 
-    <div class="set-section">
-      <div class="set-title">Alertes & notifications</div>
-      <div class="set-card">
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(255,95,95,.12)">🚨</div>
-          <div class="set-info"><div class="set-name">Dépassement de budget</div><div class="set-desc">Alerte quand 100% atteint</div></div>
-          <label class="toggle"><input type="checkbox" ${prefs.notifBudgetOver!==false?'checked':''} onchange="togglePref('notifBudgetOver',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(255,179,64,.12)">⚠️</div>
-          <div class="set-info"><div class="set-name">Budget à 80%</div><div class="set-desc">Avertissement préventif</div></div>
-          <label class="toggle"><input type="checkbox" ${prefs.notifBudgetWarn!==false?'checked':''} onchange="togglePref('notifBudgetWarn',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(79,142,255,.12)">📅</div>
-          <div class="set-info"><div class="set-name">Fin de période</div><div class="set-desc">Rappel 3 jours avant</div></div>
-          <label class="toggle"><input type="checkbox" ${prefs.notifPeriodEnd!==false?'checked':''} onchange="togglePref('notifPeriodEnd',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-        <div class="divider"></div>
-        <div class="set-row">
-          <div class="set-icon" style="background:rgba(99,217,160,.12)">📊</div>
-          <div class="set-info"><div class="set-name">Récap quotidien</div><div class="set-desc">Résumé des dépenses du jour</div></div>
-          <label class="toggle"><input type="checkbox" ${prefs.notifDaily!==false?'checked':''} onchange="togglePref('notifDaily',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-      </div>
-    </div>
+  // Alertes
+  html+='<div class="set-section"><div class="set-title">Alertes &amp; notifications</div><div class="set-card">';
+  var notifToggles=[
+    {icon:'🚨',bg:'rgba(255,95,95,.12)',name:'Dépassement de budget',desc:'Alerte quand 100% atteint',key:'notifBudgetOver',val:prefs.notifBudgetOver!==false},
+    {icon:'⚠️',bg:'rgba(255,179,64,.12)',name:'Budget à 80%',desc:'Avertissement préventif',key:'notifBudgetWarn',val:prefs.notifBudgetWarn!==false},
+    {icon:'📅',bg:'rgba(79,142,255,.12)',name:'Fin de période',desc:'Rappel 3 jours avant',key:'notifPeriodEnd',val:prefs.notifPeriodEnd!==false},
+    {icon:'📊',bg:'rgba(99,217,160,.12)',name:'Récap quotidien',desc:'Résumé des dépenses du jour',key:'notifDaily',val:prefs.notifDaily!==false}
+  ];
+  notifToggles.forEach(function(t,i){
+    if(i>0) html+='<div class="divider"></div>';
+    html+='<div class="set-row"><div class="set-icon" style="background:'+t.bg+'">'+t.icon+'</div>';
+    html+='<div class="set-info"><div class="set-name">'+t.name+'</div><div class="set-desc">'+t.desc+'</div></div>';
+    html+='<label class="toggle"><input type="checkbox" '+(t.val?'checked':'')+' onchange="togglePref(\''+t.key+'\',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+  });
+  html+='</div></div>';
 
-    <div class="set-section">
-      <div class="set-title">Zone danger</div>
-      <div class="set-card">
-        <div style="padding:16px">
-          <button class="btn-danger" onclick="confirmReset()">🗑 Supprimer toutes les données</button>
-        </div>
-      </div>
-    </div>
+  // Partage
+  html+='<div class="set-section"><div class="set-title">Partager l\'appli</div><div class="set-card">';
+  html+='<div class="set-row" onclick="shareApp()" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)">🔗</div>';
+  html+='<div class="set-info"><div class="set-name">Copier le lien</div><div class="set-desc">Partage l\'appli avec quelqu\'un</div></div><span class="set-right" style="font-size:18px">⎘</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" onclick="nativeShare()" style="cursor:pointer"><div class="set-icon" style="background:rgba(99,217,160,.15)">📤</div>';
+  html+='<div class="set-info"><div class="set-name">Partager via...</div><div class="set-desc">AirDrop, Messages, Mail...</div></div><span class="set-right">›</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row"><div class="set-icon" style="background:rgba(156,39,176,.15)">✏️</div>';
+  html+='<div class="set-info"><div class="set-name">Lien GitHub</div><div class="set-desc" id="appUrlDisplay" style="word-break:break-all;font-size:11px">'+(prefs.appUrl||'Non configuré')+'</div></div></div>';
+  html+='<div style="padding:0 16px 14px"><input type="url" id="appUrlInput" placeholder="https://..." value="'+(prefs.appUrl||'')+'" oninput="updateAppUrl(this.value)" style="margin-top:8px;font-size:13px"></div>';
+  html+='</div></div>';
 
-    <div style="text-align:center;padding:8px;font-size:12px;color:var(--t3)">Mon Budget v4.3</div>
-  </div>`;
+  // Zone danger
+  html+='<div class="set-section"><div class="set-title">Zone danger</div><div class="set-card">';
+  html+='<div style="padding:16px"><button class="btn-danger" onclick="confirmReset()">🗑 Supprimer toutes les données</button></div>';
+  html+='</div></div>';
+
+  html+='<div style="text-align:center;padding:8px;font-size:12px;color:var(--t3)">Mon Budget v5.9</div>';
+  html+='</div>';
+  el.innerHTML=html;
 }
-
-function setTheme(t){prefs.theme=t;savePrefs();renderSettings();toast(t==='auto'?'🌗 Mode auto':t==='dark'?'🌙 Mode sombre':'☀️ Mode clair')}
-function setProfile(id){prefs.profile=id;savePrefs();renderSettings();toast(PROFILES.find(p=>p.id===id)?.emoji+" Profil mis à jour !");}
-
-function setColorTheme(id){prefs.colorTheme=id;savePrefs();renderSettings();const t=COLOR_THEMES.find(t=>t.id===id);toast('🎨 Thème '+( t?t.name:'Défaut')+' !');}
-function setAccent(i){prefs.accentIdx=i;savePrefs();renderSettings();toast('🎨 Couleur mise à jour')}
-function togglePref(key,val){prefs[key]=val;savePrefs();toast(val?'✅ Activé':'Désactivé')}
-function updateAppName(v){prefs.appName=v||'Mon Budget';savePrefs();const d=document.getElementById('appNameDesc');if(d)d.textContent=prefs.appName}
-function setCurrency(v){prefs.currency=v;savePrefs();const c=document.getElementById('amount-currency');if(c)c.textContent=v;toast('💱 Devise : '+v)}
-function setPayDay(d){prefs.payDay=d;savePrefs();renderDash();toast('📅 Jour de paie : le '+d)}
-
-
 function exportBackup(){
   const backup = {
     version: '2.5',
@@ -1774,87 +1661,74 @@ function showSplash(){
 function renderSavings(){
   if(!data.savings) data.savings=[];
   if(!data.savingsGoals) data.savingsGoals=[];
-  const cur=prefs.currency||'€';
-  const total=data.savings.reduce((s,e)=>s+(e.type==='deposit'?e.amount:-e.amount),0);
-  const goal=data.savingsGoals[0]||null;
-  const goalAmt=goal?goal.amount:0;
-  const goalPct=goalAmt>0?Math.min(Math.round((total/goalAmt)*100),100):0;
-  // This month deposits
-  const pm=currentPeriod();
-  const thisPeriod=data.savings.filter(e=>inPeriod(e.date,pm)&&e.type==='deposit').reduce((s,e)=>s+e.amount,0);
-  // Projection: avg monthly deposit
-  const allDeposits=data.savings.filter(e=>e.type==='deposit');
-  const months={};
-  allDeposits.forEach(e=>{const m=e.date.slice(0,7);months[m]=(months[m]||0)+e.amount});
-  const mVals=Object.values(months);
-  const avgMonthly=mVals.length>0?Math.round(mVals.reduce((a,b)=>a+b,0)/mVals.length):0;
-  const monthsLeft=goalAmt>0&&avgMonthly>0?Math.ceil((goalAmt-total)/avgMonthly):null;
-  // Date projection
-  let projDate='';
-  if(monthsLeft!==null&&monthsLeft>0){
-    const d=new Date();d.setMonth(d.getMonth()+monthsLeft);
-    projDate=d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
-  } else if(goalAmt>0&&total>=goalAmt){
-    projDate='Objectif atteint ! 🎉';
+  var cur=prefs.currency||'€';
+  var total=data.savings.reduce(function(s,e){return s+(e.type==='deposit'?e.amount:-e.amount);},0);
+  var goal=data.savingsGoals[0]||null;
+  var goalAmt=goal?goal.amount:0;
+  var goalPct=goalAmt>0?Math.min(Math.round((total/goalAmt)*100),100):0;
+  var pm=currentPeriod();
+  var thisPeriod=data.savings.filter(function(e){return inPeriod(e.date,pm)&&e.type==='deposit';}).reduce(function(s,e){return s+e.amount;},0);
+  var allDeposits=data.savings.filter(function(e){return e.type==='deposit';});
+  var months={};
+  allDeposits.forEach(function(e){var m=e.date.slice(0,7);months[m]=(months[m]||0)+e.amount;});
+  var mVals=Object.values(months);
+  var avgMonthly=mVals.length>0?Math.round(mVals.reduce(function(a,b){return a+b;},0)/mVals.length):0;
+  var monthsLeft=goalAmt>0&&avgMonthly>0?Math.ceil((goalAmt-total)/avgMonthly):null;
+  var projDate='';
+  if(monthsLeft!==null&&monthsLeft>0){var pd=new Date();pd.setMonth(pd.getMonth()+monthsLeft);projDate=pd.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});}
+  else if(goalAmt>0&&total>=goalAmt){projDate='Objectif atteint ! 🎉';}
+
+  var el=document.getElementById('s-savings');
+  var html='<div class="sav-pad">';
+  html+='<div class="sav-hero">';
+  html+='<div class="sav-hero-label">Épargne totale</div>';
+  html+='<div class="sav-hero-amount">'+fmtAmt(Math.max(0,total))+' '+cur+'</div>';
+  html+='<div class="sav-hero-sub">'+(thisPeriod>0?'+'+fmtAmt(thisPeriod)+' '+cur+' cette période':'Aucun versement cette période')+'</div>';
+  if(goalAmt>0){
+    html+='<div class="sav-goal-bar-wrap">';
+    html+='<div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:500">Objectif : '+fmtAmt(goalAmt)+' '+cur+(goal.name?' — '+goal.name:'')+'</div>';
+    html+='<div class="sav-goal-bar-track"><div class="sav-goal-bar-fill" style="width:'+goalPct+'%"></div></div>';
+    html+='<div class="sav-goal-labels"><span>'+goalPct+'%</span><span>'+fmtAmt(Math.max(0,goalAmt-total))+' '+cur+' restants</span></div>';
+    html+='</div>';
   }
-
-  const el=document.getElementById('s-savings');
-  el.innerHTML=`<div class="sav-pad">
-    <div class="sav-hero">
-      <div class="sav-hero-label">Épargne totale</div>
-      <div class="sav-hero-amount">${fmtAmt(Math.max(0,total))} ${cur}</div>
-      <div class="sav-hero-sub">${thisPeriod>0?"+"+fmtAmt(thisPeriod)+" "+cur+" cette période":"Aucun versement cette période"}</div>
-      ${goalAmt>0?`
-      <div class="sav-goal-bar-wrap">
-        <div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:500">Objectif : ${fmtAmt(goalAmt)} ${cur} ${goal.name?'— '+goal.name:''}</div>
-        <div class="sav-goal-bar-track"><div class="sav-goal-bar-fill" style="width:${goalPct}%"></div></div>
-        <div class="sav-goal-labels"><span>${goalPct}%</span><span>${fmtAmt(Math.max(0,goalAmt-total))} ${cur} restants</span></div>
-      </div>`:''}
-    </div>
-
-    <div class="sav-stats">
-      <div class="sav-stat"><div class="sav-stat-label">Versement moyen</div><div class="sav-stat-val green">${avgMonthly>0?fmtAmt(avgMonthly)+' '+cur+'/m':'—'}</div></div>
-      <div class="sav-stat"><div class="sav-stat-label">${goalAmt>0?'Projection':'Total versements'}</div><div class="sav-stat-val">${goalAmt>0?(projDate||'—'):fmtAmt(allDeposits.reduce((s,e)=>s+e.amount,0))+' '+cur}</div></div>
-    </div>
-
-    <div class="sav-add-card">
-      <div class="sav-add-title">Ajouter un mouvement</div>
-      <div class="f-group"><label class="f-label">Description (optionnel)</label><input type="text" id="sav-desc" placeholder="Ex : Virement mensuel"></div>
-      <div class="f-row" style="margin-bottom:12px">
-        <div class="f-group" style="margin-bottom:0"><label class="f-label">Montant (${cur})</label><input type="number" id="sav-amount" placeholder="200" inputmode="decimal" min="0" step="0.01"></div>
-        <div class="f-group" style="margin-bottom:0"><label class="f-label">Date</label><input type="date" id="sav-date" value="${new Date().toISOString().split('T')[0]}"></div>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button class="sav-btn" style="flex:1" onclick="addSaving('deposit')">+ Déposer</button>
-        <button class="sav-btn withdraw" style="flex:1" onclick="addSaving('withdraw')">− Retirer</button>
-      </div>
-    </div>
-
-    <div class="goal-edit-card">
-      <div class="sav-add-title">🎯 Objectif d'épargne</div>
-      <div class="f-row">
-        <div class="f-group"><label class="f-label">Nom (ex: Vacances)</label><input type="text" id="goal-name" placeholder="Mon objectif" value="${goal?goal.name:''}"></div>
-        <div class="f-group"><label class="f-label">Montant cible (${cur})</label><input type="number" id="goal-amount" placeholder="5000" inputmode="decimal" value="${goalAmt||''}"></div>
-      </div>
-      <button class="sav-btn" style="width:100%" onclick="saveGoal()">Enregistrer l'objectif</button>
-    </div>
-
-    ${data.savings.length?`
-    <div class="sec-label">Historique</div>
-    <div class="glass-card" style="overflow:hidden">
-      ${data.savings.slice().reverse().map((e,i,arr)=>`
-        ${i>0?'<div class="divider"></div>':''}
-        <div class="sav-entry">
-          <div class="sav-entry-icon ${e.type==='deposit'?'dep':'with'}">${e.type==='deposit'?'💰':'💸'}</div>
-          <div class="sav-entry-info">
-            <div class="sav-entry-label">${e.desc||( e.type==='deposit'?'Versement':'Retrait')}</div>
-            <div class="sav-entry-date">${e.date.slice(8)}/${e.date.slice(5,7)}/${e.date.slice(0,4)}</div>
-          </div>
-          <div class="sav-entry-amt ${e.type==='deposit'?'dep':'with'}">${e.type==='deposit'?'+':'-'}${fmtAmt(e.amount)} ${cur}</div>
-          <button class="tx-del" onclick="deleteSaving(${data.savings.length-1-i})">×</button>
-        </div>`).join('')}
-    </div>`:'<div class="empty">Aucun mouvement d\'épargne.<br>Commence par déposer de l\'argent !</div>'}
-  </div>`;
+  html+='</div>';
+  html+='<div class="sav-stats">';
+  html+='<div class="sav-stat"><div class="sav-stat-label">Versement moyen</div><div class="sav-stat-val green">'+(avgMonthly>0?fmtAmt(avgMonthly)+' '+cur+'/m':'—')+'</div></div>';
+  html+='<div class="sav-stat"><div class="sav-stat-label">'+(goalAmt>0?'Projection':'Total versements')+'</div><div class="sav-stat-val">'+(goalAmt>0?(projDate||'—'):fmtAmt(allDeposits.reduce(function(s,e){return s+e.amount;},0))+' '+cur)+'</div></div>';
+  html+='</div>';
+  html+='<div class="sav-add-card"><div class="sav-add-title">Ajouter un mouvement</div>';
+  html+='<div class="f-group"><label class="f-label">Description (optionnel)</label><input type="text" id="sav-desc" placeholder="Ex : Virement mensuel"></div>';
+  html+='<div class="f-row" style="margin-bottom:12px">';
+  html+='<div class="f-group" style="margin-bottom:0"><label class="f-label">Montant ('+cur+')</label><input type="number" id="sav-amount" placeholder="200" inputmode="decimal" min="0" step="0.01"></div>';
+  html+='<div class="f-group" style="margin-bottom:0"><label class="f-label">Date</label><input type="date" id="sav-date" value="'+new Date().toISOString().split('T')[0]+'"></div>';
+  html+='</div><div style="display:flex;gap:10px">';
+  html+='<button class="sav-btn" style="flex:1" onclick="addSaving(\'deposit\')">+ Déposer</button>';
+  html+='<button class="sav-btn withdraw" style="flex:1" onclick="addSaving(\'withdraw\')">− Retirer</button>';
+  html+='</div></div>';
+  html+='<div class="goal-edit-card"><div class="sav-add-title">🎯 Objectif d\'épargne</div>';
+  html+='<div class="f-row">';
+  html+='<div class="f-group"><label class="f-label">Nom (ex: Vacances)</label><input type="text" id="goal-name" placeholder="Mon objectif" value="'+(goal?goal.name:'')+'"></div>';
+  html+='<div class="f-group"><label class="f-label">Montant cible ('+cur+')</label><input type="number" id="goal-amount" placeholder="5000" inputmode="decimal" value="'+(goalAmt||'')+'"></div>';
+  html+='</div><button class="sav-btn" style="width:100%" onclick="saveGoal()">Enregistrer l\'objectif</button></div>';
+  if(data.savings.length){
+    html+='<div class="sec-label">Historique</div><div class="glass-card" style="overflow:hidden">';
+    var reversed=data.savings.slice().reverse();
+    reversed.forEach(function(e,i){
+      var realIdx=data.savings.length-1-i;
+      if(i>0) html+='<div class="divider"></div>';
+      html+='<div class="sav-entry">';
+      html+='<div class="sav-entry-icon '+(e.type==='deposit'?'dep':'with')+'">'+(e.type==='deposit'?'💰':'💸')+'</div>';
+      html+='<div class="sav-entry-info"><div class="sav-entry-label">'+(e.desc||(e.type==='deposit'?'Versement':'Retrait'))+'</div>';
+      html+='<div class="sav-entry-date">'+e.date.slice(8)+'/'+e.date.slice(5,7)+'/'+e.date.slice(0,4)+'</div></div>';
+      html+='<div class="sav-entry-amt '+(e.type==='deposit'?'dep':'with')+'">'+(e.type==='deposit'?'+':'-')+fmtAmt(e.amount)+' '+cur+'</div>';
+      html+='<button class="tx-del" onclick="deleteSaving('+realIdx+')">×</button></div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div class="empty">Aucun mouvement d\'épargne.<br>Commence par déposer de l\'argent !</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
 }
 
 function addSaving(type){
@@ -2183,72 +2057,63 @@ function processDueRecurring(){
 }
 
 function renderRecurring(){
-  if(!data.recurring) data.recurring = [];
-  const cur = prefs.currency || '€';
-  const today = new Date();
-  const todayDay = today.getDate();
-
-  // Due today
-  const dueToday = data.recurring.filter(r => r.active && r.freq==='monthly' && r.day===todayDay);
-
-  const el = document.getElementById('s-recurring');
-  el.innerHTML = `<div class="rec-pad">
-    ${dueToday.length > 0 ? `
-    <div class="rec-today-card">
-      <div class="rec-today-title">🔔 À passer aujourd'hui</div>
-      ${dueToday.map(r=>`<div class="rec-today-item"><span style="color:#fff;font-size:14px;font-weight:500">${r.desc}</span><span style="color:rgba(255,255,255,.9);font-size:14px">${r.type==='expense'?'-':'+'}${fmtAmt(r.amount)} ${cur}</span></div>`).join('')}
-    </div>` : ''}
-
-    <div class="rec-add-card">
-      <div style="font-size:15px;font-weight:600;margin-bottom:14px">🔁 Nouvelle récurrence</div>
-      <div class="type-toggle" style="margin-bottom:12px">
-        <button class="type-btn active" id="rec-btn-exp" onclick="setRecType('expense')">Dépense</button>
-        <button class="type-btn" id="rec-btn-inc" onclick="setRecType('income')">Revenu</button>
-      </div>
-      <div class="f-group"><label class="f-label">Description</label><input type="text" id="rec-desc" placeholder="Ex : Loyer, Netflix..."></div>
-      <div class="f-row">
-        <div class="f-group"><label class="f-label">Montant (${cur})</label><input type="number" id="rec-amount" placeholder="500" inputmode="decimal"></div>
-        <div class="f-group"><label class="f-label">Jour du mois</label>
-          <select id="rec-day">${Array.from({length:28},(_,i)=>i+1).map(d=>`<option value="${d}"${d===1?' selected':''}>${d}</option>`).join('')}</select>
-        </div>
-      </div>
-      <div class="f-group"><label class="f-label">Catégorie</label><select id="rec-cat">${CATS.expense.map(c=>`<option value="${c.id}">${c.e} ${c.l}</option>`).join('')}</select></div>
-      <button class="btn-save" onclick="addRecurring()">Ajouter la récurrence</button>
-    </div>
-
-    ${data.recurring.length > 0 ? `
-    <div class="sec-label">Mes récurrences</div>
-    <div class="glass-card" style="overflow:hidden">
-      ${data.recurring.map((r,i)=>{
-        const c = getCat(r.cat);
-        const next = getNextDate(r);
-        return `${i>0?'<div class="divider"></div>':''}
-        <div class="rec-item" onclick="openEditRec(${i})" style="cursor:pointer">
-          <div class="rec-icon">${c.e}</div>
-          <div class="rec-info">
-            <div class="rec-name">${r.desc}</div>
-            <div class="rec-meta">${FREQ_LABELS[r.freq]||r.freq} · le ${r.day} · ${c.l}</div>
-          </div>
-          <div class="rec-right">
-            <div class="rec-amt ${r.type==='expense'?'exp':'inc'}">${r.type==='expense'?'-':'+'}${fmtAmt(r.amount)} ${cur}</div>
-            <div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">
-              <div class="rec-next">le ${r.day}</div>
-              <label style="position:relative;width:36px;height:20px;flex-shrink:0">
-                <input type="checkbox" ${r.active?'checked':''} onchange="toggleRecurring(${i},this.checked)" style="opacity:0;position:absolute;inset:0">
-                <div style="position:absolute;inset:0;border-radius:10px;background:${r.active?'var(--accent)':'var(--surface2)'};transition:.2s"></div>
-                <div style="position:absolute;top:2px;left:${r.active?'18':'2'}px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
-              </label>
-              <span style="font-size:16px;color:var(--t3)">›</span>
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>` : '<div class="empty">Aucune récurrence.<br>Ajoute ton loyer, tes abonnements...</div>'}
-  </div>`;
-
-  // Update settings count
-  const rc = document.getElementById('recCount');
-  if(rc) rc.textContent = data.recurring.length + ' récurrence(s) active(s)';
+  if(!data.recurring) data.recurring=[];
+  var cur=prefs.currency||'€';
+  var today=new Date();
+  var todayDay=today.getDate();
+  var dueToday=data.recurring.filter(function(r){return r.active&&r.freq==='monthly'&&r.day===todayDay;});
+  var el=document.getElementById('s-recurring');
+  var html='<div class="rec-pad">';
+  if(dueToday.length>0){
+    html+='<div class="rec-today-card"><div class="rec-today-title">🔔 À passer aujourd\'hui</div>';
+    dueToday.forEach(function(r){
+      html+='<div class="rec-today-item"><span style="color:#fff;font-size:14px;font-weight:500">'+r.desc+'</span>';
+      html+='<span style="color:rgba(255,255,255,.9);font-size:14px">'+(r.type==='expense'?'-':'+')+fmtAmt(r.amount)+' '+cur+'</span></div>';
+    });
+    html+='</div>';
+  }
+  html+='<div class="rec-add-card"><div style="font-size:15px;font-weight:600;margin-bottom:14px">🔁 Nouvelle récurrence</div>';
+  html+='<div class="type-toggle" style="margin-bottom:12px">';
+  html+='<button class="type-btn active" id="rec-btn-exp" onclick="setRecType(\'expense\')">Dépense</button>';
+  html+='<button class="type-btn" id="rec-btn-inc" onclick="setRecType(\'income\')">Revenu</button>';
+  html+='</div>';
+  html+='<div class="f-group"><label class="f-label">Description</label><input type="text" id="rec-desc" placeholder="Ex : Loyer, Netflix..."></div>';
+  html+='<div class="f-row">';
+  html+='<div class="f-group"><label class="f-label">Montant ('+cur+')</label><input type="number" id="rec-amount" placeholder="500" inputmode="decimal"></div>';
+  html+='<div class="f-group"><label class="f-label">Jour du mois</label><select id="rec-day">';
+  for(var d=1;d<=28;d++) html+='<option value="'+d+'"'+(d===1?' selected':'')+'>'+d+'</option>';
+  html+='</select></div></div>';
+  html+='<div class="f-group"><label class="f-label">Catégorie</label><select id="rec-cat">';
+  CATS.expense.forEach(function(c){html+='<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';});
+  html+='</select></div>';
+  html+='<button class="btn-save" onclick="addRecurring()">Ajouter la récurrence</button></div>';
+  if(data.recurring.length>0){
+    html+='<div class="sec-label">Mes récurrences</div><div class="glass-card" style="overflow:hidden">';
+    data.recurring.forEach(function(r,i){
+      var c=getCat(r.cat);
+      if(i>0) html+='<div class="divider"></div>';
+      html+='<div class="rec-item" onclick="openEditRec('+i+')" style="cursor:pointer">';
+      html+='<div class="rec-icon">'+c.e+'</div>';
+      html+='<div class="rec-info"><div class="rec-name">'+r.desc+'</div>';
+      html+='<div class="rec-meta">'+(FREQ_LABELS[r.freq]||r.freq)+' · le '+r.day+' · '+c.l+'</div></div>';
+      html+='<div class="rec-right">';
+      html+='<div class="rec-amt '+(r.type==='expense'?'exp':'inc')+'">'+(r.type==='expense'?'-':'+')+fmtAmt(r.amount)+' '+cur+'</div>';
+      html+='<div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">';
+      html+='<div class="rec-next">le '+r.day+'</div>';
+      html+='<label style="position:relative;width:36px;height:20px;flex-shrink:0">';
+      html+='<input type="checkbox" '+(r.active?'checked':'')+' onchange="toggleRecurring('+i+',this.checked)" style="opacity:0;position:absolute;inset:0">';
+      html+='<div style="position:absolute;inset:0;border-radius:10px;background:'+(r.active?'var(--accent)':'var(--surface2)')+';transition:.2s"></div>';
+      html+='<div style="position:absolute;top:2px;left:'+(r.active?'18':'2')+'px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>';
+      html+='</label><span style="font-size:16px;color:var(--t3)">›</span></div></div></div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div class="empty">Aucune récurrence.<br>Ajoute ton loyer, tes abonnements...</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+  var rc=document.getElementById('recCount');
+  if(rc) rc.textContent=data.recurring.length+' récurrence(s) active(s)';
 }
 
 let recType = 'expense';
@@ -2507,135 +2372,94 @@ let calMonth = new Date().getMonth();
 let calSelectedDay = null;
 
 function renderCalendar(){
-  const cur = prefs.currency || '€';
-  const today = new Date();
-  const todayStr = fmtDate(today);
-
-  // All transactions for current cal month
-  const monthStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
-  const monthTx = data.transactions.filter(t => t.date.startsWith(monthStr));
-
-  // Build day map: date -> {expense, income, txs}
-  const dayMap = {};
-  monthTx.forEach(t => {
-    if(!dayMap[t.date]) dayMap[t.date] = {expense:0, income:0, txs:[]};
-    if(t.type==='expense') dayMap[t.date].expense += t.amount;
-    else dayMap[t.date].income += t.amount;
+  var cur=prefs.currency||'€';
+  var today=new Date();
+  var todayStr=fmtDate(today);
+  var monthStr=calYear+'-'+String(calMonth+1).padStart(2,'0');
+  var monthTx=data.transactions.filter(function(t){return t.date.startsWith(monthStr);});
+  var dayMap={};
+  monthTx.forEach(function(t){
+    if(!dayMap[t.date]) dayMap[t.date]={expense:0,income:0,txs:[]};
+    if(t.type==='expense') dayMap[t.date].expense+=t.amount;
+    else dayMap[t.date].income+=t.amount;
     dayMap[t.date].txs.push(t);
   });
+  var totalExp=monthTx.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+  var totalInc=monthTx.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+  var daysWithTx=Object.keys(dayMap).length;
+  var maxExpVal=Math.max.apply(null,Object.values(dayMap).map(function(d){return d.expense;}).concat([1]));
+  var firstDay=new Date(calYear,calMonth,1).getDay();
+  var startOffset=(firstDay+6)%7;
+  var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  var monthLabel=new Date(calYear,calMonth,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  var period=currentPeriod();
 
-  // Month stats
-  const totalExp = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const totalInc = monthTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const daysWithTx = Object.keys(dayMap).length;
-
-  // Max expense for color intensity
-  const maxExp = Math.max(...Object.values(dayMap).map(d=>d.expense), 1);
-
-  // Calendar grid
-  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
-  const startOffset = (firstDay + 6) % 7; // Mon=0
-  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
-  const monthLabel = new Date(calYear, calMonth, 1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
-
-  // Period boundaries for highlighting
-  const period = currentPeriod();
-
-  let cells = '';
-  // Empty cells before first day
-  for(let i=0;i<startOffset;i++) cells += '<div class="cal-day empty"></div>';
-  // Day cells
-  for(let d=1;d<=daysInMonth;d++){
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayData = dayMap[dateStr];
-    const isToday = dateStr === todayStr;
-    const isSel = dateStr === calSelectedDay;
-    const inPer = dateStr >= period.start && dateStr <= period.end;
-    let dotColor = 'transparent';
-    let bgStyle = '';
+  var cells='';
+  for(var ei=0;ei<startOffset;ei++) cells+='<div class="cal-day empty"></div>';
+  for(var d=1;d<=daysInMonth;d++){
+    var dateStr=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var dayData=dayMap[dateStr];
+    var isToday=dateStr===todayStr;
+    var isSel=dateStr===calSelectedDay;
+    var inPer=dateStr>=period.start&&dateStr<=period.end;
+    var dotColor='transparent';
+    var bgStyle='';
     if(dayData){
-      if(dayData.expense > 0 && dayData.income > 0){
-        dotColor = '#7b5ea7';
-      } else if(dayData.expense > 0){
-        const intensity = Math.round(40 + (dayData.expense/maxExp)*160);
-        dotColor = `rgba(255,95,95,1)`;
-        bgStyle = `background:rgba(255,95,95,${0.06 + (dayData.expense/maxExp)*0.18})`;
-      } else if(dayData.income > 0){
-        dotColor = 'var(--inc-t)';
-        bgStyle = 'background:rgba(26,158,92,0.1)';
-      }
+      if(dayData.expense>0&&dayData.income>0){dotColor='#7b5ea7';}
+      else if(dayData.expense>0){dotColor='rgba(255,95,95,1)';bgStyle='background:rgba(255,95,95,'+(0.06+(dayData.expense/maxExpVal)*0.18)+')';}
+      else if(dayData.income>0){dotColor='var(--inc-t)';bgStyle='background:rgba(26,158,92,0.1)';}
     }
-    cells += `<div class="cal-day${isToday?' today':''}${isSel?' selected':''}${inPer?' in-period':''}" 
-      style="${bgStyle}" onclick="selectCalDay('${dateStr}')">
-      <div class="cal-day-num">${d}</div>
-      ${dayData?('<div class="cal-dot" style="background:'+dotColor+'"></div>'):'<div style="height:7px"></div>'}
-    </div>`;
+    cells+='<div class="cal-day'+(isToday?' today':'')+(isSel?' selected':'')+(inPer?' in-period':'')+'" style="'+bgStyle+'" onclick="selectCalDay(\''+dateStr+'\')">';
+    cells+='<div class="cal-day-num">'+d+'</div>';
+    cells+=dayData?('<div class="cal-dot" style="background:'+dotColor+'"></div>'):'<div style="height:7px"></div>';
+    cells+='</div>';
   }
 
-  // Selected day detail
-  let detailHtml = '';
+  var detailHtml='';
   if(calSelectedDay){
-    const sd = dayMap[calSelectedDay];
-    const [sy,sm,sday] = calSelectedDay.split('-');
-    const dateLabel = new Date(parseInt(sy),parseInt(sm)-1,parseInt(sday)).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-    if(sd && sd.txs.length > 0){
-      detailHtml = `<div class="cal-detail">
-        <div class="cal-detail-header">
-          <div class="cal-detail-date">${dateLabel}</div>
-          <div class="cal-detail-total" style="color:${sd.expense>0?'var(--exp-t)':'var(--inc-t)'}">
-            ${sd.expense>0?'-'+fmtAmt(Math.round(sd.expense)):'+'+fmtAmt(Math.round(sd.income))} ${cur}
-          </div>
-        </div>
-        ${sd.txs.map((t,i)=>{const c=getCat(t.cat);return`
-          ${i>0?'<div class="divider"></div>':''}
-          <div class="tx-item" onclick="openEditTx(${t.id})" style="cursor:pointer">
-            <div class="tx-icon">${c.e}</div>
-            <div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${c.l}</div></div>
-            <div class="tx-amt ${t.type==='expense'?'exp':'inc'}">${t.type==='expense'?'-':'+'}${fmtAmt(t.amount)} ${cur}</div>
-            <span style="font-size:16px;color:var(--t3)">›</span>
-          </div>`}).join('')}
-      </div>`;
+    var sd=dayMap[calSelectedDay];
+    var sdParts=calSelectedDay.split('-');
+    var dateLabel=new Date(parseInt(sdParts[0]),parseInt(sdParts[1])-1,parseInt(sdParts[2])).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    if(sd&&sd.txs.length>0){
+      detailHtml='<div class="cal-detail"><div class="cal-detail-header"><div class="cal-detail-date">'+dateLabel+'</div>';
+      detailHtml+='<div class="cal-detail-total" style="color:'+(sd.expense>0?'var(--exp-t)':'var(--inc-t)')+'">'+( sd.expense>0?('-'+fmtAmt(Math.round(sd.expense))):('+'+fmtAmt(Math.round(sd.income))))+' '+cur+'</div></div>';
+      sd.txs.forEach(function(t,i){
+        var c=getCat(t.cat);
+        if(i>0) detailHtml+='<div class="divider"></div>';
+        detailHtml+='<div class="tx-item" onclick="openEditTx('+t.id+')" style="cursor:pointer">';
+        detailHtml+='<div class="tx-icon">'+c.e+'</div>';
+        detailHtml+='<div class="tx-info"><div class="tx-name">'+t.desc+'</div><div class="tx-meta">'+c.l+'</div></div>';
+        detailHtml+='<div class="tx-amt '+(t.type==='expense'?'exp':'inc')+'">'+(t.type==='expense'?'-':'+')+fmtAmt(t.amount)+' '+cur+'</div>';
+        detailHtml+='<span style="font-size:16px;color:var(--t3)">›</span></div>';
+      });
+      detailHtml+='</div>';
     } else {
-      detailHtml = `<div class="cal-detail" style="padding:24px;text-align:center;color:var(--t3);font-size:14px">${dateLabel}<br>Aucune transaction</div>`;
+      detailHtml='<div class="cal-detail" style="padding:24px;text-align:center;color:var(--t3);font-size:14px">'+dateLabel+'<br>Aucune transaction</div>';
     }
   }
 
-  const el = document.getElementById('s-calendar');
-  el.innerHTML = `<div class="cal-pad">
-    <div class="cal-nav">
-      <button class="cal-nav-btn" onclick="calMove(-1)">‹</button>
-      <div class="cal-month-label">${monthLabel}</div>
-      <button class="cal-nav-btn" onclick="calMove(1)">›</button>
-    </div>
-
-    <div class="cal-summary-cards">
-      <div class="cal-sum-card">
-        <div class="cal-sum-val" style="color:var(--exp-t)">${fmtAmt(Math.round(totalExp))} ${cur}</div>
-        <div class="cal-sum-label">Dépenses</div>
-      </div>
-      <div class="cal-sum-card">
-        <div class="cal-sum-val" style="color:var(--inc-t)">${fmtAmt(Math.round(totalInc))} ${cur}</div>
-        <div class="cal-sum-label">Revenus</div>
-      </div>
-      <div class="cal-sum-card">
-        <div class="cal-sum-val">${daysWithTx}</div>
-        <div class="cal-sum-label">Jours actifs</div>
-      </div>
-    </div>
-
-    <div class="cal-weekdays" style="margin-top:14px">
-      ${['L','M','M','J','V','S','D'].map(d=>`<div class="cal-wd">${d}</div>`).join('')}
-    </div>
-    <div class="cal-grid">${cells}</div>
-
-    <div class="cal-legend">
-      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(255,95,95,.8)"></div>Dépense</div>
-      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--inc-t)"></div>Revenu</div>
-      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#7b5ea7"></div>Les deux</div>
-    </div>
-
-    ${detailHtml}
-  </div>`;
+  var el=document.getElementById('s-calendar');
+  var html='<div class="cal-pad">';
+  html+='<div class="cal-nav"><button class="cal-nav-btn" onclick="calMove(-1)">‹</button>';
+  html+='<div class="cal-month-label">'+monthLabel+'</div>';
+  html+='<button class="cal-nav-btn" onclick="calMove(1)">›</button></div>';
+  html+='<div class="cal-summary-cards">';
+  html+='<div class="cal-sum-card"><div class="cal-sum-val" style="color:var(--exp-t)">'+fmtAmt(Math.round(totalExp))+' '+cur+'</div><div class="cal-sum-label">Dépenses</div></div>';
+  html+='<div class="cal-sum-card"><div class="cal-sum-val" style="color:var(--inc-t)">'+fmtAmt(Math.round(totalInc))+' '+cur+'</div><div class="cal-sum-label">Revenus</div></div>';
+  html+='<div class="cal-sum-card"><div class="cal-sum-val">'+daysWithTx+'</div><div class="cal-sum-label">Jours actifs</div></div>';
+  html+='</div>';
+  html+='<div class="cal-weekdays" style="margin-top:14px">';
+  ['L','M','M','J','V','S','D'].forEach(function(wd){html+='<div class="cal-wd">'+wd+'</div>';});
+  html+='</div>';
+  html+='<div class="cal-grid">'+cells+'</div>';
+  html+='<div class="cal-legend">';
+  html+='<div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(255,95,95,.8)"></div>Dépense</div>';
+  html+='<div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--inc-t)"></div>Revenu</div>';
+  html+='<div class="cal-legend-item"><div class="cal-legend-dot" style="background:#7b5ea7"></div>Les deux</div>';
+  html+='</div>';
+  html+=detailHtml;
+  html+='</div>';
+  el.innerHTML=html;
 }
 
 function selectCalDay(dateStr){
@@ -2708,130 +2532,110 @@ function nativeShare(){
 let statsYear = new Date().getFullYear();
 
 function renderStats(){
-  const cur = prefs.currency||'€';
-  const now = new Date();
+  var cur=prefs.currency||'€';
+  var years=[...new Set(data.transactions.map(function(t){return parseInt(t.date.slice(0,4));}))].sort().reverse();
+  if(years.indexOf(statsYear)===-1&&years.length) statsYear=years[0];
 
-  // All years available
-  const years = [...new Set(data.transactions.map(t=>parseInt(t.date.slice(0,4))))].sort().reverse();
-  if(!years.includes(statsYear) && years.length) statsYear = years[0];
+  var yearTx=data.transactions.filter(function(t){return t.date.startsWith(statsYear+'');});
+  var yearExp=yearTx.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+  var yearInc=yearTx.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+  var yearSav=yearInc-yearExp;
+  var savRate=yearInc>0?Math.round((yearSav/yearInc)*100):0;
 
-  // Year transactions
-  const yearTx = data.transactions.filter(t=>t.date.startsWith(statsYear+''));
-  const yearExp = yearTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const yearInc = yearTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const yearSav = yearInc - yearExp;
-  const savRate = yearInc>0 ? Math.round((yearSav/yearInc)*100) : 0;
+  var prevYearTx=data.transactions.filter(function(t){return t.date.startsWith((statsYear-1)+'');});
+  var prevYearExp=prevYearTx.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+  var expDiff=prevYearExp>0?Math.round(((yearExp-prevYearExp)/prevYearExp)*100):null;
 
-  // Previous year comparison
-  const prevYearTx = data.transactions.filter(t=>t.date.startsWith((statsYear-1)+''));
-  const prevYearExp = prevYearTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const expDiff = prevYearExp>0 ? Math.round(((yearExp-prevYearExp)/prevYearExp)*100) : null;
+  var byCat={};
+  yearTx.filter(function(t){return t.type==='expense';}).forEach(function(t){byCat[t.cat]=(byCat[t.cat]||0)+t.amount;});
+  var topCats=Object.entries(byCat).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+  var maxCat=topCats.length?topCats[0][1]:1;
 
-  // By category
-  const byCat = {};
-  yearTx.filter(t=>t.type==='expense').forEach(t=>{byCat[t.cat]=(byCat[t.cat]||0)+t.amount});
-  const topCats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const maxCat = topCats.length ? topCats[0][1] : 1;
+  var MONTH_NAMES=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  var monthly=[];
+  for(var mi=0;mi<12;mi++){
+    var ms=statsYear+'-'+String(mi+1).padStart(2,'0');
+    var me=yearTx.filter(function(t){return t.date.startsWith(ms)&&t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+    var mr=yearTx.filter(function(t){return t.date.startsWith(ms)&&t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+    monthly.push({month:MONTH_NAMES[mi],exp:me,inc:mr});
+  }
+  var maxMonthly=Math.max.apply(null,monthly.map(function(m){return Math.max(m.exp,m.inc);}).concat([1]));
+  var periodsWithData=monthly.filter(function(m){return m.exp>0||m.inc>0;}).length||1;
+  var avgMonthlyExp=Math.round(yearExp/periodsWithData);
+  var avgMonthlyInc=Math.round(yearInc/periodsWithData);
+  var expMonths=monthly.filter(function(m){return m.exp>0;});
+  var bestMonth=expMonths.length?expMonths.reduce(function(a,b){return a.exp<b.exp?a:b;}):null;
+  var worstMonth=expMonths.length?expMonths.reduce(function(a,b){return a.exp>b.exp?a:b;}):null;
 
-  // Monthly breakdown (12 months)
-  const monthly = Array.from({length:12},(_,i)=>{
-    const m = String(i+1).padStart(2,'0');
-    const ms = `${statsYear}-${m}`;
-    const e = yearTx.filter(t=>t.date.startsWith(ms)&&t.type==='expense').reduce((s,t)=>s+t.amount,0);
-    const r = yearTx.filter(t=>t.date.startsWith(ms)&&t.type==='income').reduce((s,t)=>s+t.amount,0);
-    return {month:['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'][i], exp:e, inc:r};
+  var el=document.getElementById('s-stats');
+  var html='<div class="stats-pad">';
+
+  // Year toggle
+  html+='<div class="stats-year-toggle">';
+  if(years.length){
+    years.forEach(function(y){
+      html+='<div class="stats-year-btn'+(y===statsYear?' active':'')+'" onclick="statsYear='+y+';renderStats()">'+y+'</div>';
+    });
+  } else {
+    html+='<div class="stats-year-btn active">'+statsYear+'</div>';
+  }
+  html+='</div>';
+
+  // Hero cards
+  html+='<div class="stats-hero">';
+  html+='<div class="stats-card"><div class="stats-card-label">Dépenses</div><div class="stats-card-val red">'+fmtAmt(Math.round(yearExp))+' '+cur+'</div>';
+  html+=expDiff!==null?('<div class="stats-card-sub" style="color:'+(expDiff>0?'var(--exp-t)':'var(--inc-t)')+'">'+( expDiff>0?'▲':'▼')+' '+Math.abs(expDiff)+'% vs '+(statsYear-1)+'</div>'):'<div class="stats-card-sub">Année en cours</div>';
+  html+='</div>';
+  html+='<div class="stats-card"><div class="stats-card-label">Revenus</div><div class="stats-card-val green">'+fmtAmt(Math.round(yearInc))+' '+cur+'</div><div class="stats-card-sub">Moy. '+fmtAmt(avgMonthlyInc)+' '+cur+'/mois</div></div>';
+  html+='<div class="stats-card"><div class="stats-card-label">Épargne nette</div><div class="stats-card-val '+(yearSav>=0?'green':'red')+'">'+(yearSav>=0?'+':'')+fmtAmt(Math.round(yearSav))+' '+cur+'</div><div class="stats-card-sub">Taux '+Math.max(0,savRate)+'%</div></div>';
+  html+='<div class="stats-card"><div class="stats-card-label">Moy. dépenses</div><div class="stats-card-val accent">'+fmtAmt(avgMonthlyExp)+' '+cur+'</div><div class="stats-card-sub">par période</div></div>';
+  html+='</div>';
+
+  // Best/worst
+  if(bestMonth||worstMonth){
+    html+='<div class="stats-card full" style="margin-bottom:12px"><div class="stats-card-label">Meilleur &amp; pire mois</div><div style="display:flex;gap:10px;margin-top:6px">';
+    if(bestMonth) html+='<div style="flex:1;background:rgba(26,158,92,.08);border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:var(--inc-t);font-weight:600;margin-bottom:2px">🏆 Meilleur</div><div style="font-size:15px;font-weight:500">'+bestMonth.month+'</div><div style="font-size:12px;color:var(--t2)">'+fmtAmt(Math.round(bestMonth.exp))+' '+cur+'</div></div>';
+    if(worstMonth) html+='<div style="flex:1;background:rgba(255,95,95,.08);border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:var(--exp-t);font-weight:600;margin-bottom:2px">⚠️ Plus chargé</div><div style="font-size:15px;font-weight:500">'+worstMonth.month+'</div><div style="font-size:12px;color:var(--t2)">'+fmtAmt(Math.round(worstMonth.exp))+' '+cur+'</div></div>';
+    html+='</div></div>';
+  }
+
+  // Monthly chart
+  html+='<div class="sec-label">Évolution mensuelle</div>';
+  html+='<div class="stats-card full" style="margin-bottom:12px">';
+  html+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+  html+='<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--exp-t)"><div style="width:10px;height:10px;border-radius:2px;background:var(--exp-t);opacity:.7"></div>Dépenses</div>';
+  html+='<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--inc-t)"><div style="width:10px;height:10px;border-radius:2px;background:var(--inc-t);opacity:.7"></div>Revenus</div>';
+  html+='</div><div class="stats-month-chart">';
+  monthly.forEach(function(m){
+    var expH=Math.max(2,Math.round((m.exp/maxMonthly)*120));
+    var incH=Math.max(2,Math.round((m.inc/maxMonthly)*120));
+    var hasData=m.exp>0||m.inc>0;
+    html+='<div class="stats-month-col"><div style="display:flex;align-items:flex-end;gap:2px;height:120px">';
+    html+='<div class="stats-month-bar" style="height:'+(m.exp>0?expH:0)+'px;background:var(--exp-t);opacity:.75;width:48%"></div>';
+    html+='<div class="stats-month-bar" style="height:'+(m.inc>0?incH:0)+'px;background:var(--inc-t);opacity:.75;width:48%"></div>';
+    html+='</div><div class="stats-month-lbl" style="opacity:'+(hasData?1:.4)+'">'+m.month+'</div></div>';
   });
-  const maxMonthly = Math.max(...monthly.map(m=>Math.max(m.exp,m.inc)),1);
+  html+='</div></div>';
 
-  // Avg per period
-  const periodsWithData = monthly.filter(m=>m.exp>0||m.inc>0).length||1;
-  const avgMonthlyExp = Math.round(yearExp/periodsWithData);
-  const avgMonthlyInc = Math.round(yearInc/periodsWithData);
+  // Top categories
+  if(topCats.length){
+    html+='<div class="sec-label">Top catégories</div><div class="stats-card full" style="margin-bottom:12px">';
+    topCats.forEach(function(pair){
+      var id=pair[0],amt=pair[1];
+      var c=getCat(id);
+      var pct=Math.round((amt/yearExp)*100);
+      html+='<div class="stats-bar-row"><div style="font-size:16px;width:24px;flex-shrink:0">'+c.e+'</div>';
+      html+='<div class="stats-bar-label">'+c.l+'</div>';
+      html+='<div class="stats-bar-track"><div class="stats-bar-fill" style="width:'+Math.round((amt/maxCat)*100)+'%;background:'+c.c+'"></div></div>';
+      html+='<div class="stats-bar-amt">'+fmtAmt(Math.round(amt))+' '+cur+'</div>';
+      html+='<div style="font-size:11px;color:var(--t3);min-width:28px;text-align:right">'+pct+'%</div></div>';
+    });
+    html+='</div>';
+  }
 
-  // Best/worst month
-  const expMonths = monthly.filter(m=>m.exp>0);
-  const bestMonth = expMonths.length ? expMonths.reduce((a,b)=>a.exp<b.exp?a:b) : null;
-  const worstMonth = expMonths.length ? expMonths.reduce((a,b)=>a.exp>b.exp?a:b) : null;
-
-  const el = document.getElementById('s-stats');
-  el.innerHTML = `<div class="stats-pad">
-
-    <div class="stats-year-toggle">
-      ${years.length ? years.map(function(y){return '<div class="stats-year-btn'+(y===statsYear?' active':'')+('" onclick="statsYear='+y+';renderStats()">'+y+'</div>');}).join('') : ('<div class="stats-year-btn active">'+statsYear+'</div>')}
-    </div>
-
-    <div class="stats-hero">
-      <div class="stats-card">
-        <div class="stats-card-label">Dépenses</div>
-        <div class="stats-card-val red">${fmtAmt(Math.round(yearExp))} ${cur}</div>
-      ${expDiff!==null?('<div class="stats-card-sub" style="color:'+(expDiff>0?'var(--exp-t)':'var(--inc-t)')+'">'+( expDiff>0?'▲':'▼')+' '+Math.abs(expDiff)+'% vs '+(statsYear-1)+'</div>'):'<div class="stats-card-sub">Année en cours</div>'}
-      </div>
-      <div class="stats-card">
-        <div class="stats-card-label">Revenus</div>
-        <div class="stats-card-val green">${fmtAmt(Math.round(yearInc))} ${cur}</div>
-        <div class="stats-card-sub">Moy. ${fmtAmt(avgMonthlyInc)} ${cur}/mois</div>
-      </div>
-      <div class="stats-card">
-        <div class="stats-card-label">Épargne nette</div>
-        <div class="stats-card-val ${yearSav>=0?'green':'red'}">${yearSav>=0?'+':''}${fmtAmt(Math.round(yearSav))} ${cur}</div>
-        <div class="stats-card-sub">Taux ${Math.max(0,savRate)}%</div>
-      </div>
-      <div class="stats-card">
-        <div class="stats-card-label">Moy. dépenses</div>
-        <div class="stats-card-val accent">${fmtAmt(avgMonthlyExp)} ${cur}</div>
-        <div class="stats-card-sub">par période</div>
-      </div>
-    </div>
-
-    ${bestMonth||worstMonth?`
-    <div class="stats-card full" style="margin-bottom:12px">
-      <div class="stats-card-label">Meilleur & pire mois</div>
-      <div style="display:flex;gap:10px;margin-top:6px">
-      ${bestMonth?('<div style="flex:1;background:rgba(26,158,92,.08);border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:var(--inc-t);font-weight:600;margin-bottom:2px">🏆 Meilleur</div><div style="font-size:15px;font-weight:500">'+bestMonth.month+'</div><div style="font-size:12px;color:var(--t2)">'+fmtAmt(Math.round(bestMonth.exp))+' '+cur+'</div></div>'):''}
-      ${worstMonth?('<div style="flex:1;background:rgba(255,95,95,.08);border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:var(--exp-t);font-weight:600;margin-bottom:2px">⚠️ Plus chargé</div><div style="font-size:15px;font-weight:500">'+worstMonth.month+'</div><div style="font-size:12px;color:var(--t2)">'+fmtAmt(Math.round(worstMonth.exp))+' '+cur+'</div></div>'):''}
-      </div>
-    </div>`:'' }
-
-    <div class="sec-label">Évolution mensuelle</div>
-    <div class="stats-card full" style="margin-bottom:12px">
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--exp-t)"><div style="width:10px;height:10px;border-radius:2px;background:var(--exp-t);opacity:.7"></div>Dépenses</div>
-        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--inc-t)"><div style="width:10px;height:10px;border-radius:2px;background:var(--inc-t);opacity:.7"></div>Revenus</div>
-      </div>
-      <div class="stats-month-chart">
-        ${monthly.map(m=>{
-          const expH = Math.max(2, Math.round((m.exp/maxMonthly)*120));
-          const incH = Math.max(2, Math.round((m.inc/maxMonthly)*120));
-          const hasData = m.exp>0||m.inc>0;
-          return`<div class="stats-month-col">
-            <div style="display:flex;align-items:flex-end;gap:2px;height:120px">
-              <div class="stats-month-bar" style="height:${m.exp>0?expH:0}px;background:var(--exp-t);opacity:.75;width:48%"></div>
-              <div class="stats-month-bar" style="height:${m.inc>0?incH:0}px;background:var(--inc-t);opacity:.75;width:48%"></div>
-            </div>
-            <div class="stats-month-lbl" style="opacity:${hasData?1:.4}">${m.month}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    ${topCats.length?`
-    <div class="sec-label">Top catégories</div>
-    <div class="stats-card full" style="margin-bottom:12px">
-      ${topCats.map(function(pair){var id=pair[0],amt=pair[1];
-        const c=getCat(id);
-        const pct=Math.round((amt/yearExp)*100);
-        return`<div class="stats-bar-row">
-          <div style="font-size:16px;width:24px;flex-shrink:0">${c.e}</div>
-          <div class="stats-bar-label">${c.l}</div>
-          <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${Math.round((amt/maxCat)*100)}%;background:${c.c}"></div></div>
-          <div class="stats-bar-amt">${fmtAmt(Math.round(amt))} ${cur}</div>
-          <div style="font-size:11px;color:var(--t3);min-width:28px;text-align:right">${pct}%</div>
-        </div>`;
-      }).join('')}
-    </div>`:'' }
-
-    ${!yearTx.length?'<div class="empty">Aucune donnée pour cette année.<br>Ajoute des transactions pour voir tes stats !</div>':''}
-  </div>`;
+  if(!yearTx.length) html+='<div class="empty">Aucune donnée pour cette année.<br>Ajoute des transactions pour voir tes stats !</div>';
+  html+='</div>';
+  el.innerHTML=html;
 }
 
 /* ── NOTIFICATIONS ── */
@@ -2852,8 +2656,8 @@ function generateNotifs(){
     const c = getCat(b.cat);
     if(pct>=100){
       notifs.push({id:'budget_over_'+b.cat, type:'danger', emoji:'🚨',
-        title:`Budget ${c.l} dépassé !`,
-    msg:'Tu as dépensé '+fmtAmt(Math.round(todayExp))+' '+cur+" aujourd'hui en "+todayTx.filter(t=>t.type==='expense').length+' transaction'+(todayTx.filter(t=>t.type==='expense').length>1?'s':''),
+        title:'Budget '+c.l+' dépassé !',
+        msg:'Tu as dépensé '+fmtAmt(Math.round(s))+' '+cur+' sur '+fmtAmt(b.limit)+' '+cur+' ('+pct+'%)',
         date:today, read:false});
     } else if(pct>=80){
       notifs.push({id:'budget_warn_'+b.cat, type:'warn', emoji:'⚠️',
