@@ -533,6 +533,23 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .badge-desc{font-size:10px;color:var(--t2);margin-top:2px;line-height:1.3}
 .badge-new-tag{position:absolute;top:-6px;right:-6px;background:var(--amber);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px}
 .gamif-screen-pad{padding:16px}
+/* ─ PERSONNALISATION ─ */
+.perso-pad{padding:16px}
+.nav-order-list{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.nav-order-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius-sm);cursor:grab;user-select:none;-webkit-user-select:none;transition:var(--tr)}
+.nav-order-item.dragging{opacity:.5;transform:scale(.98)}
+.nav-order-item.drag-over{border-color:var(--accent);background:rgba(79,142,255,.08)}
+.nav-order-handle{font-size:18px;color:var(--t3);padding:0 2px}
+.nav-order-icon{font-size:20px;width:28px;text-align:center}
+.nav-order-label{font-size:15px;font-weight:500;flex:1}
+.nav-order-badge{font-size:11px;padding:2px 8px;border-radius:8px;background:var(--surface2);color:var(--t3)}
+.fav-cats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fav-cat-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:var(--radius-sm);border:.5px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:var(--tr)}
+.fav-cat-item.selected{border-color:var(--accent);background:rgba(79,142,255,.1)}
+.fav-cat-item:active{transform:scale(.95)}
+.fav-cat-emoji{font-size:22px}
+.fav-cat-name{font-size:10px;font-weight:500;color:var(--t2);text-align:center}
+.fav-cat-check{font-size:12px;color:var(--accent);font-weight:700;height:14px}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -644,6 +661,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div id="s-calendar" class="screen"></div>
     <div id="s-stats" class="screen"></div>
     <div id="s-gamif" class="screen"></div>
+    <div id="s-perso" class="screen"></div>
     <div id="s-recurring" class="screen"></div>
     <div id="s-settings" class="screen"></div>
   </div>
@@ -958,12 +976,21 @@ function prevPeriods(n){
 }
 
 let data=JSON.parse(localStorage.getItem('budget_v4')||'{"transactions":[],"budgets":[{"cat":"food","limit":400},{"cat":"transport","limit":150},{"cat":"loisirs","limit":100},{"cat":"restaurants","limit":80}],"savings":[],"savingsGoals":[]}');
-let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"appName":"Mon Budget","currency":"€","payDay":25,"appUrl":"","colorTheme":"default"}');
+let prefs=JSON.parse(localStorage.getItem('budget_prefs')||'{"theme":"auto","accentIdx":0,"showDonut":true,"showBars":true,"showRecent":true,"appName":"Mon Budget","currency":"€","payDay":25,"appUrl":"","colorTheme":"default","navOrder":["dash","add","history","savings","budget"],"favCats":[]}');
 let txType='expense';
 let donutChart=null;
 
 function save(){localStorage.setItem('budget_v4',JSON.stringify(data))}
 function savePrefs(){localStorage.setItem('budget_prefs',JSON.stringify(prefs));applyPrefs()}
+function setTheme(t){prefs.theme=t;savePrefs();renderSettings();}
+function setColorTheme(id){prefs.colorTheme=id;savePrefs();renderSettings();toast('🎨 Thème appliqué !');}
+function setProfile(id){prefs.profile=id;savePrefs();renderSettings();}
+function setCurrency(v){prefs.currency=v;savePrefs();renderDash();}
+function setPayDay(d){prefs.payDay=d;savePrefs();toast('📅 Jour de paie mis à jour !');}
+function setAccent(i){prefs.accentIdx=i;savePrefs();renderSettings();}
+function togglePref(key,val){prefs[key]=val;savePrefs();renderDash();}
+function updateAppName(v){prefs.appName=v;savePrefs();}
+
 
 function applyPrefs(){
   var root=document.documentElement;
@@ -1008,7 +1035,15 @@ function setType(t){
   document.getElementById('btn-exp').classList.toggle('active',t==='expense');
   document.getElementById('btn-inc').classList.toggle('active',t==='income');
   const sel=document.getElementById('cat');
-  sel.innerHTML=CATS[t].map(c=>`<option value="${c.id}">${c.e} ${c.l}</option>`).join('');
+  var favCats=prefs.favCats||[];
+  var sorted=CATS[t].slice().sort(function(a,b){
+    var aFav=favCats.indexOf(a.id)!==-1;
+    var bFav=favCats.indexOf(b.id)!==-1;
+    if(aFav&&!bFav) return -1;
+    if(!aFav&&bFav) return 1;
+    return 0;
+  });
+  sel.innerHTML=sorted.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
 }
 
 
@@ -1127,6 +1162,7 @@ function nav(s){
   if(s==='calendar')renderCalendar();
   if(s==='stats')renderStats();
   if(s==='gamif')renderGamif();
+  if(s==='perso')renderPerso();
   if(s==='settings'){renderSettings();document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'))}
 }
 
@@ -1375,49 +1411,56 @@ function renderSettings(){
   html+='<div class="profile-avatar" id="avatarLarge" onclick="openPhotoModal()">'+avatarContent+'</div>';
   html+='<div class="profile-name" id="appNameDisplay">'+(prefs.appName||'Mon Budget')+'</div>';
 
-  // Apparence
+  // 1. APPARENCE
   html+='<div class="set-section" style="margin-top:20px"><div class="set-title">Apparence</div><div class="set-card">';
   html+='<div class="theme-row">';
   [{v:'auto',i:'🌗',l:'Auto'},{v:'light',i:'☀️',l:'Clair'},{v:'dark',i:'🌙',l:'Sombre'}].forEach(function(t){
-    html+='<div class="theme-opt'+(prefs.theme===t.v?' sel':'')+'" onclick="setTheme(\''+t.v+'\')"><span class="theme-opt-icon">'+t.i+'</span>'+t.l+'</div>';
+    html+='<div class="theme-opt'+(prefs.theme===t.v?' sel':'')+('" onclick="setTheme(\''+t.v+'\')">'+'<span class="theme-opt-icon">'+t.i+'</span>'+t.l+'</div>');
   });
   html+='</div><div class="divider"></div>';
   html+='<div class="set-row" style="padding-bottom:4px"><div class="set-icon" style="background:rgba(79,142,255,.15)">🎨</div>';
   html+='<div class="set-info"><div class="set-name">Thème de couleur</div><div class="set-desc">Change l\'ambiance complète</div></div></div>';
   html+='<div class="theme-picker">';
   COLOR_THEMES.forEach(function(t){
-    html+='<div class="theme-swatch'+((prefs.colorTheme||'default')===t.id?' sel':'')+'" onclick="setColorTheme(\''+t.id+'\')"><div class="theme-swatch-preview" style="background:'+t.grad+'"></div><div class="theme-swatch-name">'+t.name+'</div></div>';
+    html+='<div class="theme-swatch'+((prefs.colorTheme||'default')===t.id?' sel':'')+('" onclick="setColorTheme(\''+t.id+'\')">'+'<div class="theme-swatch-preview" style="background:'+t.grad+'"></div><div class="theme-swatch-name">'+t.name+'</div></div>');
   });
-  html+='</div>';
+  html+='</div></div></div>';
+
+  // 2. RÉCURRENCES
+  html+='<div class="set-section"><div class="set-title">Transactions récurrentes</div><div class="set-card">';
+  html+='<div class="set-row" onclick="nav(\'recurring\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)">🔁</div>';
+  html+='<div class="set-info"><div class="set-name">Gérer les récurrences</div><div class="set-desc" id="recCount">'+((data.recurring||[]).filter(function(r){return r.active;}).length)+' récurrence(s) active(s)</div></div><span class="set-right">›</span></div>';
   html+='</div></div>';
 
-  // Profil fiscal
-  html+='<div class="set-section"><div class="set-title">Mon profil fiscal</div><div class="set-card"><div class="profile-grid">';
-  PROFILES.forEach(function(p){
-    html+='<div class="profile-opt'+((prefs.profile||'salarie')===p.id?' sel':'')+'" onclick="setProfile(\''+p.id+'\')"><span class="profile-opt-emoji">'+p.emoji+'</span><div class="profile-opt-name">'+p.name+'</div><div class="profile-opt-desc">'+p.desc.split('—')[0].trim()+'</div></div>';
-  });
-  html+='</div>';
-  var curProfile=PROFILES.find(function(x){return x.id===(prefs.profile||'salarie');})||PROFILES[0];
-  if(curProfile.tips) html+='<div class="profile-tip">💡 '+curProfile.tips+'</div>';
-  html+='</div></div>';
-
-  // Tableau de bord toggles
-  html+='<div class="set-section"><div class="set-title">Tableau de bord</div><div class="set-card">';
-  var toggles=[
-    {icon:'🍩',bg:'rgba(255,152,0,.15)',name:'Graphique donut',desc:'Répartition des dépenses',key:'showDonut',val:prefs.showDonut},
-    {icon:'📊',bg:'rgba(33,150,243,.15)',name:'Graphique en barres',desc:'6 derniers mois',key:'showBars',val:prefs.showBars},
-    {icon:'🕐',bg:'rgba(76,175,80,.15)',name:'Dernières transactions',desc:'Aperçu sur l\'accueil',key:'showRecent',val:prefs.showRecent},
-    {icon:'💰',bg:'rgba(99,217,160,.15)',name:'Épargne automatique',desc:'Vire le solde restant en épargne',key:'autoSavings',val:prefs.autoSavings!==false}
-  ];
-  toggles.forEach(function(t,i){
+  // 3. ALERTES & NOTIFICATIONS
+  html+='<div class="set-section"><div class="set-title">Alertes &amp; notifications</div><div class="set-card">';
+  [{icon:'🚨',bg:'rgba(255,95,95,.12)',name:'Dépassement de budget',desc:'Alerte quand 100% atteint',key:'notifBudgetOver',val:prefs.notifBudgetOver!==false},
+   {icon:'⚠️',bg:'rgba(255,179,64,.12)',name:'Budget à 80%',desc:'Avertissement préventif',key:'notifBudgetWarn',val:prefs.notifBudgetWarn!==false},
+   {icon:'📅',bg:'rgba(79,142,255,.12)',name:'Fin de période',desc:'Rappel 3 jours avant',key:'notifPeriodEnd',val:prefs.notifPeriodEnd!==false},
+   {icon:'📊',bg:'rgba(99,217,160,.12)',name:'Récap quotidien',desc:'Résumé des dépenses du jour',key:'notifDaily',val:prefs.notifDaily!==false}
+  ].forEach(function(t,i){
     if(i>0) html+='<div class="divider"></div>';
     html+='<div class="set-row"><div class="set-icon" style="background:'+t.bg+'">'+t.icon+'</div>';
     html+='<div class="set-info"><div class="set-name">'+t.name+'</div><div class="set-desc">'+t.desc+'</div></div>';
-    html+='<label class="toggle"><input type="checkbox" '+(t.val?'checked':'')+' onchange="togglePref(\''+t.key+'\',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+    html+='<label class="toggle"><input type="checkbox" '+(t.val?'checked':'')+' onchange="togglePref(\'"+t.key+"\',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
   });
   html+='</div></div>';
 
-  // Général
+  // 4. TABLEAU DE BORD
+  html+='<div class="set-section"><div class="set-title">Tableau de bord</div><div class="set-card">';
+  [{icon:'🍩',bg:'rgba(255,152,0,.15)',name:'Graphique donut',desc:'Répartition des dépenses',key:'showDonut',val:prefs.showDonut},
+   {icon:'📊',bg:'rgba(33,150,243,.15)',name:'Graphique en barres',desc:'6 derniers mois',key:'showBars',val:prefs.showBars},
+   {icon:'🕐',bg:'rgba(76,175,80,.15)',name:'Dernières transactions',desc:'Aperçu sur l\'accueil',key:'showRecent',val:prefs.showRecent},
+   {icon:'💰',bg:'rgba(99,217,160,.15)',name:'Épargne automatique',desc:'Vire le solde restant en épargne',key:'autoSavings',val:prefs.autoSavings!==false}
+  ].forEach(function(t,i){
+    if(i>0) html+='<div class="divider"></div>';
+    html+='<div class="set-row"><div class="set-icon" style="background:'+t.bg+'">'+t.icon+'</div>';
+    html+='<div class="set-info"><div class="set-name">'+t.name+'</div><div class="set-desc">'+t.desc+'</div></div>';
+    html+='<label class="toggle"><input type="checkbox" '+(t.val?'checked':'')+' onchange="togglePref(\'"+t.key+"\',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+  });
+  html+='</div></div>';
+
+  // 5. GÉNÉRAL
   html+='<div class="set-section"><div class="set-title">Général</div><div class="set-card">';
   var avatarIconContent=prefs.avatarPhoto?('<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover">'):(prefs.avatarEmoji||'💰');
   html+='<div class="set-row" onclick="openPhotoModal()" style="cursor:pointer"><div class="set-icon" style="background:linear-gradient(135deg,var(--accent),#7b5ea7);overflow:hidden" id="settingsAvatarIcon">'+avatarIconContent+'</div>';
@@ -1444,20 +1487,7 @@ function renderSettings(){
   }
   html+='</select></div></div></div>';
 
-  // Données
-  html+='<div class="set-section"><div class="set-title">Données &amp; Sauvegarde</div><div class="set-card">';
-  html+='<div class="set-row" onclick="exportBackup()" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)">💾</div>';
-  html+='<div class="set-info"><div class="set-name">Sauvegarder mes données</div><div class="set-desc">'+data.transactions.length+' transactions · '+(data.savings||[]).length+' épargnes</div></div><span class="set-right" style="font-size:18px">↗</span></div>';
-  html+='<div class="divider"></div>';
-  html+='<div class="set-row" style="cursor:pointer"><div class="set-icon" style="background:rgba(99,217,160,.15)">📥</div>';
-  html+='<div class="set-info"><div class="set-name">Restaurer une sauvegarde</div><div class="set-desc">Importer un fichier .json</div></div>';
-  html+='<label style="cursor:pointer;color:var(--accent);font-size:13px;font-weight:500">Choisir<input type="file" accept=".json" style="display:none" onchange="importBackup(event)"></label></div>';
-  html+='<div class="divider"></div>';
-  html+='<div class="set-row" onclick="exportCSV()" style="cursor:pointer"><div class="set-icon" style="background:rgba(255,152,0,.15)">📊</div>';
-  html+='<div class="set-info"><div class="set-name">Exporter en CSV</div><div class="set-desc">Pour Excel ou Google Sheets</div></div><span class="set-right" style="font-size:18px">↗</span></div>';
-  html+='</div></div>';
-
-  // Outils
+  // 6. OUTILS (stats, calendrier, badges, perso)
   html+='<div class="set-section"><div class="set-title">Outils</div><div class="set-card">';
   html+='<div class="set-row" onclick="nav(\'calendar\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/></svg></div>';
   html+='<div class="set-info"><div class="set-name">Vue Calendrier</div><div class="set-desc">Dépenses jour par jour</div></div><span class="set-right">›</span></div>';
@@ -1467,31 +1497,22 @@ function renderSettings(){
   html+='<div class="divider"></div>';
   html+='<div class="set-row" onclick="nav(\'gamif\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(255,179,64,.15)">🏆</div>';
   html+='<div class="set-info"><div class="set-name">Succès &amp; Badges</div><div class="set-desc" id="badgeCount">'+getUnlockedBadges().length+'/'+BADGES.length+' badges débloqués</div></div><span class="set-right">›</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" onclick="nav(\'perso\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(156,39,176,.15)">🎛️</div>';
+  html+='<div class="set-info"><div class="set-name">Personnalisation</div><div class="set-desc">Onglets, catégories favorites</div></div><span class="set-right">›</span></div>';
   html+='</div></div>';
 
-  // Récurrences
-  html+='<div class="set-section"><div class="set-title">Transactions récurrentes</div><div class="set-card">';
-  html+='<div class="set-row" onclick="nav(\'recurring\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)">🔁</div>';
-  html+='<div class="set-info"><div class="set-name">Gérer les récurrences</div><div class="set-desc" id="recCount">'+((data.recurring||[]).filter(function(r){return r.active;}).length)+' récurrence(s) active(s)</div></div><span class="set-right">›</span></div>';
-  html+='</div></div>';
-
-  // Alertes
-  html+='<div class="set-section"><div class="set-title">Alertes &amp; notifications</div><div class="set-card">';
-  var notifToggles=[
-    {icon:'🚨',bg:'rgba(255,95,95,.12)',name:'Dépassement de budget',desc:'Alerte quand 100% atteint',key:'notifBudgetOver',val:prefs.notifBudgetOver!==false},
-    {icon:'⚠️',bg:'rgba(255,179,64,.12)',name:'Budget à 80%',desc:'Avertissement préventif',key:'notifBudgetWarn',val:prefs.notifBudgetWarn!==false},
-    {icon:'📅',bg:'rgba(79,142,255,.12)',name:'Fin de période',desc:'Rappel 3 jours avant',key:'notifPeriodEnd',val:prefs.notifPeriodEnd!==false},
-    {icon:'📊',bg:'rgba(99,217,160,.12)',name:'Récap quotidien',desc:'Résumé des dépenses du jour',key:'notifDaily',val:prefs.notifDaily!==false}
-  ];
-  notifToggles.forEach(function(t,i){
-    if(i>0) html+='<div class="divider"></div>';
-    html+='<div class="set-row"><div class="set-icon" style="background:'+t.bg+'">'+t.icon+'</div>';
-    html+='<div class="set-info"><div class="set-name">'+t.name+'</div><div class="set-desc">'+t.desc+'</div></div>';
-    html+='<label class="toggle"><input type="checkbox" '+(t.val?'checked':'')+' onchange="togglePref(\''+t.key+'\',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+  // 7. PROFIL FISCAL
+  html+='<div class="set-section"><div class="set-title">Mon profil fiscal</div><div class="set-card"><div class="profile-grid">';
+  PROFILES.forEach(function(p){
+    html+='<div class="profile-opt'+((prefs.profile||'salarie')===p.id?' sel':'')+'" onclick="setProfile(\''+p.id+'\')"><span class="profile-opt-emoji">'+p.emoji+'</span><div class="profile-opt-name">'+p.name+'</div><div class="profile-opt-desc">'+p.desc.split('—')[0].trim()+'</div></div>';
   });
+  html+='</div>';
+  var curProfile=PROFILES.find(function(x){return x.id===(prefs.profile||'salarie');})||PROFILES[0];
+  if(curProfile.tips) html+='<div class="profile-tip">💡 '+curProfile.tips+'</div>';
   html+='</div></div>';
 
-  // Partage
+  // 8. PARTAGER
   html+='<div class="set-section"><div class="set-title">Partager l\'appli</div><div class="set-card">';
   html+='<div class="set-row" onclick="shareApp()" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)">🔗</div>';
   html+='<div class="set-info"><div class="set-name">Copier le lien</div><div class="set-desc">Partage l\'appli avec quelqu\'un</div></div><span class="set-right" style="font-size:18px">⎘</span></div>';
@@ -1504,12 +1525,25 @@ function renderSettings(){
   html+='<div style="padding:0 16px 14px"><input type="url" id="appUrlInput" placeholder="https://..." value="'+(prefs.appUrl||'')+'" oninput="updateAppUrl(this.value)" style="margin-top:8px;font-size:13px"></div>';
   html+='</div></div>';
 
-  // Zone danger
+  // 9. DONNÉES & SAUVEGARDE
+  html+='<div class="set-section"><div class="set-title">Données &amp; Sauvegarde</div><div class="set-card">';
+  html+='<div class="set-row" onclick="exportBackup()" style="cursor:pointer"><div class="set-icon" style="background:rgba(79,142,255,.15)">💾</div>';
+  html+='<div class="set-info"><div class="set-name">Sauvegarder mes données</div><div class="set-desc">'+data.transactions.length+' transactions · '+(data.savings||[]).length+' épargnes</div></div><span class="set-right" style="font-size:18px">↗</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" style="cursor:pointer"><div class="set-icon" style="background:rgba(99,217,160,.15)">📥</div>';
+  html+='<div class="set-info"><div class="set-name">Restaurer une sauvegarde</div><div class="set-desc">Importer un fichier .json</div></div>';
+  html+='<label style="cursor:pointer;color:var(--accent);font-size:13px;font-weight:500">Choisir<input type="file" accept=".json" style="display:none" onchange="importBackup(event)"></label></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" onclick="exportCSV()" style="cursor:pointer"><div class="set-icon" style="background:rgba(255,152,0,.15)">📊</div>';
+  html+='<div class="set-info"><div class="set-name">Exporter en CSV</div><div class="set-desc">Pour Excel ou Google Sheets</div></div><span class="set-right" style="font-size:18px">↗</span></div>';
+  html+='</div></div>';
+
+  // 10. ZONE DANGER
   html+='<div class="set-section"><div class="set-title">Zone danger</div><div class="set-card">';
   html+='<div style="padding:16px"><button class="btn-danger" onclick="confirmReset()">🗑 Supprimer toutes les données</button></div>';
   html+='</div></div>';
 
-  html+='<div style="text-align:center;padding:8px;font-size:12px;color:var(--t3)">Mon Budget v5.9</div>';
+  html+='<div style="text-align:center;padding:8px;font-size:12px;color:var(--t3)">Mon Budget v6.0</div>';
   html+='</div>';
   el.innerHTML=html;
 }
@@ -3030,6 +3064,121 @@ function renderGamif(){
 
   localStorage.setItem('budget_badges', JSON.stringify(unlocked));
 }
+
+/* ── PERSONNALISATION ── */
+const NAV_ITEMS = [
+  {id:'dash',     label:'Accueil',    emoji:'🏠'},
+  {id:'add',      label:'Ajouter',    emoji:'➕'},
+  {id:'history',  label:'Historique', emoji:'📋'},
+  {id:'savings',  label:'Épargne',    emoji:'💰'},
+  {id:'budget',   label:'Budgets',    emoji:'🎯'},
+];
+
+let dragSrcIdx = null;
+
+function getNavOrder(){
+  var order = prefs.navOrder || ['dash','add','history','savings','budget'];
+  // Ensure all items present
+  NAV_ITEMS.forEach(function(n){if(order.indexOf(n.id)===-1) order.push(n.id);});
+  return order.filter(function(id){return NAV_ITEMS.find(function(n){return n.id===id;});});
+}
+
+function renderPerso(){
+  var el = document.getElementById('s-perso');
+  var order = getNavOrder();
+  var favCats = prefs.favCats || [];
+
+  var html = '<div class="perso-pad">';
+
+  // Nav order
+  html += '<div class="sec-label">Ordre des onglets</div>';
+  html += '<div class="glass-card" style="padding:12px;margin-bottom:12px">';
+  html += '<div style="font-size:12px;color:var(--t2);margin-bottom:10px">Appuie et glisse pour réordonner</div>';
+  html += '<div class="nav-order-list" id="navOrderList">';
+  order.forEach(function(id, i){
+    var item = NAV_ITEMS.find(function(n){return n.id===id;});
+    if(!item) return;
+    html += '<div class="nav-order-item" draggable="true" data-idx="'+i+'" data-id="'+id+'"';
+    html += ' ondragstart="navDragStart(event,'+i+')" ondragover="navDragOver(event,'+i+')" ondrop="navDrop(event,'+i+')" ondragend="navDragEnd(event)">';
+    html += '<span class="nav-order-handle">⠿</span>';
+    html += '<span class="nav-order-icon">'+item.emoji+'</span>';
+    html += '<span class="nav-order-label">'+item.label+'</span>';
+    if(i===0) html += '<span class="nav-order-badge">Premier</span>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  // Fav categories
+  html += '<div class="sec-label">Catégories favorites</div>';
+  html += '<div class="glass-card" style="padding:12px;margin-bottom:12px">';
+  html += '<div style="font-size:12px;color:var(--t2);margin-bottom:10px">Apparaissent en premier lors de l\'ajout</div>';
+  html += '<div class="fav-cats-grid">';
+  CATS.expense.forEach(function(c){
+    var isFav = favCats.indexOf(c.id) !== -1;
+    html += '<div class="fav-cat-item'+(isFav?' selected':'')+'" onclick="toggleFavCat(\''+c.id+'\')">';
+    html += '<div class="fav-cat-emoji">'+c.e+'</div>';
+    html += '<div class="fav-cat-name">'+c.l+'</div>';
+    html += '<div class="fav-cat-check">'+(isFav?'✓':'')+'</div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function navDragStart(e, idx){
+  dragSrcIdx = idx;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function navDragOver(e, idx){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.nav-order-item').forEach(function(el){el.classList.remove('drag-over');});
+  e.currentTarget.classList.add('drag-over');
+}
+function navDrop(e, idx){
+  e.preventDefault();
+  if(dragSrcIdx === null || dragSrcIdx === idx) return;
+  var order = getNavOrder();
+  var moved = order.splice(dragSrcIdx, 1)[0];
+  order.splice(idx, 0, moved);
+  prefs.navOrder = order;
+  savePrefs();
+  applyNavOrder();
+  renderPerso();
+  toast('✅ Ordre mis à jour !');
+}
+function navDragEnd(e){
+  dragSrcIdx = null;
+  document.querySelectorAll('.nav-order-item').forEach(function(el){
+    el.classList.remove('dragging','drag-over');
+  });
+}
+
+function toggleFavCat(id){
+  var favCats = prefs.favCats || [];
+  var idx = favCats.indexOf(id);
+  if(idx === -1) favCats.push(id);
+  else favCats.splice(idx, 1);
+  prefs.favCats = favCats;
+  savePrefs();
+  renderPerso();
+}
+
+function applyNavOrder(){
+  var order = getNavOrder();
+  var navEl = document.querySelector('.nav-pill');
+  if(!navEl) return;
+  var btns = navEl.querySelectorAll('.nav-btn');
+  var btnMap = {};
+  btns.forEach(function(b){ btnMap[b.getAttribute('data-s')] = b; });
+  // Reorder DOM
+  order.forEach(function(id){
+    if(btnMap[id]) navEl.appendChild(btnMap[id]);
+  });
+}
 // Init
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
@@ -3038,6 +3187,7 @@ processEndOfPeriodSavings();
 processDueRecurring();
 setTimeout(updateNotifBadge, 100);
 setTimeout(checkNewBadges, 500);
+applyNavOrder();
 showSplash();
 if(prefs.pinEnabled){ setTimeout(()=>showPinScreen("unlock"), 1900); }
 setType('expense');
