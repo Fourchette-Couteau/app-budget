@@ -966,15 +966,30 @@ function save(){localStorage.setItem('budget_v4',JSON.stringify(data))}
 function savePrefs(){localStorage.setItem('budget_prefs',JSON.stringify(prefs));applyPrefs()}
 
 function applyPrefs(){
-  const root=document.documentElement;
+  var root=document.documentElement;
   if(prefs.theme==='auto') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme',prefs.theme);
-  const isDark = prefs.theme==='dark' || (prefs.theme==='auto' && window.matchMedia('(prefers-color-scheme:dark)').matches);
-  const acc=ACCENTS[prefs.accentIdx]||ACCENTS[0];
-  root.style.setProperty('--accent', isDark ? acc.dark : acc.light);
-  root.style.setProperty('--accent2', isDark ? '#63d9a0' : '#1a9e5c');
+  var ct=prefs.colorTheme||'default';
+  if(ct==='default') root.removeAttribute('data-color-theme');
+  else root.setAttribute('data-color-theme',ct);
+  var isDark=prefs.theme==='dark'||(prefs.theme==='auto'&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+  if(ct==='default'){
+    var acc=ACCENTS[prefs.accentIdx]||ACCENTS[0];
+    root.style.setProperty('--accent',isDark?acc.dark:acc.light);
+    root.style.setProperty('--accent2',isDark?'#63d9a0':'#1a9e5c');
+  } else {
+    root.style.removeProperty('--accent');
+    root.style.removeProperty('--accent2');
+  }
   document.getElementById('hTitle').textContent=prefs.appName||'Mon Budget';updateAvatars();
   document.title=prefs.appName||'Mon Budget';
+}
+
+function setColorTheme(id){
+  prefs.colorTheme=id;
+  savePrefs();
+  renderSettings();
+  toast('🎨 Thème appliqué !');
 }
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
@@ -1374,15 +1389,6 @@ function renderSettings(){
     html+='<div class="theme-swatch'+((prefs.colorTheme||'default')===t.id?' sel':'')+'" onclick="setColorTheme(\''+t.id+'\')"><div class="theme-swatch-preview" style="background:'+t.grad+'"></div><div class="theme-swatch-name">'+t.name+'</div></div>';
   });
   html+='</div>';
-  if(prefs.colorTheme==='default'||!prefs.colorTheme){
-    html+='<div class="divider"></div><div class="set-row"><div class="set-icon" style="background:rgba(79,142,255,.15)">✦</div>';
-    html+='<div class="set-info"><div class="set-name">Couleur d\'accentuation</div><div class="set-desc">Pour le thème Défaut</div></div></div>';
-    html+='<div class="accent-row">';
-    ACCENTS.forEach(function(a,i){
-      html+='<div class="accent-swatch'+(prefs.accentIdx===i?' sel':'')+'" style="background:'+(isDark?a.dark:a.light)+'" onclick="setAccent('+i+')" title="'+a.name+'"></div>';
-    });
-    html+='</div>';
-  }
   html+='</div></div>';
 
   // Profil fiscal
