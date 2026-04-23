@@ -68,9 +68,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 
 .orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .orb{position:absolute;border-radius:50%;filter:blur(60px);animation:float 8s ease-in-out infinite}
-.orb1{width:300px;height:300px;background:var(--orb1);top:-60px;right:-60px}
-.orb2{width:250px;height:250px;background:var(--orb2);bottom:120px;left:-80px;animation-delay:3s}
-.orb3{width:200px;height:200px;background:var(--orb3);top:40%;right:-40px;animation-delay:5s}
+.orb1{width:380px;height:380px;background:var(--orb1);top:-80px;right:-80px;filter:blur(60px)}
+.orb2{width:320px;height:320px;background:var(--orb2);bottom:80px;left:-100px;animation-delay:3s;filter:blur(50px)}
+.orb3{width:260px;height:260px;background:var(--orb3);top:35%;right:-50px;animation-delay:5s;filter:blur(45px)}
 @keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.05)}}
 
 #app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1}
@@ -411,16 +411,65 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .cal-sum-val{font-size:16px;font-weight:500;margin-bottom:2px}
 .cal-sum-label{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
 /* ─ THEMES ─ */
-[data-color-theme="ocean"][data-theme="dark"],[data-color-theme="ocean"]:root:not([data-theme="light"]){--accent:#00b4d8;--accent2:#48cae4;--orb1:rgba(0,180,216,.2);--orb2:rgba(72,202,228,.12);--orb3:rgba(0,119,182,.15)}
-[data-color-theme="ocean"][data-theme="light"]{--accent:#0077b6;--accent2:#00b4d8;--orb1:rgba(0,119,182,.1);--orb2:rgba(0,180,216,.08);--orb3:rgba(72,202,228,.07)}
-[data-color-theme="forest"][data-theme="dark"],[data-color-theme="forest"]:root:not([data-theme="light"]){--accent:#52b788;--accent2:#74c69d;--orb1:rgba(82,183,136,.18);--orb2:rgba(116,198,157,.12);--orb3:rgba(45,106,79,.15)}
-[data-color-theme="forest"][data-theme="light"]{--accent:#2d6a4f;--accent2:#52b788;--orb1:rgba(45,106,79,.1);--orb2:rgba(82,183,136,.08);--orb3:rgba(116,198,157,.07)}
-[data-color-theme="sunset"][data-theme="dark"],[data-color-theme="sunset"]:root:not([data-theme="light"]){--accent:#f77f00;--accent2:#fcbf49;--orb1:rgba(247,127,0,.18);--orb2:rgba(252,191,73,.12);--orb3:rgba(214,40,40,.12)}
-[data-color-theme="sunset"][data-theme="light"]{--accent:#d62828;--accent2:#f77f00;--orb1:rgba(214,40,40,.1);--orb2:rgba(247,127,0,.08);--orb3:rgba(252,191,73,.07)}
-[data-color-theme="midnight"][data-theme="dark"],[data-color-theme="midnight"]:root:not([data-theme="light"]){--accent:#a78bfa;--accent2:#c4b5fd;--orb1:rgba(167,139,250,.18);--orb2:rgba(196,181,253,.1);--orb3:rgba(109,40,217,.15)}
-[data-color-theme="midnight"][data-theme="light"]{--accent:#7c3aed;--accent2:#a78bfa;--orb1:rgba(124,58,237,.1);--orb2:rgba(167,139,250,.08);--orb3:rgba(196,181,253,.07)}
-[data-color-theme="rose"][data-theme="dark"],[data-color-theme="rose"]:root:not([data-theme="light"]){--accent:#fb7185;--accent2:#fda4af;--orb1:rgba(251,113,133,.18);--orb2:rgba(253,164,175,.1);--orb3:rgba(190,18,60,.12)}
-[data-color-theme="rose"][data-theme="light"]{--accent:#be123c;--accent2:#fb7185;--orb1:rgba(190,18,60,.1);--orb2:rgba(251,113,133,.08);--orb3:rgba(253,164,175,.07)}
+/* OCEAN - Bleu azur */
+[data-color-theme="ocean"]{
+  --accent:#00b4d8;--accent2:#48cae4;
+  --orb1:rgba(0,180,216,.45);--orb2:rgba(0,119,182,.35);--orb3:rgba(72,202,228,.3);
+  --balance-grad:linear-gradient(135deg,#0077b6,#00b4d8,#48cae4);
+  --nav-pill:rgba(0,100,160,.6);
+}
+[data-color-theme="ocean"][data-theme="light"]{
+  --accent:#0077b6;--accent2:#00b4d8;
+  --orb1:rgba(0,119,182,.25);--orb2:rgba(0,180,216,.18);--orb3:rgba(72,202,228,.15);
+}
+
+/* FOREST - Vert forêt */
+[data-color-theme="forest"]{
+  --accent:#52b788;--accent2:#74c69d;
+  --orb1:rgba(82,183,136,.45);--orb2:rgba(45,106,79,.4);--orb3:rgba(116,198,157,.3);
+  --balance-grad:linear-gradient(135deg,#1b4332,#2d6a4f,#52b788);
+  --nav-pill:rgba(27,67,50,.6);
+}
+[data-color-theme="forest"][data-theme="light"]{
+  --accent:#2d6a4f;--accent2:#52b788;
+  --orb1:rgba(45,106,79,.22);--orb2:rgba(82,183,136,.18);--orb3:rgba(116,198,157,.14);
+}
+
+/* SUNSET - Orange chaud */
+[data-color-theme="sunset"]{
+  --accent:#f77f00;--accent2:#fcbf49;
+  --orb1:rgba(247,127,0,.45);--orb2:rgba(214,40,40,.38);--orb3:rgba(252,191,73,.35);
+  --balance-grad:linear-gradient(135deg,#c1121f,#f77f00,#fcbf49);
+  --nav-pill:rgba(150,50,0,.6);
+}
+[data-color-theme="sunset"][data-theme="light"]{
+  --accent:#d62828;--accent2:#f77f00;
+  --orb1:rgba(214,40,40,.22);--orb2:rgba(247,127,0,.18);--orb3:rgba(252,191,73,.15);
+}
+
+/* MIDNIGHT - Violet profond */
+[data-color-theme="midnight"]{
+  --accent:#a78bfa;--accent2:#c4b5fd;
+  --orb1:rgba(167,139,250,.45);--orb2:rgba(109,40,217,.4);--orb3:rgba(196,181,253,.3);
+  --balance-grad:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);
+  --nav-pill:rgba(76,29,149,.6);
+}
+[data-color-theme="midnight"][data-theme="light"]{
+  --accent:#7c3aed;--accent2:#a78bfa;
+  --orb1:rgba(124,58,237,.22);--orb2:rgba(167,139,250,.18);--orb3:rgba(196,181,253,.14);
+}
+
+/* ROSE - Rose vif */
+[data-color-theme="rose"]{
+  --accent:#fb7185;--accent2:#fda4af;
+  --orb1:rgba(251,113,133,.45);--orb2:rgba(190,18,60,.4);--orb3:rgba(253,164,175,.3);
+  --balance-grad:linear-gradient(135deg,#881337,#be123c,#fb7185);
+  --nav-pill:rgba(136,19,55,.6);
+}
+[data-color-theme="rose"][data-theme="light"]{
+  --accent:#be123c;--accent2:#fb7185;
+  --orb1:rgba(190,18,60,.22);--orb2:rgba(251,113,133,.18);--orb3:rgba(253,164,175,.14);
+}
 
 /* Theme picker in settings */
 .theme-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 16px}
@@ -969,29 +1018,17 @@ var ACCENTS=[
 ];
 var COLOR_THEMES=[
   {id:'default',  name:'Défaut',
-    dark:  {accent:'#4f8eff',accent2:'#63d9a0',orb1:'rgba(79,142,255,.18)',orb2:'rgba(99,217,160,.12)',orb3:'rgba(255,95,95,.10)'},
-    light: {accent:'#2c6af6',accent2:'#1a9e5c',orb1:'rgba(44,106,246,.10)',orb2:'rgba(26,158,92,.07)',orb3:'rgba(224,52,43,.06)'},
     grad:'linear-gradient(135deg,#4f8eff,#7b5ea7)'},
   {id:'ocean',    name:'Océan',
-    dark:  {accent:'#00b4d8',accent2:'#48cae4',orb1:'rgba(0,180,216,.20)',orb2:'rgba(72,202,228,.13)',orb3:'rgba(0,119,182,.15)'},
-    light: {accent:'#0077b6',accent2:'#00b4d8',orb1:'rgba(0,119,182,.10)',orb2:'rgba(0,180,216,.08)',orb3:'rgba(72,202,228,.07)'},
-    grad:'linear-gradient(135deg,#00b4d8,#0077b6)'},
+    grad:'linear-gradient(135deg,#0077b6,#00b4d8,#48cae4)'},
   {id:'forest',   name:'Forêt',
-    dark:  {accent:'#52b788',accent2:'#74c69d',orb1:'rgba(82,183,136,.18)',orb2:'rgba(116,198,157,.12)',orb3:'rgba(45,106,79,.15)'},
-    light: {accent:'#2d6a4f',accent2:'#52b788',orb1:'rgba(45,106,79,.10)',orb2:'rgba(82,183,136,.08)',orb3:'rgba(116,198,157,.07)'},
-    grad:'linear-gradient(135deg,#52b788,#2d6a4f)'},
+    grad:'linear-gradient(135deg,#1b4332,#2d6a4f,#52b788)'},
   {id:'sunset',   name:'Coucher',
-    dark:  {accent:'#f77f00',accent2:'#fcbf49',orb1:'rgba(247,127,0,.18)',orb2:'rgba(252,191,73,.12)',orb3:'rgba(214,40,40,.12)'},
-    light: {accent:'#d62828',accent2:'#f77f00',orb1:'rgba(214,40,40,.10)',orb2:'rgba(247,127,0,.08)',orb3:'rgba(252,191,73,.07)'},
-    grad:'linear-gradient(135deg,#f77f00,#d62828)'},
+    grad:'linear-gradient(135deg,#c1121f,#f77f00,#fcbf49)'},
   {id:'midnight', name:'Minuit',
-    dark:  {accent:'#a78bfa',accent2:'#c4b5fd',orb1:'rgba(167,139,250,.18)',orb2:'rgba(196,181,253,.10)',orb3:'rgba(109,40,217,.15)'},
-    light: {accent:'#7c3aed',accent2:'#a78bfa',orb1:'rgba(124,58,237,.10)',orb2:'rgba(167,139,250,.08)',orb3:'rgba(196,181,253,.07)'},
-    grad:'linear-gradient(135deg,#a78bfa,#7c3aed)'},
+    grad:'linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa)'},
   {id:'rose',     name:'Rosé',
-    dark:  {accent:'#fb7185',accent2:'#fda4af',orb1:'rgba(251,113,133,.18)',orb2:'rgba(253,164,175,.10)',orb3:'rgba(190,18,60,.12)'},
-    light: {accent:'#be123c',accent2:'#fb7185',orb1:'rgba(190,18,60,.10)',orb2:'rgba(251,113,133,.08)',orb3:'rgba(253,164,175,.07)'},
-    grad:'linear-gradient(135deg,#fb7185,#be123c)'},
+    grad:'linear-gradient(135deg,#881337,#be123c,#fb7185)'},
 ];
 
 
