@@ -938,7 +938,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <script>
-const CATS={
+var CATS={
   expense:[
     {id:'food',l:'Alimentation',e:'🛒',c:'#4CAF50'},
     {id:'transport',l:'Transport',e:'🚗',c:'#2196F3'},
@@ -960,14 +960,14 @@ const CATS={
     {id:'autre_revenu',l:'Autre revenu',e:'💰',c:'#607D8B'},
   ]
 };
-const ACCENTS=[
+var ACCENTS=[
   {name:'Bleu',dark:'#4f8eff',light:'#2c6af6'},
   {name:'Violet',dark:'#a78bfa',light:'#7c3aed'},
   {name:'Vert',dark:'#34d399',light:'#059669'},
   {name:'Rose',dark:'#f472b6',light:'#db2777'},
   {name:'Orange',dark:'#fb923c',light:'#ea580c'},
 ];
-const COLOR_THEMES=[
+var COLOR_THEMES=[
   {id:'default',  name:'Défaut',
     dark:  {accent:'#4f8eff',accent2:'#63d9a0',orb1:'rgba(79,142,255,.18)',orb2:'rgba(99,217,160,.12)',orb3:'rgba(255,95,95,.10)'},
     light: {accent:'#2c6af6',accent2:'#1a9e5c',orb1:'rgba(44,106,246,.10)',orb2:'rgba(26,158,92,.07)',orb3:'rgba(224,52,43,.06)'},
@@ -995,7 +995,7 @@ const COLOR_THEMES=[
 ];
 
 
-const PROFILES = [
+var PROFILES = [
   {
     id:'militaire', name:'Militaire', emoji:'🎖️',
     desc:'Solde imposable + primes exonérées (OPEX, ISS...)',
@@ -1064,7 +1064,7 @@ function getCat(id){return[...CATS.expense,...CATS.income].find(c=>c.id===id)||{
 function fmtAmt(v){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).format(v)}
 // Clamp day to last day of month (handles payDay 29/30/31 in short months)
 function clampDay(y, m, d){
-  const last = new Date(y, m+1, 0).getDate(); // last day of month m
+  var last = new Date(y, m+1, 0).getDate(); // last day of month m
   return Math.min(d, last);
 }
 function payDate(y, m, pd){
@@ -1072,45 +1072,45 @@ function payDate(y, m, pd){
   return new Date(y, m, clampDay(y, m, pd));
 }
 function fmtDate(d){
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function fmtLabel(d){
-  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
 }
 
 function currentPeriod(){
-  const n=new Date();
-  const today=fmtDate(n);
-  const pd=prefs&&prefs.payDay?prefs.payDay:1;
+  var n=new Date();
+  var today=fmtDate(n);
+  var pd=prefs&&prefs.payDay?prefs.payDay:1;
   let y=n.getFullYear(), m=n.getMonth();
   // Try payday this month
   let start=payDate(y,m,pd);
   if(fmtDate(start)>today){ m--; if(m<0){m=11;y--} start=payDate(y,m,pd); }
   // End = day before next payday
   let ny=y, nm=m+1; if(nm>11){nm=0;ny++}
-  const nextStart=payDate(ny,nm,pd);
-  const endD=new Date(nextStart); endD.setDate(endD.getDate()-1);
+  var nextStart=payDate(ny,nm,pd);
+  var endD=new Date(nextStart); endD.setDate(endD.getDate()-1);
   return {
     start:fmtDate(start), end:fmtDate(endD),
-    label:`${fmtLabel(start)} → ${fmtLabel(endD)}`
+    label:fmtLabel(start)+' → '+fmtLabel(endD)
   };
 }
 function inPeriod(date, p){return date>=p.start && date<=p.end}
 function prevPeriods(n){
-  const periods=[];
-  const pd=prefs&&prefs.payDay?prefs.payDay:1;
-  const now=new Date();
-  const today=fmtDate(now);
+  var periods=[];
+  var pd=prefs&&prefs.payDay?prefs.payDay:1;
+  var now=new Date();
+  var today=fmtDate(now);
   let y=now.getFullYear(), m=now.getMonth();
   let start=payDate(y,m,pd);
   if(fmtDate(start)>today){m--;if(m<0){m=11;y--}start=payDate(y,m,pd);}
   // Go back n-1 periods from current
   for(let i=n-1;i>=0;i--){
     let py=y,pm=m-i; while(pm<0){pm+=12;py--}
-    const s=payDate(py,pm,pd);
+    var s=payDate(py,pm,pd);
     let ny2=py,nm2=pm+1;if(nm2>11){nm2=0;ny2++}
-    const nextS=payDate(ny2,nm2,pd);
-    const e=new Date(nextS);e.setDate(e.getDate()-1);
+    var nextS=payDate(ny2,nm2,pd);
+    var e=new Date(nextS);e.setDate(e.getDate()-1);
     periods.push({start:fmtDate(s),end:fmtDate(e),label:fmtLabel(s)});
   }
   return periods;
@@ -1160,7 +1160,7 @@ function setColorTheme(id){
   toast('🎨 Thème appliqué !');
 }
 
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
 function openModal(title,msg,onConfirm){
   document.getElementById('modalTitle').textContent=title;
@@ -1175,7 +1175,7 @@ function setType(t){
   txType=t;
   document.getElementById('btn-exp').classList.toggle('active',t==='expense');
   document.getElementById('btn-inc').classList.toggle('active',t==='income');
-  const sel=document.getElementById('cat');
+  var sel=document.getElementById('cat');
   var favCats=prefs.favCats||[];
   var sorted=CATS[t].slice().sort(function(a,b){
     var aFav=favCats.indexOf(a.id)!==-1;
@@ -1189,9 +1189,9 @@ function setType(t){
 
 
 function updateAmountDisplay(val){
-  const display = document.getElementById('amount-display');
+  var display = document.getElementById('amount-display');
   if(!display) return;
-  const num = parseFloat(val);
+  var num = parseFloat(val);
   if(!val || isNaN(num)){
     display.textContent = '0';
     display.style.color = 'var(--t3)';
@@ -1201,10 +1201,10 @@ function updateAmountDisplay(val){
   }
 }
 function addTransaction(){
-  const amt=parseFloat(document.getElementById('amount').value);
-  const desc=document.getElementById('desc').value.trim();
-  const cat=document.getElementById('cat').value;
-  const date=document.getElementById('txdate').value||new Date().toISOString().split('T')[0];
+  var amt=parseFloat(document.getElementById('amount').value);
+  var desc=document.getElementById('desc').value.trim();
+  var cat=document.getElementById('cat').value;
+  var date=document.getElementById('txdate').value||new Date().toISOString().split('T')[0];
   if(!amt||amt<=0){toast('💡 Entre un montant valide');return}
   if(!desc){toast('💡 Ajoute une description');return}
   data.transactions.unshift({id:Date.now(),type:txType,amount:amt,desc:desc,cat:cat,date:date,accountId:prefs.multiAccounts?currentAccountId:'main'});
@@ -1220,10 +1220,10 @@ function addTransaction(){
 let editingTxId = null;
 
 function openEditTx(id){
-  const tx = data.transactions.find(t=>t.id===id);
+  var tx = data.transactions.find(t=>t.id===id);
   if(!tx) return;
   editingTxId = id;
-  const c = getCat(tx.cat);
+  var c = getCat(tx.cat);
 
   // Fill icon
   document.getElementById('editModalIcon').textContent = c.e;
@@ -1235,9 +1235,9 @@ function openEditTx(id){
   document.getElementById('edit-note').value = tx.note||'';
 
   // Fill category select with right type
-  const sel = document.getElementById('edit-cat');
+  var sel = document.getElementById('edit-cat');
   sel.innerHTML = [...CATS.expense, ...CATS.income].map(cat =>
-    `<option value="${cat.id}" ${cat.id===tx.cat?'selected':''}>${cat.e} ${cat.l}</option>`
+    '<option value="'+cat.id+'" '+(cat.id===tx.cat?'selected':'')+'>'+cat.e+' '+cat.l+'</option>'
   ).join('');
 
   document.getElementById('editModalBg').classList.add('show');
@@ -1250,14 +1250,14 @@ function closeEditModal(e){
 
 function saveEditTx(){
   if(!editingTxId) return;
-  const amt = parseFloat(document.getElementById('edit-amount').value);
-  const desc = document.getElementById('edit-desc').value.trim();
-  const cat = document.getElementById('edit-cat').value;
-  const date = document.getElementById('edit-date').value;
+  var amt = parseFloat(document.getElementById('edit-amount').value);
+  var desc = document.getElementById('edit-desc').value.trim();
+  var cat = document.getElementById('edit-cat').value;
+  var date = document.getElementById('edit-date').value;
   if(!amt||amt<=0){toast('💡 Montant invalide');return}
   if(!desc){toast('💡 Description vide');return}
-  const note = document.getElementById('edit-note').value.trim();
-  const idx = data.transactions.findIndex(t=>t.id===editingTxId);
+  var note = document.getElementById('edit-note').value.trim();
+  var idx = data.transactions.findIndex(t=>t.id===editingTxId);
   if(idx > -1){
     var _t=data.transactions[idx];data.transactions[idx]={id:_t.id,type:_t.type,amount:amt,desc:desc,cat:cat,date:date,note:note,recurringId:_t.recurringId};
     save();
@@ -1294,7 +1294,7 @@ function nav(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===s));
   document.getElementById('s-'+s).classList.add('active');
-  if(s==='add'){setType('expense');document.getElementById('txdate').value=new Date().toISOString().split('T')[0];const ad=document.getElementById('amount-display');if(ad){ad.textContent='0';ad.style.color='var(--t3)';}const ai=document.getElementById('amount');if(ai)ai.value='';}
+  if(s==='add'){setType('expense');document.getElementById('txdate').value=new Date().toISOString().split('T')[0];var ad=document.getElementById('amount-display');if(ad){ad.textContent='0';ad.style.color='var(--t3)';}var ai=document.getElementById('amount');if(ai)ai.value='';}
   if(s==='dash')renderDash();
   if(s==='history')renderHistory();
   if(s==='budget')renderBudget();
@@ -1503,7 +1503,12 @@ function renderHistory(){
     html+='<div class="search-empty">'+(histSearch?'Aucun résultat':'Aucune transaction.')+'</div>';
   }
   el.innerHTML=html;
-  
+  document.querySelectorAll('.tx-swipe-wrap').forEach(function(wrap){
+    var id=parseInt(wrap.id.replace('swipe-',''));
+    initSwipe(wrap,id);
+  });
+}
+
 /* ── RAPPORT MENSUEL ── */
 function generateRapport(){
   var cur = prefs.currency||'€';
@@ -1637,7 +1642,7 @@ function quickAddTx(){
 }
 
 /* ── DÉFI MENSUEL ── */
-const DEFIS = [
+var DEFIS = [
   {id:'no_restaurant', emoji:'🍳', title:'Chef à domicile', desc:'Zéro restaurant ce mois', check:function(d,p){
     var mTx=d.transactions.filter(function(t){return inPeriod(t.date,currentPeriod())&&t.type==='expense';});
     var resto=mTx.filter(function(t){return t.cat==='restaurants';});
@@ -1710,7 +1715,7 @@ function buildDefiCard(){
 
 /* ── MULTI-COMPTES ── */
 // Comptes courants (multi-comptes accueil)
-const ACCOUNT_TYPES = [
+var ACCOUNT_TYPES = [
   {id:'courant', emoji:'💳', name:'Compte courant', desc:'Compte principal'},
   {id:'joint',   emoji:'👥', name:'Compte joint',   desc:'Dépenses partagées'},
   {id:'pro',     emoji:'💼', name:'Compte pro',     desc:'Activité professionnelle'},
@@ -1718,7 +1723,7 @@ const ACCOUNT_TYPES = [
 ];
 
 // Placements épargne
-const SAVINGS_ACCOUNTS = [
+var SAVINGS_ACCOUNTS = [
   {id:'livreta', emoji:'🏦', name:'Livret A',       rate:3.0,  cap:22950,  desc:'Livret réglementé'},
   {id:'ldds',    emoji:'♻️', name:'LDDS',            rate:3.0,  cap:12000,  desc:'Développement durable'},
   {id:'pel',     emoji:'🏠', name:'PEL',             rate:2.25, cap:61200,  desc:'Plan épargne logement'},
@@ -2012,8 +2017,11 @@ function buildPlacementsSection(cur){
       }
       html += '<div style="display:flex;gap:8px;margin-top:10px">';
       html += '<input type="number" placeholder="Nouveau solde" inputmode="decimal" style="flex:1;font-size:13px;padding:8px 12px;border-radius:10px;border:.5px solid var(--glass-b);background:var(--surface2);color:var(--text);font-family:var(--font)" onchange="updatePlacementBalance(\''+p.id+'\',this.value)">';
+      var hasRec = getPlacementRecurrings().find(function(r){return r.placementId===p.id;});
+      html += '<button onclick="togglePlacementRecurring(\''+p.id+'\')" style="padding:8px 12px;border-radius:10px;background:'+(hasRec?'rgba(99,217,160,.15)':'var(--surface2)')+';color:'+(hasRec?'var(--inc-t)':'var(--t2)')+';border:none;cursor:pointer;font-size:13px;font-weight:500;font-family:var(--font)">🔁'+(hasRec?' '+fmtAmt(hasRec.amount)+'€/m':'')+'</button>';
       html += '<button onclick="deletePlacement(\''+p.id+'\')" style="padding:8px 12px;border-radius:10px;background:rgba(255,95,95,.1);color:var(--red);border:none;cursor:pointer;font-size:14px">🗑</button>';
       html += '</div>';
+      html += '<div id="rec-panel-'+p.id+'" style="display:none"></div>';
       html += '</div>';
     });
   } else {
@@ -2025,11 +2033,93 @@ function buildPlacementsSection(cur){
   }
   return html;
 }
-// Init swipe on all tx items
-  document.querySelectorAll('.tx-swipe-wrap').forEach(function(wrap){
-    var id = parseInt(wrap.id.replace('swipe-',''));
-    initSwipe(wrap, id);
+
+/* ── RÉCURRENCES PLACEMENTS ── */
+function getPlacementRecurrings(){
+  if(!data.placementRecurrings) data.placementRecurrings = [];
+  return data.placementRecurrings;
+}
+
+function togglePlacementRecurring(placementId){
+  var p = getPlacements().find(function(pl){return pl.id===placementId;});
+  if(!p) return;
+  var existing = getPlacementRecurrings().find(function(r){return r.placementId===placementId;});
+  if(existing){
+    // Show edit panel
+    renderPlacementRecurringPanel(placementId, existing);
+  } else {
+    // Create default recurring
+    renderPlacementRecurringPanel(placementId, null);
+  }
+}
+
+function renderPlacementRecurringPanel(placementId, existing){
+  var p = getPlacements().find(function(pl){return pl.id===placementId;});
+  if(!p) return;
+  var panel = document.getElementById('rec-panel-'+placementId);
+  if(!panel) return;
+
+  var amt = existing ? existing.amount : '';
+  var day = existing ? existing.day : 25;
+  var active = existing ? existing.active : true;
+
+  panel.innerHTML = '<div style="border-top:.5px solid var(--sep);margin-top:10px;padding-top:10px">'
+    +'<div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Virement automatique</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+    +'<input type="number" id="prec-amt-'+placementId+'" placeholder="Montant" value="'+amt+'" inputmode="decimal" style="width:100px;font-size:13px;padding:7px 10px;border-radius:10px;border:.5px solid var(--glass-b);background:var(--surface2);color:var(--text);font-family:var(--font)">'
+    +'<span style="font-size:12px;color:var(--t2)">€ le</span>'
+    +'<select id="prec-day-'+placementId+'" style="font-size:13px;padding:7px 10px;border-radius:10px;border:.5px solid var(--glass-b);background:var(--surface2);color:var(--text);font-family:var(--font)">'
+    +Array.from({length:28},function(_,i){return '<option value="'+(i+1)+'"'+(day===(i+1)?' selected':'')+' >'+(i+1)+'</option>';}).join('')
+    +'</select>'
+    +'<span style="font-size:12px;color:var(--t2)">du mois</span>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:8px">'
+    +'<button onclick="savePlacementRecurring(\''+placementId+'\')" style="flex:1;padding:8px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">✅ Enregistrer</button>'
+    +(existing?'<button onclick="deletePlacementRecurring(\''+placementId+'\')" style="padding:8px 12px;border-radius:10px;background:rgba(255,95,95,.1);color:var(--red);border:none;cursor:pointer;font-size:14px">🗑</button>':'')
+    +'</div>'
+    +'</div>';
+  panel.style.display = panel.innerHTML ? 'block' : 'none';
+}
+
+function savePlacementRecurring(placementId){
+  var amtEl = document.getElementById('prec-amt-'+placementId);
+  var dayEl = document.getElementById('prec-day-'+placementId);
+  if(!amtEl || !dayEl) return;
+  var amt = parseFloat(amtEl.value);
+  var day = parseInt(dayEl.value);
+  if(!amt || amt<=0){ toast('💡 Entre un montant'); return; }
+  if(!data.placementRecurrings) data.placementRecurrings = [];
+  // Remove existing
+  data.placementRecurrings = data.placementRecurrings.filter(function(r){return r.placementId!==placementId;});
+  data.placementRecurrings.push({id:'prec_'+Date.now(), placementId:placementId, amount:amt, day:day, active:true, lastRun:null});
+  save();
+  renderSavings();
+  toast('🔁 Récurrence enregistrée !');
+}
+
+function deletePlacementRecurring(placementId){
+  data.placementRecurrings = (data.placementRecurrings||[]).filter(function(r){return r.placementId!==placementId;});
+  save();
+  renderSavings();
+  toast('🗑 Récurrence supprimée');
+}
+
+function processDuePlacementRecurrings(){
+  var today = new Date();
+  var todayDay = today.getDate();
+  var todayStr = fmtDate(today);
+  var recurrings = getPlacementRecurrings();
+  recurrings.forEach(function(r){
+    if(!r.active) return;
+    if(r.day !== todayDay) return;
+    if(r.lastRun === todayStr) return;
+    var p = getPlacements().find(function(pl){return pl.id===r.placementId;});
+    if(!p) return;
+    p.balance += r.amount;
+    r.lastRun = todayStr;
+    toast('🔁 Virement auto : +'+fmtAmt(r.amount)+' € → '+p.name);
   });
+  save();
 }
 
 function renderBudget(){
@@ -2078,8 +2168,8 @@ function renderBudget(){
 
 function deleteBudget(i){openModal('Supprimer le budget','',()=>{data.budgets.splice(i,1);save();renderBudget();toast('Budget supprimé')})}
 function addBudget(){
-  const cat=document.getElementById('bcat').value;
-  const limit=parseFloat(document.getElementById('blimit').value);
+  var cat=document.getElementById('bcat').value;
+  var limit=parseFloat(document.getElementById('blimit').value);
   if(!limit||limit<=0){toast('💡 Entre un montant');return}
   data.budgets=data.budgets.filter(b=>b.cat!==cat);
   data.budgets.push({cat,limit});save();renderBudget();toast('✅ Budget ajouté !');
@@ -2236,31 +2326,31 @@ function renderSettings(){
   el.innerHTML=html;
 }
 function exportBackup(){
-  const backup = {
+  var backup = {
     version: '2.5',
     date: new Date().toISOString(),
     data: data,
     prefs: prefs
   };
-  const json = JSON.stringify(backup, null, 2);
-  const blob = new Blob([json], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const dateStr = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
+  var json = JSON.stringify(backup, null, 2);
+  var blob = new Blob([json], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var dateStr = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
   a.href = url;
-  a.download = `budget-sauvegarde-${dateStr}.json`;
+  a.download = 'budget-sauvegarde-'+dateStr+'.json';
   a.click();
   URL.revokeObjectURL(url);
   toast('💾 Sauvegarde téléchargée !');
 }
 
 function importBackup(ev){
-  const file = ev.target.files[0];
+  var file = ev.target.files[0];
   if(!file) return;
-  const reader = new FileReader();
+  var reader = new FileReader();
   reader.onload = r => {
     try {
-      const backup = JSON.parse(r.target.result);
+      var backup = JSON.parse(r.target.result);
       // Validate structure
       if(!backup.data || !backup.data.transactions){
         toast('❌ Fichier invalide');
@@ -2268,7 +2358,7 @@ function importBackup(ev){
       }
       openModal(
         'Restaurer la sauvegarde',
-        `Du ${new Date(backup.date).toLocaleDateString('fr-FR')} · ${backup.data.transactions.length} transactions. Tes données actuelles seront remplacées.`,
+        'Du '+new Date(backup.date).toLocaleDateString('fr-FR')+' · '+backup.data.transactions.length+' transactions. Tes données actuelles seront remplacées.',
         ()=>{
           data = backup.data;
           if(!data.savings) data.savings = [];
@@ -2292,9 +2382,9 @@ function importBackup(ev){
   ev.target.value = '';
 }
 function exportCSV(){
-  const rows=[['Date','Type','Catégorie','Description','Montant'],...data.transactions.map(t=>[t.date,t.type==='expense'?'Dépense':'Revenu',getCat(t.cat).l,t.desc,t.amount])];
-  const csv=rows.map(r=>r.join(';')).join('\n');
-  const a=document.createElement('a');
+  var rows=[['Date','Type','Catégorie','Description','Montant'],...data.transactions.map(t=>[t.date,t.type==='expense'?'Dépense':'Revenu',getCat(t.cat).l,t.desc,t.amount])];
+  var csv=rows.map(r=>r.join(';')).join('\n');
+  var a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
   a.download='budget.csv';a.click();
   toast('📁 Export CSV prêt !');
@@ -2307,13 +2397,13 @@ function confirmReset(){
 }
 
 
-const AVATAR_EMOJIS = ['💰','💵','💳','🏦','📊','💹','🪙','💎','🤑','🏧','💸','🎯','🚀','⭐','🔥','👑'];
+var AVATAR_EMOJIS = ['💰','💵','💳','🏦','📊','💹','🪙','💎','🤑','🏧','💸','🎯','🚀','⭐','🔥','👑'];
 
 function openPhotoModal(){
-  const grid = document.getElementById('emojiGrid');
-  const cur = prefs.avatarEmoji || '💰';
+  var grid = document.getElementById('emojiGrid');
+  var cur = prefs.avatarEmoji || '💰';
   grid.innerHTML = AVATAR_EMOJIS.map(e =>
-    `<div class="emoji-opt${e===cur?' sel':''}" onclick="selectEmoji('${e}')">${e}</div>`
+    '<div class="emoji-opt'+(e===cur?' sel':'')+('" onclick="selectEmoji(\''+e+'\')">')+e+'</div>'
   ).join('');
   document.getElementById('photoModalBg').classList.add('show');
 }
@@ -2330,9 +2420,9 @@ function selectEmoji(e){
   toast('✅ Avatar mis à jour !');
 }
 function handlePhotoUpload(ev){
-  const file = ev.target.files[0];
+  var file = ev.target.files[0];
   if(!file) return;
-  const reader = new FileReader();
+  var reader = new FileReader();
   reader.onload = r => {
     prefs.avatarPhoto = r.target.result;
     prefs.avatarEmoji = null;
@@ -2344,22 +2434,22 @@ function handlePhotoUpload(ev){
   reader.readAsDataURL(file);
 }
 function updateAvatars(){
-  const hasPhoto = prefs.avatarPhoto;
-  const emoji = prefs.avatarEmoji || '💰';
-  const avatarContent = hasPhoto
+  var hasPhoto = prefs.avatarPhoto;
+  var emoji = prefs.avatarEmoji || '💰';
+  var avatarContent = hasPhoto
     ? '<img src="'+prefs.avatarPhoto+'" class="avatar-img" alt="avatar">'
     : emoji;
-  const el = document.getElementById('avatarBtn');
+  var el = document.getElementById('avatarBtn');
   if(el) el.innerHTML = avatarContent;
-  const el2 = document.getElementById('avatarLarge');
+  var el2 = document.getElementById('avatarLarge');
   if(el2) el2.innerHTML = hasPhoto
     ? '<img src="'+prefs.avatarPhoto+'" class="avatar-img" alt="avatar">'
     : emoji;
-  const el3 = document.getElementById('settingsAvatarIcon');
+  var el3 = document.getElementById('settingsAvatarIcon');
   if(el3) el3.innerHTML = hasPhoto
     ? '<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover">'
     : emoji;
-  const el4 = document.getElementById('splashAvatar');
+  var el4 = document.getElementById('splashAvatar');
   if(el4) el4.innerHTML = hasPhoto
     ? '<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover;border-radius:34px">'
     : emoji;
@@ -2367,9 +2457,9 @@ function updateAvatars(){
 
 
 function showSplash(){
-  const splash = document.getElementById('splash');
-  const splashAvatar = document.getElementById('splashAvatar');
-  const splashName = document.getElementById('splashAppName');
+  var splash = document.getElementById('splash');
+  var splashAvatar = document.getElementById('splashAvatar');
+  var splashName = document.getElementById('splashAppName');
   // Set avatar
   if(prefs.avatarPhoto){
     splashAvatar.innerHTML = '<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover;border-radius:34px">';
@@ -2461,9 +2551,9 @@ function renderSavings(){
 }
 
 function addSaving(type){
-  const amt=parseFloat(document.getElementById('sav-amount').value);
-  const desc=document.getElementById('sav-desc').value.trim();
-  const date=document.getElementById('sav-date').value||new Date().toISOString().split('T')[0];
+  var amt=parseFloat(document.getElementById('sav-amount').value);
+  var desc=document.getElementById('sav-desc').value.trim();
+  var date=document.getElementById('sav-date').value||new Date().toISOString().split('T')[0];
   if(!amt||amt<=0){toast('💡 Entre un montant valide');return}
   if(!data.savings) data.savings=[];
   data.savings.push({id:Date.now(),type:type,amount:amt,desc:desc,date:date});
@@ -2481,8 +2571,8 @@ function deleteSaving(i){
 }
 
 function saveGoal(){
-  const name=document.getElementById('goal-name').value.trim();
-  const amount=parseFloat(document.getElementById('goal-amount').value);
+  var name=document.getElementById('goal-name').value.trim();
+  var amount=parseFloat(document.getElementById('goal-amount').value);
   if(!amount||amount<=0){toast('💡 Entre un montant cible');return}
   if(!data.savingsGoals) data.savingsGoals=[];
   data.savingsGoals=[{name,amount}];
@@ -2492,7 +2582,7 @@ function saveGoal(){
 
 /* ── CALCULATEUR IMPÔTS MILITAIRE 2024 ── */
 // Barème IR 2024 (revenus 2023) - célibataire (1 part)
-const TRANCHES = [
+var TRANCHES = [
   {min:0,      max:11294,  rate:0,    label:'0%'},
   {min:11294,  max:28797,  rate:0.11, label:'11%'},
   {min:28797,  max:82341,  rate:0.30, label:'30%'},
@@ -2501,7 +2591,7 @@ const TRANCHES = [
 ];
 
 // Primes militaires exonérées d'IR (liste non exhaustive des principales)
-const PRIMES_EXONEREES = [
+var PRIMES_EXONEREES = [
   {id:'issu',    label:'Indemnité de sujétion spéciale (ISS)',       montant:0, note:'Variable selon grade'},
   {id:'opex',    label:'Indemnité OPEX',                              montant:0, note:'Si déployé en opération'},
   {id:'service', label:'Prime de service et de technicité (PST)',     montant:0, note:'Variable'},
@@ -2514,21 +2604,21 @@ function saveTaxPrefs(){localStorage.setItem('tax_prefs', JSON.stringify(taxPref
 
 function calcIR(revenuImposable){
   // Abattement 10% frais pro (min 495, max 14171)
-  const abattement = Math.min(Math.max(revenuImposable * 0.10, 495), 14171);
-  const base = Math.max(0, revenuImposable - abattement);
+  var abattement = Math.min(Math.max(revenuImposable * 0.10, 495), 14171);
+  var base = Math.max(0, revenuImposable - abattement);
   let impot = 0;
-  const detail = [];
-  for(const t of TRANCHES){
+  var detail = [];
+  for(var t of TRANCHES){
     if(base <= t.min) break;
-    const taxable = Math.min(base, t.max) - t.min;
-    const montant = taxable * t.rate;
+    var taxable = Math.min(base, t.max) - t.min;
+    var montant = taxable * t.rate;
     if(t.rate > 0) detail.push({label:t.label, taxable, montant});
     impot += montant;
   }
   // Décote (si impôt brut < 1929€ pour célibataire)
   let decote = 0;
   if(impot < 1929) decote = Math.max(0, 873 - 0.4525 * impot);
-  const impotNet = Math.max(0, impot - decote);
+  var impotNet = Math.max(0, impot - decote);
   return {base, abattement, impotBrut:impot, decote, impotNet, detail};
 }
 
@@ -2536,49 +2626,49 @@ function calcIR(revenuImposable){
 function buildForecastCard(period, expenseSoFar, income, cur){
   if(expenseSoFar === 0 && income === 0) return '';
 
-  const today = new Date();
-  const startDate = new Date(period.start);
-  const endDate = new Date(period.end);
+  var today = new Date();
+  var startDate = new Date(period.start);
+  var endDate = new Date(period.end);
 
   // Days elapsed and total in period
-  const totalDays = Math.round((endDate - startDate) / (1000*60*60*24)) + 1;
-  const daysElapsed = Math.max(1, Math.round((today - startDate) / (1000*60*60*24)) + 1);
-  const daysLeft = Math.max(0, totalDays - daysElapsed);
+  var totalDays = Math.round((endDate - startDate) / (1000*60*60*24)) + 1;
+  var daysElapsed = Math.max(1, Math.round((today - startDate) / (1000*60*60*24)) + 1);
+  var daysLeft = Math.max(0, totalDays - daysElapsed);
 
   if(daysElapsed < 2) return ''; // Not enough data yet
 
   // Daily burn rate & projection
-  const dailyBurn = expenseSoFar / daysElapsed;
-  const projectedTotal = Math.round(dailyBurn * totalDays);
-  const projectedLeft = Math.round(dailyBurn * daysLeft);
-  const progressPct = Math.min(100, Math.round((daysElapsed / totalDays) * 100));
+  var dailyBurn = expenseSoFar / daysElapsed;
+  var projectedTotal = Math.round(dailyBurn * totalDays);
+  var projectedLeft = Math.round(dailyBurn * daysLeft);
+  var progressPct = Math.min(100, Math.round((daysElapsed / totalDays) * 100));
 
   // Compare to income
-  const budgetRef = income > 0 ? income : null;
-  const overBudget = budgetRef && projectedTotal > budgetRef;
-  const ratio = budgetRef ? Math.min(projectedTotal / budgetRef, 1.5) : 0;
-  const barPct = budgetRef ? Math.min(Math.round(ratio * 100), 100) : progressPct;
-  const barColor = !budgetRef ? 'var(--accent)' : ratio > 1 ? 'var(--red)' : ratio > 0.85 ? 'var(--amber)' : 'var(--inc-t)';
+  var budgetRef = income > 0 ? income : null;
+  var overBudget = budgetRef && projectedTotal > budgetRef;
+  var ratio = budgetRef ? Math.min(projectedTotal / budgetRef, 1.5) : 0;
+  var barPct = budgetRef ? Math.min(Math.round(ratio * 100), 100) : progressPct;
+  var barColor = !budgetRef ? 'var(--accent)' : ratio > 1 ? 'var(--red)' : ratio > 0.85 ? 'var(--amber)' : 'var(--inc-t)';
 
   let badge, badgeClass, tip;
   if(!budgetRef){
-    badge = `${progressPct}% de la période`;
+    badge = progressPct+'% de la période';
     badgeClass = 'ok';
-    tip = `Tu dépenses en moyenne ${fmtAmt(Math.round(dailyBurn))} ${cur}/jour · Il te reste ${daysLeft} jours.`;
+    tip = 'Tu dépenses en moyenne '+fmtAmt(Math.round(dailyBurn))+' '+cur+'/jour · Il te reste '+daysLeft+' jours.';
   } else if(overBudget){
-    const over = projectedTotal - budgetRef;
-    badge = `⚠️ Dépassement prévu`;
+    var over = projectedTotal - budgetRef;
+    badge = '⚠️ Dépassement prévu';
     badgeClass = 'over';
-    tip = `À ce rythme tu dépasseras tes revenus de ${fmtAmt(over)} ${cur}. Ralentis un peu !`;
+    tip = 'À ce rythme tu dépasseras tes revenus de '+fmtAmt(over)+' '+cur+'. Ralentis un peu !';
   } else if(ratio > 0.85){
-    badge = `Attention`;
+    badge = 'Attention';
     badgeClass = 'warn';
-    tip = `Tu es sur la bonne voie mais surveille tes dépenses ces ${daysLeft} prochains jours.`;
+    tip = 'Tu es sur la bonne voie mais surveille tes dépenses ces '+daysLeft+' prochains jours.';
   } else {
-    const saving = budgetRef - projectedTotal;
-    badge = `✓ Dans les clous`;
+    var saving = budgetRef - projectedTotal;
+    badge = '✓ Dans les clous';
     badgeClass = 'ok';
-    tip = `Super ! Tu devrais terminer avec ${fmtAmt(saving)} ${cur} d'économisés cette période.`;
+    tip = 'Super ! Tu devrais terminer avec '+fmtAmt(saving)+' '+cur+' d\'économisés cette période.';
   }
 
   return `
@@ -2617,30 +2707,30 @@ function buildForecastCard(period, expenseSoFar, income, cur){
 }
 function buildTaxCard(cur){
   // Collect all salary income from current year
-  const year = new Date().getFullYear();
-  const profile = PROFILES.find(p=>p.id===(prefs.profile||'salarie')) || PROFILES[0];
-  const allCatsIncome = [...CATS.expense,...CATS.income];
-  const yearTx = data.transactions.filter(t=>t.type==='income' && t.date.startsWith(year+''));
+  var year = new Date().getFullYear();
+  var profile = PROFILES.find(p=>p.id===(prefs.profile||'salarie')) || PROFILES[0];
+  var allCatsIncome = [...CATS.expense,...CATS.income];
+  var yearTx = data.transactions.filter(t=>t.type==='income' && t.date.startsWith(year+''));
   // Exclude tax-free categories based on profile
-  const taxableTx = yearTx.filter(t=>{
-    const cat = allCatsIncome.find(c=>c.id===t.cat);
+  var taxableTx = yearTx.filter(t=>{
+    var cat = allCatsIncome.find(c=>c.id===t.cat);
     return !cat || !cat.taxFree;
   });
-  const yearIncome = taxableTx.reduce((s,t)=>s+t.amount, 0);
-  const yearExo = yearTx.filter(t=>{const cat=allCatsIncome.find(c=>c.id===t.cat);return cat&&cat.taxFree}).reduce((s,t)=>s+t.amount,0);
+  var yearIncome = taxableTx.reduce((s,t)=>s+t.amount, 0);
+  var yearExo = yearTx.filter(t=>{var cat=allCatsIncome.find(c=>c.id===t.cat);return cat&&cat.taxFree}).reduce((s,t)=>s+t.amount,0);
   if(yearIncome === 0) return '';
 
   // How many months of data do we have this year?
-  const monthsWithData = new Set(yearTx.map(t=>t.date.slice(0,7))).size;
-  const currentMonth = new Date().getMonth() + 1;
+  var monthsWithData = new Set(yearTx.map(t=>t.date.slice(0,7))).size;
+  var currentMonth = new Date().getMonth() + 1;
   // Annualize: if we have partial year, project to 12 months
-  const annualized = monthsWithData > 0 ? Math.round((yearIncome / monthsWithData) * 12) : yearIncome;
+  var annualized = monthsWithData > 0 ? Math.round((yearIncome / monthsWithData) * 12) : yearIncome;
 
-  const result = calcIR(annualized);
-  const tauxEffectif = annualized > 0 ? (result.impotNet / annualized * 100) : 0;
-  const mensuel = result.impotNet / 12;
-  const alreadyPaid = mensuel * currentMonth; // approx already withheld
-  const maxImpot = result.detail.length > 0 ? Math.max(...result.detail.map(d=>d.montant)) : 1;
+  var result = calcIR(annualized);
+  var tauxEffectif = annualized > 0 ? (result.impotNet / annualized * 100) : 0;
+  var mensuel = result.impotNet / 12;
+  var alreadyPaid = mensuel * currentMonth; // approx already withheld
+  var maxImpot = result.detail.length > 0 ? Math.max(...result.detail.map(d=>d.montant)) : 1;
 
   return `
   <div class="sec-label">Estimation impôts ${year}</div>
@@ -2691,14 +2781,14 @@ function updateTaxPref(key, val){
 
 
 /* ── TRANSACTIONS RÉCURRENTES ── */
-const FREQ_LABELS = {monthly:'Mensuel', weekly:'Hebdo', bimonthly:'Bi-mensuel'};
+var FREQ_LABELS = {monthly:'Mensuel', weekly:'Hebdo', bimonthly:'Bi-mensuel'};
 
 function getNextDate(rec){
   // Find the next date this recurring tx should fire
-  const today = new Date().toISOString().split('T')[0];
-  const pd = prefs.payDay || 25;
+  var today = new Date().toISOString().split('T')[0];
+  var pd = prefs.payDay || 25;
   if(rec.freq === 'monthly'){
-    const now = new Date();
+    var now = new Date();
     let d = new Date(now.getFullYear(), now.getMonth(), rec.day);
     if(d.toISOString().split('T')[0] < today) d = new Date(now.getFullYear(), now.getMonth()+1, rec.day);
     return d.toISOString().split('T')[0];
@@ -2711,36 +2801,36 @@ function processEndOfPeriodSavings(){
   if(prefs.autoSavings === false) return;
   if(!data.savings) data.savings = [];
 
-  const today = fmtDate(new Date());
-  const pd = prefs.payDay || 25;
+  var today = fmtDate(new Date());
+  var pd = prefs.payDay || 25;
 
   // Get current period start to know what the PREVIOUS period was
-  const period = currentPeriod();
-  const prevEnd = new Date(period.start);
+  var period = currentPeriod();
+  var prevEnd = new Date(period.start);
   prevEnd.setDate(prevEnd.getDate() - 1);
-  const prevEndStr = fmtDate(prevEnd);
+  var prevEndStr = fmtDate(prevEnd);
 
   // Get previous period start
-  const prevStart = new Date(period.start);
+  var prevStart = new Date(period.start);
   prevStart.setMonth(prevStart.getMonth() - 1);
   // Clamp to last day if needed
-  const prevStartStr = fmtDate(new Date(prevStart.getFullYear(), prevStart.getMonth(), clampDay(prevStart.getFullYear(), prevStart.getMonth(), pd)));
+  var prevStartStr = fmtDate(new Date(prevStart.getFullYear(), prevStart.getMonth(), clampDay(prevStart.getFullYear(), prevStart.getMonth(), pd)));
 
   // Check if we already did auto-savings for this period transition
-  const alreadyDone = data.savings.some(s => s.autoForPeriod === period.start);
+  var alreadyDone = data.savings.some(s => s.autoForPeriod === period.start);
   if(alreadyDone) return;
 
   // Only run on payday or just after (first 2 days of new period)
-  const daysSinceStart = Math.round((new Date(today) - new Date(period.start)) / (1000*60*60*24));
+  var daysSinceStart = Math.round((new Date(today) - new Date(period.start)) / (1000*60*60*24));
   if(daysSinceStart > 2) return; // Only run in first 2 days of new period
 
   // Calculate previous period balance
-  const prevTx = data.transactions.filter(t => t.date >= prevStartStr && t.date <= prevEndStr);
+  var prevTx = data.transactions.filter(t => t.date >= prevStartStr && t.date <= prevEndStr);
   if(prevTx.length === 0) return; // No transactions in prev period, skip
 
-  const prevIncome  = prevTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount, 0);
-  const prevExpense = prevTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount, 0);
-  const leftover = Math.round((prevIncome - prevExpense) * 100) / 100;
+  var prevIncome  = prevTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount, 0);
+  var prevExpense = prevTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount, 0);
+  var leftover = Math.round((prevIncome - prevExpense) * 100) / 100;
 
   if(leftover <= 0) return; // Nothing to save or negative, skip
 
@@ -2749,7 +2839,7 @@ function processEndOfPeriodSavings(){
     id: Date.now(),
     type: 'deposit',
     amount: leftover,
-    desc: `Reliquat période ${prevStartStr.slice(8)}/${prevStartStr.slice(5,7)} → ${prevEndStr.slice(8)}/${prevEndStr.slice(5,7)}`,
+    desc: 'Reliquat période '+prevStartStr.slice(8)+'/'+prevStartStr.slice(5,7)+' → '+prevEndStr.slice(8)+'/'+prevEndStr.slice(5,7),
     date: today,
     autoForPeriod: period.start, // marker so we don't do it twice
     auto: true
@@ -2757,20 +2847,20 @@ function processEndOfPeriodSavings(){
   save();
 
   setTimeout(()=>{
-    toast(`💰 ${leftover.toLocaleString('fr-FR')} € transférés en épargne !`);
+    toast('💰 '+leftover.toLocaleString('fr-FR')+' € transférés en épargne !');
   }, 2500);
 }
 function processDueRecurring(){
   if(!data.recurring || data.recurring.length === 0) return;
-  const today = new Date().toISOString().split('T')[0];
-  const todayDay = new Date().getDate();
+  var today = new Date().toISOString().split('T')[0];
+  var todayDay = new Date().getDate();
   let added = 0;
   data.recurring.forEach(rec => {
     if(!rec.active) return;
     if(rec.freq === 'monthly' && todayDay === rec.day){
       // Check if already added this month
-      const monthStr = today.slice(0,7);
-      const alreadyAdded = data.transactions.some(t =>
+      var monthStr = today.slice(0,7);
+      var alreadyAdded = data.transactions.some(t =>
         t.recurringId === rec.id && t.date.startsWith(monthStr)
       );
       if(!alreadyAdded){
@@ -2850,15 +2940,15 @@ function setRecType(t){
   recType = t;
   document.getElementById('rec-btn-exp').classList.toggle('active', t==='expense');
   document.getElementById('rec-btn-inc').classList.toggle('active', t==='income');
-  const sel = document.getElementById('rec-cat');
-  if(sel) sel.innerHTML = CATS[t].map(c=>`<option value="${c.id}">${c.e} ${c.l}</option>`).join('');
+  var sel = document.getElementById('rec-cat');
+  if(sel) sel.innerHTML = CATS[t].map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
 }
 
 function addRecurring(){
-  const desc = document.getElementById('rec-desc').value.trim();
-  const amount = parseFloat(document.getElementById('rec-amount').value);
-  const day = parseInt(document.getElementById('rec-day').value);
-  const cat = document.getElementById('rec-cat').value;
+  var desc = document.getElementById('rec-desc').value.trim();
+  var amount = parseFloat(document.getElementById('rec-amount').value);
+  var day = parseInt(document.getElementById('rec-day').value);
+  var cat = document.getElementById('rec-cat').value;
   if(!desc){toast('💡 Entre une description');return}
   if(!amount||amount<=0){toast('💡 Entre un montant');return}
   if(!data.recurring) data.recurring=[];
@@ -2890,11 +2980,11 @@ let pinTemp = '';
 let pinResolve = null;
 
 function initPinScreen(){
-  const hasPhoto = prefs.avatarPhoto;
-  const emoji = prefs.avatarEmoji || '💰';
-  const av = document.getElementById('pinAvatar');
+  var hasPhoto = prefs.avatarPhoto;
+  var emoji = prefs.avatarEmoji || '💰';
+  var av = document.getElementById('pinAvatar');
   if(av) av.innerHTML = hasPhoto ? '<img src="'+prefs.avatarPhoto+'" style="width:100%;height:100%;object-fit:cover;border-radius:24px">' : emoji;
-  const pt = document.getElementById('pinTitle');
+  var pt = document.getElementById('pinTitle');
   if(pt) pt.textContent = prefs.appName || 'Mon Budget';
 }
 
@@ -2904,21 +2994,21 @@ function showPinScreen(mode='unlock'){
   pinTemp = '';
   initPinScreen();
   updatePinDots();
-  const sub = document.getElementById('pinSubtitle');
-  const hint = document.getElementById('pinHint');
-  const err = document.getElementById('pinError');
+  var sub = document.getElementById('pinSubtitle');
+  var hint = document.getElementById('pinHint');
+  var err = document.getElementById('pinError');
   if(err) err.textContent = '';
   if(mode === 'unlock'){
     if(sub) sub.textContent = 'Entrer le code';
     if(hint) hint.textContent = '';
     // Show Face ID button if available
-    const fb = document.getElementById('pinFaceBtn');
+    var fb = document.getElementById('pinFaceBtn');
     if(fb){fb.style.opacity='1';fb.textContent='🫥';}
     tryFaceID();
   } else if(mode === 'setup1'){
     if(sub) sub.textContent = 'Nouveau code PIN';
     if(hint) hint.textContent = 'Choisissez un code à 4 chiffres pour protéger vos données.';
-    const fb = document.getElementById('pinFaceBtn');
+    var fb = document.getElementById('pinFaceBtn');
     if(fb) fb.style.opacity='0';
   } else if(mode === 'setup2'){
     if(sub) sub.textContent = 'Confirmer le code';
@@ -2933,7 +3023,7 @@ function hidePinScreen(){
 
 function updatePinDots(){
   for(let i=0;i<4;i++){
-    const d = document.getElementById('pd'+i);
+    var d = document.getElementById('pd'+i);
     if(d){
       d.classList.toggle('filled', i < pinBuffer.length);
       d.classList.remove('error');
@@ -2943,10 +3033,10 @@ function updatePinDots(){
 
 function pinShakeError(msg){
   for(let i=0;i<4;i++){
-    const d = document.getElementById('pd'+i);
+    var d = document.getElementById('pd'+i);
     if(d){ d.classList.remove('filled'); void d.offsetWidth; d.classList.add('error'); }
   }
-  const err = document.getElementById('pinError');
+  var err = document.getElementById('pinError');
   if(err) err.textContent = msg;
   setTimeout(()=>{ pinBuffer=''; updatePinDots(); }, 600);
 }
@@ -2968,7 +3058,7 @@ function pinDel(){
 }
 
 function handlePinComplete(){
-  const stored = localStorage.getItem('budget_pin');
+  var stored = localStorage.getItem('budget_pin');
   if(pinMode === 'unlock'){
     if(pinBuffer === stored){
       hidePinScreen();
@@ -3017,7 +3107,7 @@ function openPinSetup(){
 function tryFaceID(){
   if(!window.PublicKeyCredential) return;
   // Try biometric if supported — gracefully falls back to PIN
-  const fb = document.getElementById('pinFaceBtn');
+  var fb = document.getElementById('pinFaceBtn');
   if(fb) fb.textContent = '⊙';
 }
 
@@ -3027,7 +3117,7 @@ let editingRecIdx = null;
 let editRecType = 'expense';
 
 function openEditRec(i){
-  const r = data.recurring[i];
+  var r = data.recurring[i];
   if(!r) return;
   editingRecIdx = i;
   editRecType = r.type;
@@ -3044,12 +3134,12 @@ function openEditRec(i){
   document.getElementById('editrec-amount').value = r.amount;
 
   // Day selector
-  const daySel = document.getElementById('editrec-day');
-  daySel.innerHTML = Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}"${d===r.day?' selected':''}>${d}</option>`).join('');
+  var daySel = document.getElementById('editrec-day');
+  daySel.innerHTML = Array.from({length:31},function(_,i){var d=i+1;return '<option value="'+d+'"'+(d===r.day?' selected':'')+'>'+d+'</option>';}).join('');
 
   // Cat selector
-  const catSel = document.getElementById('editrec-cat');
-  catSel.innerHTML = [...CATS.expense,...CATS.income].map(c=>`<option value="${c.id}"${c.id===r.cat?' selected':''}>${c.e} ${c.l}</option>`).join('');
+  var catSel = document.getElementById('editrec-cat');
+  catSel.innerHTML = CATS.expense.concat(CATS.income).map(function(c){return '<option value="'+c.id+'"'+(c.id===r.cat?' selected':'')+'>'+c.e+' '+c.l+'</option>';}).join('');
 
   document.getElementById('editRecModalBg').classList.add('show');
 }
@@ -3067,10 +3157,10 @@ function closeEditRecModal(e){
 
 function saveEditRec(){
   if(editingRecIdx === null) return;
-  const desc = document.getElementById('editrec-desc').value.trim();
-  const amount = parseFloat(document.getElementById('editrec-amount').value);
-  const day = parseInt(document.getElementById('editrec-day').value);
-  const cat = document.getElementById('editrec-cat').value;
+  var desc = document.getElementById('editrec-desc').value.trim();
+  var amount = parseFloat(document.getElementById('editrec-amount').value);
+  var day = parseInt(document.getElementById('editrec-day').value);
+  var cat = document.getElementById('editrec-cat').value;
   if(!desc){toast('💡 Entre une description');return}
   if(!amount||amount<=0){toast('💡 Entre un montant');return}
   var _r=data.recurring[editingRecIdx];data.recurring[editingRecIdx]={id:_r.id,freq:_r.freq,active:_r.active,type:editRecType,desc:desc,amount:amount,day:day,cat:cat};;
@@ -3196,7 +3286,7 @@ function selectCalDay(dateStr){
   renderCalendar();
   if(calSelectedDay){
     setTimeout(()=>{
-      const det = document.querySelector('.cal-detail');
+      var det = document.querySelector('.cal-detail');
       if(det) det.scrollIntoView({behavior:'smooth',block:'nearest'});
     },100);
   }
@@ -3214,12 +3304,12 @@ function calMove(dir){
 function updateAppUrl(v){
   prefs.appUrl = v.trim();
   savePrefs();
-  const el = document.getElementById('appUrlDisplay');
+  var el = document.getElementById('appUrlDisplay');
   if(el) el.textContent = prefs.appUrl || 'Non configuré';
 }
 
 function shareApp(){
-  const url = prefs.appUrl || window.location.href;
+  var url = prefs.appUrl || window.location.href;
   if(navigator.clipboard){
     navigator.clipboard.writeText(url).then(()=>{
       toast('🔗 Lien copié !');
@@ -3230,7 +3320,7 @@ function shareApp(){
 }
 
 function fallbackCopy(text){
-  const ta = document.createElement('textarea');
+  var ta = document.createElement('textarea');
   ta.value = text;
   ta.style.position = 'fixed';
   ta.style.opacity = '0';
@@ -3243,12 +3333,12 @@ function fallbackCopy(text){
 }
 
 function nativeShare(){
-  const url = prefs.appUrl || window.location.href;
-  const name = prefs.appName || 'Mon Budget';
+  var url = prefs.appUrl || window.location.href;
+  var name = prefs.appName || 'Mon Budget';
   if(navigator.share){
     navigator.share({
       title: name,
-      text: `Gère ton budget avec ${name} — une appli gratuite !`,
+      text: 'Gère ton budget avec '+name+' — une appli gratuite !',
       url: url
     }).catch(()=>{});
   } else {
@@ -3369,20 +3459,20 @@ function renderStats(){
 
 /* ── NOTIFICATIONS ── */
 function generateNotifs(){
-  const notifs = [];
-  const now = new Date();
-  const today = fmtDate(now);
-  const cur = prefs.currency||'€';
-  const period = currentPeriod();
+  var notifs = [];
+  var now = new Date();
+  var today = fmtDate(now);
+  var cur = prefs.currency||'€';
+  var period = currentPeriod();
 
   // 1. Budget alerts
-  const spent = {};
+  var spent = {};
   data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense')
     .forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
   data.budgets.forEach(b=>{
-    const s = spent[b.cat]||0;
-    const pct = Math.round((s/b.limit)*100);
-    const c = getCat(b.cat);
+    var s = spent[b.cat]||0;
+    var pct = Math.round((s/b.limit)*100);
+    var c = getCat(b.cat);
     if(pct>=100){
       notifs.push({id:'budget_over_'+b.cat, type:'danger', emoji:'🚨',
         title:'Budget '+c.l+' dépassé !',
@@ -3390,19 +3480,19 @@ function generateNotifs(){
         date:today, read:false});
     } else if(pct>=80){
       notifs.push({id:'budget_warn_'+b.cat, type:'warn', emoji:'⚠️',
-        title:`Budget ${c.l} bientôt atteint`,
-        msg:`${pct}% utilisé — il te reste ${fmtAmt(Math.round(b.limit-s))} ${cur}`,
+        title:'Budget '+c.l+' bientôt atteint',
+        msg:pct+'% utilisé — il te reste '+fmtAmt(Math.round(b.limit-s))+' '+cur+',',
         date:today, read:false});
     }
   });
 
   // 2. End of period reminder (last 3 days)
-  const endDate = new Date(period.end);
-  const daysLeft = Math.round((endDate - now)/(1000*60*60*24));
+  var endDate = new Date(period.end);
+  var daysLeft = Math.round((endDate - now)/(1000*60*60*24));
   if(daysLeft >= 0 && daysLeft <= 3){
-    const income = data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='income').reduce((s,t)=>s+t.amount,0);
-    const expense = data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense').reduce((s,t)=>s+t.amount,0);
-    const left = income - expense;
+    var income = data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='income').reduce((s,t)=>s+t.amount,0);
+    var expense = data.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    var left = income - expense;
     notifs.push({id:'period_end_'+period.end, type:'info', emoji:'📅',
     title:'Fin de période dans '+daysLeft+' jour'+(daysLeft>1?'s':''),
     msg:left>=0?('Il te reste '+fmtAmt(Math.round(left))+' '+cur+' non dépensés'):('Tu es à -'+fmtAmt(Math.round(Math.abs(left)))+' '+cur),
@@ -3410,8 +3500,8 @@ function generateNotifs(){
   }
 
   // 3. Recurring due today
-  const todayDay = now.getDate();
-  const dueToday = (data.recurring||[]).filter(r=>r.active&&r.freq==='monthly'&&r.day===todayDay);
+  var todayDay = now.getDate();
+  var dueToday = (data.recurring||[]).filter(r=>r.active&&r.freq==='monthly'&&r.day===todayDay);
   if(dueToday.length){
     notifs.push({id:'recurring_'+today, type:'info', emoji:'🔁',
     title:dueToday.length+' récurrence'+(dueToday.length>1?'s':'')+" aujourd'hui",
@@ -3420,23 +3510,23 @@ function generateNotifs(){
   }
 
   // 4. Daily recap (if has transactions today)
-  const todayTx = data.transactions.filter(t=>t.date===today);
+  var todayTx = data.transactions.filter(t=>t.date===today);
   if(todayTx.length>0){
-    const todayExp = todayTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    var todayExp = todayTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
     if(todayExp>0){
       notifs.push({id:'daily_'+today, type:'ok', emoji:'📊',
-        title:`Récap du jour`,
+        title:'Récap du jour',
     msg:'Tu as dépensé '+fmtAmt(Math.round(todayExp))+' '+cur+" aujourd'hui en "+todayTx.filter(t=>t.type==='expense').length+' transaction'+(todayTx.filter(t=>t.type==='expense').length>1?'s':''),
         date:today, read:false});
     }
   }
 
   // 5. Savings auto transfer
-  const lastSavAuto = (data.savings||[]).filter(s=>s.auto).slice(-1)[0];
+  var lastSavAuto = (data.savings||[]).filter(s=>s.auto).slice(-1)[0];
   if(lastSavAuto && lastSavAuto.date===today){
     notifs.push({id:'savings_auto_'+today, type:'ok', emoji:'💰',
       title:'Épargne automatique effectuée',
-      msg:`${fmtAmt(lastSavAuto.amount)} ${cur} transférés depuis le reliquat de la période précédente`,
+      msg:fmtAmt(lastSavAuto.amount)+' '+cur+' transférés depuis le reliquat de la période précédente',
       date:today, read:false});
   }
 
@@ -3444,16 +3534,16 @@ function generateNotifs(){
 }
 
 function getStoredNotifs(){
-  const stored = JSON.parse(localStorage.getItem('budget_notifs')||'[]');
-  const fresh = generateNotifs();
+  var stored = JSON.parse(localStorage.getItem('budget_notifs')||'[]');
+  var fresh = generateNotifs();
   // Merge: keep stored read status, add new ones
-  const merged = [];
+  var merged = [];
   fresh.forEach(n=>{
-    const existing = stored.find(s=>s.id===n.id);
+    var existing = stored.find(s=>s.id===n.id);
     merged.push(existing ? {id:n.id,type:n.type,emoji:n.emoji,title:n.title,msg:n.msg,date:n.date,read:existing.read} : n);
   });
   // Keep old read notifs from last 7 days
-  const week = new Date(); week.setDate(week.getDate()-7);
+  var week = new Date(); week.setDate(week.getDate()-7);
   stored.filter(s=>s.read && s.date >= fmtDate(week) && !merged.find(m=>m.id===s.id))
         .forEach(s=>merged.push(s));
   merged.sort((a,b)=>b.date.localeCompare(a.date));
@@ -3465,7 +3555,7 @@ function saveNotifs(notifs){
 }
 
 function openNotifPanel(){
-  const notifs = getStoredNotifs();
+  var notifs = getStoredNotifs();
   saveNotifs(notifs);
   renderNotifList(notifs);
   document.getElementById('notifBg').classList.add('show');
@@ -3478,28 +3568,28 @@ function closeNotifPanel(e){
 }
 
 function renderNotifList(notifs){
-  const el = document.getElementById('notifList');
+  var el = document.getElementById('notifList');
   if(!notifs.length){
     el.innerHTML='<div class="notif-empty">🎉 Tout est bon !<br>Aucune alerte pour le moment.</div>';
     return;
   }
-  const unread = notifs.filter(n=>!n.read);
-  const read = notifs.filter(n=>n.read);
+  var unread = notifs.filter(n=>!n.read);
+  var read = notifs.filter(n=>n.read);
   let html = '';
   if(unread.length){
-    html += `<div class="notif-section-title">Nouvelles (${unread.length})</div>`;
+    html += '<div class="notif-section-title">Nouvelles ('+unread.length+')</div>';
     html += unread.map(n=>notifItemHtml(n)).join('');
   }
   if(read.length){
-    html += `<div class="notif-section-title">Déjà lues</div>`;
+    html += '<div class="notif-section-title">Déjà lues</div>';
     html += read.map(n=>notifItemHtml(n)).join('');
   }
   el.innerHTML = html;
 }
 
 function notifItemHtml(n){
-  const typeClass = n.type==='danger'?'unread-danger':n.type==='warn'?'unread-warn':'unread';
-  const bgColor = n.type==='danger'?'rgba(255,95,95,.12)':n.type==='warn'?'rgba(255,179,64,.12)':n.type==='ok'?'rgba(26,158,92,.12)':'rgba(79,142,255,.12)';
+  var typeClass = n.type==='danger'?'unread-danger':n.type==='warn'?'unread-warn':'unread';
+  var bgColor = n.type==='danger'?'rgba(255,95,95,.12)':n.type==='warn'?'rgba(255,179,64,.12)':n.type==='ok'?'rgba(26,158,92,.12)':'rgba(79,142,255,.12)';
   return`<div class="notif-item${!n.read?' '+typeClass:''}" onclick="markRead('${n.id}')">
     <div class="notif-dot" style="background:${bgColor}">${n.emoji}</div>
     <div class="notif-info">
@@ -3511,8 +3601,8 @@ function notifItemHtml(n){
 }
 
 function markRead(id){
-  const notifs = getStoredNotifs();
-  const n = notifs.find(n=>n.id===id);
+  var notifs = getStoredNotifs();
+  var n = notifs.find(n=>n.id===id);
   if(n) n.read = true;
   saveNotifs(notifs);
   renderNotifList(notifs);
@@ -3520,22 +3610,22 @@ function markRead(id){
 }
 
 function clearNotifs(){
-  const notifs = getStoredNotifs().map(n=>({id:n.id,type:n.type,emoji:n.emoji,title:n.title,msg:n.msg,date:n.date,read:true}));
+  var notifs = getStoredNotifs().map(n=>({id:n.id,type:n.type,emoji:n.emoji,title:n.title,msg:n.msg,date:n.date,read:true}));
   saveNotifs(notifs);
   renderNotifList(notifs);
   updateNotifBadge();
 }
 
 function updateNotifBadge(){
-  const notifs = getStoredNotifs();
-  const unread = notifs.filter(n=>!n.read).length;
-  const bell = document.getElementById('notifBell');
+  var notifs = getStoredNotifs();
+  var unread = notifs.filter(n=>!n.read).length;
+  var bell = document.getElementById('notifBell');
   if(!bell) return;
   // Remove old badge
-  const old = bell.querySelector('.notif-badge');
+  var old = bell.querySelector('.notif-badge');
   if(old) old.remove();
   if(unread>0){
-    const badge = document.createElement('div');
+    var badge = document.createElement('div');
     badge.className='notif-badge';
     badge.textContent = unread>9?'9+':unread;
     bell.appendChild(badge);
@@ -3543,7 +3633,7 @@ function updateNotifBadge(){
 }
 
 /* ── GAMIFICATION ── */
-const BADGES = [
+var BADGES = [
   // 🌱 Premiers pas
   {id:'first_tx',      cat:'debut',  emoji:'🌱', name:'Premier pas',       desc:'1ère transaction',          check:d=>d.transactions.length>=1},
   {id:'first_savings', cat:'debut',  emoji:'🐣', name:'Épargnant',          desc:'1er versement épargne',     check:d=>(d.savings||[]).filter(s=>s.type==='deposit').length>=1},
@@ -3577,22 +3667,22 @@ const BADGES = [
   {id:'no_resto_month',cat:'defi',   emoji:'🥗', name:'Cuisinier',          desc:'0 resto sur une période',   check:d=>checkNoRestaurant(d)},
   {id:'sav_auto_3',    cat:'defi',   emoji:'🤖', name:'Automatique',        desc:'3 épargnes auto effectuées',check:d=>(d.savings||[]).filter(s=>s.auto).length>=3},
   {id:'recurring_3',   cat:'defi',   emoji:'⚙️', name:'Pilote auto',       desc:'3 récurrences actives',     check:d=>(d.recurring||[]).filter(r=>r.active).length>=3},
-  {id:'no_expense_day',cat:'defi',   emoji:'🧘', name:'Journée zen',        desc:'Un jour sans dépense',      check:d=>{const dates=new Set(d.transactions.filter(t=>t.type==='expense').map(t=>t.date));const all=new Set(d.transactions.map(t=>t.date));return[...all].some(dt=>!dates.has(dt))}},
+  {id:'no_expense_day',cat:'defi',   emoji:'🧘', name:'Journée zen',        desc:'Un jour sans dépense',      check:d=>{var dates=new Set(d.transactions.filter(t=>t.type==='expense').map(t=>t.date));var all=new Set(d.transactions.map(t=>t.date));return[...all].some(dt=>!dates.has(dt))}},
 ];
 
 function checkBudgetRespected(d, count){
-  const period = currentPeriod();
-  const spent = {};
+  var period = currentPeriod();
+  var spent = {};
   d.transactions.filter(t=>inPeriod(t.date,period)&&t.type==='expense').forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
-  const ok = d.budgets.filter(b=>(spent[b.cat]||0)<=b.limit).length;
+  var ok = d.budgets.filter(b=>(spent[b.cat]||0)<=b.limit).length;
   return ok >= count;
 }
 
 function checkNoRestaurant(d){
-  const periods = prevPeriods(3);
-  for(const p of periods){
-    const hasTx = d.transactions.some(t=>inPeriod(t.date,p));
-    const hasResto = d.transactions.some(t=>inPeriod(t.date,p)&&t.cat==='restaurants');
+  var periods = prevPeriods(3);
+  for(var p of periods){
+    var hasTx = d.transactions.some(t=>inPeriod(t.date,p));
+    var hasResto = d.transactions.some(t=>inPeriod(t.date,p)&&t.cat==='restaurants');
     if(hasTx && !hasResto) return true;
   }
   return false;
@@ -3600,11 +3690,11 @@ function checkNoRestaurant(d){
 
 function getStreak(d){
   if(!d.transactions.length) return 0;
-  const dates = new Set(d.transactions.map(t=>t.date));
+  var dates = new Set(d.transactions.map(t=>t.date));
   let streak = 0;
   let day = new Date();
   while(true){
-    const s = fmtDate(day);
+    var s = fmtDate(day);
     if(dates.has(s)){ streak++; day.setDate(day.getDate()-1); }
     else break;
   }
@@ -3613,31 +3703,31 @@ function getStreak(d){
 
 function calcScore(d){
   let score = 0;
-  const period = currentPeriod();
-  const mTx = d.transactions.filter(t=>inPeriod(t.date,period));
-  const income = mTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const expense = mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  var period = currentPeriod();
+  var mTx = d.transactions.filter(t=>inPeriod(t.date,period));
+  var income = mTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  var expense = mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
 
   // 30pts - savings rate
   if(income>0){
-    const sr = (income-expense)/income;
+    var sr = (income-expense)/income;
     score += Math.min(30, Math.round(sr*60));
   }
 
   // 25pts - budgets respected
   if(d.budgets.length>0){
-    const spent={};
+    var spent={};
     mTx.filter(t=>t.type==='expense').forEach(t=>{spent[t.cat]=(spent[t.cat]||0)+t.amount});
-    const ok = d.budgets.filter(b=>(spent[b.cat]||0)<=b.limit).length;
+    var ok = d.budgets.filter(b=>(spent[b.cat]||0)<=b.limit).length;
     score += Math.round((ok/d.budgets.length)*25);
   } else score += 15;
 
   // 20pts - has savings
-  const totalSav = (d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0);
+  var totalSav = (d.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0);
   if(totalSav>0) score += Math.min(20, Math.round(totalSav/100));
 
   // 15pts - streak
-  const streak = getStreak(d);
+  var streak = getStreak(d);
   score += Math.min(15, streak);
 
   // 10pts - transactions this period
@@ -3668,14 +3758,14 @@ function getUnlockedBadges(){
 }
 
 function checkNewBadges(){
-  const prev = JSON.parse(localStorage.getItem('budget_badges')||'[]');
-  const now = getUnlockedBadges().map(b=>b.id);
-  const newOnes = now.filter(id=>!prev.includes(id));
+  var prev = JSON.parse(localStorage.getItem('budget_badges')||'[]');
+  var now = getUnlockedBadges().map(b=>b.id);
+  var newOnes = now.filter(id=>!prev.includes(id));
   if(newOnes.length){
     localStorage.setItem('budget_badges', JSON.stringify(now));
     newOnes.forEach(id=>{
-      const b = BADGES.find(b=>b.id===id);
-      if(b) setTimeout(()=>toast(`${b.emoji} Nouveau badge : ${b.name} !`), 500);
+      var b = BADGES.find(b=>b.id===id);
+      if(b) setTimeout(function(){toast(b.emoji+' Nouveau badge : '+b.name+' !');}, 500);
     });
   } else {
     localStorage.setItem('budget_badges', JSON.stringify(now));
@@ -3683,20 +3773,20 @@ function checkNewBadges(){
 }
 
 function renderGamif(){
-  const cur = prefs.currency||'€';
-  const score = calcScore(data);
-  const grade = getScoreGrade(score);
-  const streak = getStreak(data);
-  const totalSav = Math.round((data.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0));
-  const unlocked = getUnlockedBadges().map(b=>b.id);
-  const prev = JSON.parse(localStorage.getItem('budget_badges')||'[]');
-  const isNew = id => unlocked.includes(id) && !prev.includes(id);
+  var cur = prefs.currency||'€';
+  var score = calcScore(data);
+  var grade = getScoreGrade(score);
+  var streak = getStreak(data);
+  var totalSav = Math.round((data.savings||[]).filter(s=>s.type==='deposit').reduce((a,b)=>a+b.amount,0));
+  var unlocked = getUnlockedBadges().map(b=>b.id);
+  var prev = JSON.parse(localStorage.getItem('budget_badges')||'[]');
+  var isNew = id => unlocked.includes(id) && !prev.includes(id);
 
-  const bc = document.getElementById('badgeCount');
+  var bc = document.getElementById('badgeCount');
   if(bc) bc.textContent = unlocked.length+'/'+BADGES.length+' badges débloqués';
 
   // Build badges HTML without nested template literals
-  const CATS_ORDER = [
+  var CATS_ORDER = [
     {key:'debut',  label:'🌱 Premiers pas'},
     {key:'volume', label:'⚡ Volume'},
     {key:'epargne',label:'💰 Épargne'},
@@ -3708,14 +3798,14 @@ function renderGamif(){
 
   let badgesHtml = '';
   CATS_ORDER.forEach(function(cat){
-    const catBadges = BADGES.filter(function(b){return b.cat===cat.key;});
-    const catUnlocked = catBadges.filter(function(b){return unlocked.includes(b.id);}).length;
-    const allDone = catUnlocked===catBadges.length;
+    var catBadges = BADGES.filter(function(b){return b.cat===cat.key;});
+    var catUnlocked = catBadges.filter(function(b){return unlocked.includes(b.id);}).length;
+    var allDone = catUnlocked===catBadges.length;
     badgesHtml += '<div class="sec-label" style="font-size:11px;margin-top:14px">'+cat.label+' <span style="color:'+(allDone?'var(--inc-t)':'var(--t3)')+'">'+catUnlocked+'/'+catBadges.length+'</span></div>';
     badgesHtml += '<div class="badges-grid">';
     catBadges.forEach(function(b){
-      const ok = unlocked.includes(b.id);
-      const isnew = isNew(b.id);
+      var ok = unlocked.includes(b.id);
+      var isnew = isNew(b.id);
       badgesHtml += '<div class="badge-item'+(ok?'':' locked')+(isnew?' new-unlock':'')+'">';
       if(isnew) badgesHtml += '<div class="badge-new-tag">NEW</div>';
       badgesHtml += '<div class="badge-emoji">'+b.emoji+'</div>';
@@ -3729,7 +3819,7 @@ function renderGamif(){
     badgesHtml += '</div>';
   });
 
-  const el = document.getElementById('s-gamif');
+  var el = document.getElementById('s-gamif');
   el.innerHTML = '<div class="gamif-screen-pad">'
     + '<div class="score-card">'
     + '<div class="score-label">Score financier</div>'
@@ -3755,7 +3845,7 @@ function renderGamif(){
 }
 
 /* ── PERSONNALISATION ── */
-const NAV_ITEMS = [
+var NAV_ITEMS = [
   {id:'dash',     label:'Accueil',    emoji:'🏠'},
   {id:'add',      label:'Ajouter',    emoji:'➕'},
   {id:'history',  label:'Historique', emoji:'📋'},
@@ -4118,7 +4208,7 @@ function quickAddTx(){
 }
 
 /* ── DÉFI MENSUEL ── */
-const DEFIS = [
+var DEFIS = [
   {id:'no_restaurant', emoji:'🍳', title:'Chef à domicile', desc:'Zéro restaurant ce mois', check:function(d,p){
     var mTx=d.transactions.filter(function(t){return inPeriod(t.date,currentPeriod())&&t.type==='expense';});
     var resto=mTx.filter(function(t){return t.cat==='restaurants';});
@@ -4190,26 +4280,6 @@ function buildDefiCard(){
 }
 
 /* ── MULTI-COMPTES ── */
-// Comptes courants (multi-comptes accueil)
-const ACCOUNT_TYPES = [
-  {id:'courant', emoji:'💳', name:'Compte courant', desc:'Compte principal'},
-  {id:'joint',   emoji:'👥', name:'Compte joint',   desc:'Dépenses partagées'},
-  {id:'pro',     emoji:'💼', name:'Compte pro',     desc:'Activité professionnelle'},
-  {id:'custom',  emoji:'✏️', name:'Personnalisé',   desc:'Nom libre'},
-];
-
-// Placements épargne
-const SAVINGS_ACCOUNTS = [
-  {id:'livreta', emoji:'🏦', name:'Livret A',       rate:3.0,  cap:22950,  desc:'Livret réglementé'},
-  {id:'ldds',    emoji:'♻️', name:'LDDS',            rate:3.0,  cap:12000,  desc:'Développement durable'},
-  {id:'pel',     emoji:'🏠', name:'PEL',             rate:2.25, cap:61200,  desc:'Plan épargne logement'},
-  {id:'cel',     emoji:'🔑', name:'CEL',             rate:2.0,  cap:15300,  desc:'Compte épargne logement'},
-  {id:'livretj', emoji:'🎓', name:'Livret Jeune',    rate:4.0,  cap:1600,   desc:'Pour les -25 ans'},
-  {id:'assvie',  emoji:'📈', name:'Assurance-vie',   rate:3.5,  cap:0,      desc:'Fonds euros moyen'},
-  {id:'csl',     emoji:'💰', name:'Compte sur livret',rate:1.5, cap:0,      desc:'Livret bancaire classique'},
-  {id:'savpro',  emoji:'🏢', name:'Épargne salariale',rate:0,   cap:0,      desc:'PEE, PERCO...'},
-  {id:'savcustom',emoji:'✏️',name:'Autre placement', rate:0,   cap:0,      desc:'Personnalisé'},
-];
 
 var currentAccountId = 'main';
 var selectedAccountType = 'courant';
@@ -4375,137 +4445,6 @@ function buildAccountHero(cur){
   return html;
 }
 
-/* ── PLACEMENTS ÉPARGNE MULTIPLES ── */
-var selectedPlacementType = 'livreta';
-
-function getPlacements(){
-  if(!data.placements) data.placements = [];
-  return data.placements;
-}
-
-function getPlacementTotal(){
-  return getPlacements().reduce(function(s,p){return s+p.balance;},0);
-}
-
-function openPlacementModal(){
-  selectedPlacementType = 'livreta';
-  renderPlacementTypeGrid();
-  document.getElementById('placementNameInput').value = '';
-  document.getElementById('placementBalInput').value = '';
-  document.getElementById('placementRateInput').value = '';
-  document.getElementById('placementModalBg').classList.add('show');
-}
-
-function closePlacementModal(e){
-  if(!e||e.target===document.getElementById('placementModalBg'))
-    document.getElementById('placementModalBg').classList.remove('show');
-}
-
-function renderPlacementTypeGrid(){
-  var grid = document.getElementById('placementTypeGrid');
-  if(!grid) return;
-  grid.innerHTML = SAVINGS_ACCOUNTS.map(function(t){
-    return '<div class="placement-type-btn'+(selectedPlacementType===t.id?' selected':'')+'" onclick="selectPlacementType(\''+t.id+'\')">'
-      +'<div style="font-size:20px;margin-bottom:4px">'+t.emoji+'</div>'
-      +'<div style="font-size:12px;font-weight:600">'+t.name+'</div>'
-      +'<div style="font-size:10px;color:'+(t.rate>0?'var(--inc-t)':'var(--t3)')+';">'+(t.rate>0?'Taux '+t.rate+'%':t.desc)+'</div>'
-      +(t.cap>0?'<div style="font-size:9px;color:var(--t3)">Plafond '+fmtAmt(t.cap)+' €</div>':'')
-      +'</div>';
-  }).join('');
-}
-
-function selectPlacementType(id){
-  selectedPlacementType = id;
-  var type = SAVINGS_ACCOUNTS.find(function(t){return t.id===id;});
-  var nameInput = document.getElementById('placementNameInput');
-  if(nameInput && type && !nameInput.value) nameInput.value = type.name;
-  var rateInput = document.getElementById('placementRateInput');
-  if(rateInput && type) rateInput.placeholder = type.rate>0?type.rate+' (auto)':'Manuel';
-  renderPlacementTypeGrid();
-}
-
-function savePlacement(){
-  var type = SAVINGS_ACCOUNTS.find(function(t){return t.id===selectedPlacementType;})||SAVINGS_ACCOUNTS[0];
-  var name = document.getElementById('placementNameInput').value.trim() || type.name;
-  var balance = parseFloat(document.getElementById('placementBalInput').value)||0;
-  var customRate = parseFloat(document.getElementById('placementRateInput').value);
-  var rate = !isNaN(customRate) && customRate>0 ? customRate : type.rate;
-  if(!data.placements) data.placements = [];
-  data.placements.push({
-    id:'pl_'+Date.now(), type:selectedPlacementType,
-    emoji:type.emoji, name:name, balance:balance,
-    rate:rate, cap:type.cap, createdAt:new Date().toISOString()
-  });
-  save();
-  document.getElementById('placementModalBg').classList.remove('show');
-  renderSavings();
-  toast('✅ '+name+' ajouté !');
-}
-
-function updatePlacementBalance(id, newBal){
-  var p = getPlacements().find(function(p){return p.id===id;});
-  if(p){p.balance = parseFloat(newBal)||0; save(); renderSavings();}
-}
-
-function deletePlacement(id){
-  openModal('Supprimer ce placement ?','', function(){
-    data.placements = (data.placements||[]).filter(function(p){return p.id!==id;});
-    save(); renderSavings(); toast('🗑 Placement supprimé');
-  });
-}
-
-function buildPlacementsSection(cur){
-  var placements = getPlacements();
-  var total = getPlacementTotal();
-  var totalInterest = placements.reduce(function(s,p){return s+(p.balance*(p.rate/100));},0);
-
-  var html = '<div class="sec-label" style="display:flex;justify-content:space-between;align-items:center">';
-  html += '<span>Mes placements</span>';
-  html += '<button onclick="openPlacementModal()" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">+ Ajouter</button>';
-  html += '</div>';
-
-  if(placements.length > 0){
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
-    html += '<div class="glass-card" style="padding:12px;text-align:center"><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Total placé</div><div style="font-size:20px;font-weight:300">'+fmtAmt(Math.round(total))+' '+cur+'</div></div>';
-    html += '<div class="glass-card" style="padding:12px;text-align:center"><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Intérêts/an ~</div><div style="font-size:20px;font-weight:300;color:var(--inc-t)">+'+fmtAmt(Math.round(totalInterest))+' '+cur+'</div></div>';
-    html += '</div>';
-
-    placements.forEach(function(p){
-      var capPct = p.cap>0 ? Math.min(100,Math.round((p.balance/p.cap)*100)) : 0;
-      var annualInterest = Math.round(p.balance*(p.rate/100));
-      var monthlyInterest = Math.round(annualInterest/12);
-      html += '<div class="placement-card">';
-      html += '<div class="placement-header">';
-      html += '<div class="placement-emoji">'+p.emoji+'</div>';
-      html += '<div class="placement-info"><div class="placement-name">'+p.name+'</div>';
-      html += '<div class="placement-type">'+p.type.toUpperCase()+(p.rate>0?' · Taux '+p.rate+'%':'')+'</div></div>';
-      if(p.rate>0) html += '<span class="placement-rate-badge">'+p.rate+'%</span>';
-      html += '</div>';
-      html += '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:8px">';
-      html += '<div class="placement-bal">'+fmtAmt(Math.round(p.balance))+' '+cur+'</div>';
-      html += '</div>';
-      if(p.cap>0){
-        html += '<div class="placement-progress"><div class="placement-progress-fill" style="width:'+capPct+'%"></div></div>';
-        html += '<div class="placement-footer"><span>'+capPct+'% du plafond</span><span>Plafond '+fmtAmt(p.cap)+' '+cur+'</span></div>';
-      }
-      if(p.rate>0){
-        html += '<div class="placement-interest">💰 ~'+fmtAmt(annualInterest)+' '+cur+'/an · '+fmtAmt(monthlyInterest)+' '+cur+'/mois</div>';
-      }
-      html += '<div style="display:flex;gap:8px;margin-top:10px">';
-      html += '<input type="number" placeholder="Nouveau solde" inputmode="decimal" style="flex:1;font-size:13px;padding:8px 12px;border-radius:10px;border:.5px solid var(--glass-b);background:var(--surface2);color:var(--text);font-family:var(--font)" onchange="updatePlacementBalance(\''+p.id+'\',this.value)">';
-      html += '<button onclick="deletePlacement(\''+p.id+'\')" style="padding:8px 12px;border-radius:10px;background:rgba(255,95,95,.1);color:var(--red);border:none;cursor:pointer;font-size:14px">🗑</button>';
-      html += '</div>';
-      html += '</div>';
-    });
-  } else {
-    html += '<div class="glass-card" style="padding:24px;text-align:center;color:var(--t3)">';
-    html += '<div style="font-size:32px;margin-bottom:8px">🏦</div>';
-    html += '<div style="font-size:14px;font-weight:500;margin-bottom:4px">Aucun placement</div>';
-    html += '<div style="font-size:12px">Ajoute ton Livret A, PEL, assurance-vie...</div>';
-    html += '</div>';
-  }
-  return html;
-}
 // Init
 if(!prefs.payDay) prefs.payDay=25;
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyPrefs()});
@@ -4515,6 +4454,7 @@ processDueRecurring();
 setTimeout(updateNotifBadge, 100);
 setTimeout(checkNewBadges, 500);
 applyNavOrder();
+processDuePlacementRecurrings();
 showSplash();
 if(prefs.pinEnabled){ setTimeout(()=>showPinScreen("unlock"), 1900); }
 setType('expense');
