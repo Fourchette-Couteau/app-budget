@@ -705,6 +705,17 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .forecast-month-bal.pos{color:var(--inc-t)}
 .forecast-month-bal.neg{color:var(--exp-t)}
 .forecast-month-sub{font-size:9px;color:var(--t3);margin-top:2px}
+/* ─ CATÉGORIES PERSO ─ */
+.cat-perso-modal-bg{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end}
+.cat-perso-modal-bg.show{opacity:1;pointer-events:all}
+.cat-perso-modal{width:100%;background:var(--bg2);border-radius:28px 28px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+20px);max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.cat-perso-modal-bg.show .cat-perso-modal{transform:translateY(0)}
+.cat-list-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--glass);border:.5px solid var(--glass-b);margin-bottom:8px}
+.cat-emoji-btn{width:40px;height:40px;border-radius:10px;background:var(--surface2);border:.5px solid var(--glass-b);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.cat-name-input{flex:1;background:none;border:none;font-size:14px;font-weight:500;color:var(--text);font-family:var(--font);outline:none}
+.emoji-picker-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-height:200px;overflow-y:auto;padding:8px 0}
+.emoji-picker-btn{font-size:22px;padding:6px;border-radius:8px;cursor:pointer;text-align:center;transition:var(--tr);border:none;background:none}
+.emoji-picker-btn:active{background:var(--surface2);transform:scale(1.2)}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -947,6 +958,17 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <button class="btn-save" onclick="savePlacement()" style="width:100%">Ajouter le placement</button>
   </div>
 </div>
+<div class="cat-perso-modal-bg" id="catPersoModalBg" onclick="closeCatPersoModal(event)">
+  <div class="cat-perso-modal">
+    <div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:17px;font-weight:600">Personnaliser les catégories</div>
+      <button onclick="addCustomCat()" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">+ Ajouter</button>
+    </div>
+    <div id="catPersoList"></div>
+    <button onclick="saveCatPerso()" style="width:100%;padding:13px;border-radius:14px;background:var(--accent);border:none;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px">Enregistrer</button>
+  </div>
+</div>
 <div class="account-modal-bg" id="accountModalBg" onclick="closeAccountModal(event)">
   <div class="account-modal">
     <div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>
@@ -1111,7 +1133,13 @@ var PROFILES = [
     tips:'L\'estimation IR est calculee sur le bareme standard. Consulte impots.gouv.fr pour ta situation.'
   },
 ];
-function getCat(id){return[...CATS.expense,...CATS.income].find(c=>c.id===id)||{l:id,e:'📦',c:'#888'}}
+function getCat(id){
+  var custom=getCustomCats();
+  var found=custom.find(function(c){return c.id===id;});
+  if(found) return found;
+  var all=CATS.expense.concat(CATS.income);
+  return all.find(function(c){return c.id===id;})||{id:id,l:id,e:'📦',c:'#888'};
+}
 function fmtAmt(v){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).format(v)}
 // Clamp day to last day of month (handles payDay 29/30/31 in short months)
 function clampDay(y, m, d){
@@ -2943,7 +2971,11 @@ function renderRecurring(){
     });
     html+='</div>';
   }
-  html+='<div class="rec-add-card"><div style="font-size:15px;font-weight:600;margin-bottom:14px">🔁 Nouvelle récurrence</div>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  html+='<div class="sec-label" style="margin-bottom:0">🔁 Nouvelle récurrence</div>';
+  html+='<button onclick="openCatPersoModal()" style="font-size:11px;padding:5px 10px;border-radius:8px;background:var(--surface2);border:none;color:var(--t2);cursor:pointer;font-family:var(--font)">✏️ Catégories</button>';
+  html+='</div>';
+  html+='<div class="rec-add-card">';
   html+='<div class="type-toggle" style="margin-bottom:12px">';
   html+='<button class="type-btn active" id="rec-btn-exp" onclick="setRecType(\'expense\')">Dépense</button>';
   html+='<button class="type-btn" id="rec-btn-inc" onclick="setRecType(\'income\')">Revenu</button>';
@@ -2959,7 +2991,10 @@ function renderRecurring(){
   html+='</select></div>';
   html+='<button class="btn-save" onclick="addRecurring()">Ajouter la récurrence</button></div>';
   if(data.recurring.length>0){
-    html+='<div class="sec-label">Mes récurrences</div><div class="glass-card" style="overflow:hidden">';
+    var totalRec = data.recurring.filter(function(r){return r.active&&r.type==='expense';}).reduce(function(s,r){return s+r.amount;},0);
+    var totalRecInc = data.recurring.filter(function(r){return r.active&&r.type==='income';}).reduce(function(s,r){return s+r.amount;},0);
+    html+='<div class="sec-label" style="display:flex;justify-content:space-between;align-items:center"><span>Mes récurrences</span><span style="font-size:12px;font-weight:600;color:var(--exp-t)">-'+fmtAmt(Math.round(totalRec))+' '+cur+'/m'+(totalRecInc>0?' <span style="color:var(--inc-t)">+'+fmtAmt(Math.round(totalRecInc))+'</span>':'')+'</span></div>';
+    html+='<div class="glass-card" style="overflow:hidden">';
     data.recurring.forEach(function(r,i){
       var c=getCat(r.cat);
       if(i>0) html+='<div class="divider"></div>';
@@ -2993,7 +3028,9 @@ function setRecType(t){
   document.getElementById('rec-btn-exp').classList.toggle('active', t==='expense');
   document.getElementById('rec-btn-inc').classList.toggle('active', t==='income');
   var sel = document.getElementById('rec-cat');
-  if(sel) sel.innerHTML = CATS[t].map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+  var customCats = getCustomCats();
+  var allCats = CATS[t].concat(t==='expense'?customCats:[]);
+  if(sel) sel.innerHTML = allCats.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
 }
 
 function addRecurring(){
@@ -4642,6 +4679,122 @@ function buildScoreHistorySection(){
   html += '<div style="font-size:10px;color:var(--t3);margin-top:4px">'+last30.length+' derniers jours</div>';
   html += '</div>';
   return html;
+}
+
+/* ── CATÉGORIES PERSONNALISÉES ── */
+var EMOJI_LIST = ['🛒','🚗','🏠','💊','🎬','👕','📱','🍽️','🏃','📦','✈️','🎮','🎓','💈','🐾','🎵','🏋️','🛠️','🚿','🌿','☕','🍕','🛍️','💻','📚','🎁','🏖️','🚂','🛒','⚽','🎯','🎪','🌮','🍣','🍺','💰','🔧','🏥','🚌','🎭','🌟','🎈','🦋','🐱','🐶','🌺','💎','🎸','🎹','🎨'];
+
+function getCustomCats(){
+  return JSON.parse(localStorage.getItem('budget_custom_cats')||'[]');
+}
+
+function getCat(id){
+  // Check custom cats first
+  var custom = getCustomCats();
+  var found = custom.find(function(c){return c.id===id;});
+  if(found) return found;
+  // Check built-in
+  var all = CATS.expense.concat(CATS.income);
+  return all.find(function(c){return c.id===id;}) || {id:id,l:'Autre',e:'📦',c:'#9E9E9E'};
+}
+
+function openCatPersoModal(){
+  var custom = getCustomCats();
+  renderCatPersoList(custom);
+  document.getElementById('catPersoModalBg').classList.add('show');
+}
+
+function closeCatPersoModal(e){
+  if(!e||e.target===document.getElementById('catPersoModalBg'))
+    document.getElementById('catPersoModalBg').classList.remove('show');
+}
+
+function renderCatPersoList(cats){
+  var el = document.getElementById('catPersoList');
+  if(!el) return;
+  var html = '';
+  if(cats.length===0){
+    html = '<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">Aucune catégorie personnalisée.<br>Appuie sur + Ajouter pour commencer.</div>';
+  }
+  cats.forEach(function(c, i){
+    html += '<div class="cat-list-item">';
+    html += '<div class="cat-emoji-btn" onclick="openEmojiPicker('+i+')" id="cat-emoji-'+i+'">'+c.e+'</div>';
+    html += '<input class="cat-name-input" type="text" value="'+c.l+'" placeholder="Nom de la catégorie" oninput="updateCatName('+i+',this.value)" id="cat-name-'+i+'">';
+    html += '<button onclick="removeCat('+i+')" style="background:none;border:none;font-size:18px;color:var(--t3);cursor:pointer;padding:4px">×</button>';
+    html += '</div>';
+    html += '<div id="emoji-picker-'+i+'" style="display:none;margin-bottom:8px">';
+    html += '<div class="emoji-picker-wrap">';
+    EMOJI_LIST.forEach(function(em){
+      html += '<div class="emoji-picker-btn" onclick="selectEmoji('+i+',\''+em+'\')">'+em+'</div>';
+    });
+    html += '</div></div>';
+  });
+  el.innerHTML = html;
+}
+
+var tempCats = [];
+
+function addCustomCat(){
+  var custom = getCustomCats();
+  tempCats = custom.slice();
+  tempCats.push({id:'custom_'+Date.now(), l:'Nouvelle catégorie', e:'✨', c:'#9b59b6'});
+  renderCatPersoList(tempCats);
+}
+
+function removeCat(i){
+  var custom = getCustomCats();
+  tempCats = custom.slice();
+  tempCats.splice(i,1);
+  renderCatPersoList(tempCats);
+}
+
+function updateCatName(i, val){
+  var custom = getCustomCats();
+  tempCats = custom.slice();
+  if(tempCats[i]) tempCats[i].l = val;
+}
+
+function openEmojiPicker(i){
+  // Close all other pickers
+  document.querySelectorAll('[id^="emoji-picker-"]').forEach(function(el){el.style.display='none';});
+  var picker = document.getElementById('emoji-picker-'+i);
+  if(picker) picker.style.display = picker.style.display==='none'?'block':'none';
+}
+
+function selectEmoji(i, emoji){
+  var custom = getCustomCats();
+  tempCats = custom.slice();
+  if(tempCats[i]){
+    tempCats[i].e = emoji;
+    var btn = document.getElementById('cat-emoji-'+i);
+    if(btn) btn.textContent = emoji;
+    var picker = document.getElementById('emoji-picker-'+i);
+    if(picker) picker.style.display = 'none';
+  }
+}
+
+function saveCatPerso(){
+  // Collect current values from inputs
+  var saved = [];
+  var items = document.querySelectorAll('#catPersoList .cat-list-item');
+  items.forEach(function(item, i){
+    var nameInput = item.querySelector('.cat-name-input');
+    var emojiBtn = item.querySelector('.cat-emoji-btn');
+    var existing = tempCats[i] || getCustomCats()[i] || {};
+    if(nameInput && nameInput.value.trim()){
+      saved.push({
+        id: existing.id || ('custom_'+Date.now()+'_'+i),
+        l: nameInput.value.trim(),
+        e: emojiBtn ? emojiBtn.textContent : '✨',
+        c: existing.c || '#9b59b6'
+      });
+    }
+  });
+  localStorage.setItem('budget_custom_cats', JSON.stringify(saved));
+  document.getElementById('catPersoModalBg').classList.remove('show');
+  toast('✅ Catégories sauvegardées !');
+  // Refresh category selects
+  setType(txType);
 }
 // Init
 if(!prefs.payDay) prefs.payDay=25;
