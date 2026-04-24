@@ -98,7 +98,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .nav-btn.active .nav-icon{transform:scale(1.1)}
 
 
-.glass-card{background:rgba(0,0,0,0.55);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:0.5px solid rgba(255,255,255,0.1);border-radius:var(--radius);box-shadow:var(--shadow);transition:background var(--tr),border-color var(--tr)}
+.glass-card{background:rgba(255,255,255,0.08);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:0.5px solid rgba(255,255,255,0.12);border-radius:var(--radius);box-shadow:var(--shadow);transition:background var(--tr),border-color var(--tr)}
 
 /* ─ DASHBOARD ─ */
 .dash-pad{padding:16px}
@@ -534,17 +534,17 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* ─ NOTIFICATIONS ─ */
 .notif-panel-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .notif-panel-bg.show{opacity:1;pointer-events:all}
-.notif-panel{position:absolute;top:0;right:0;width:min(340px,100vw);height:100%;background:rgba(28,28,30,.92);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.3)}
+.notif-panel{position:absolute;top:0;right:0;width:min(340px,100vw);height:100%;background:rgba(10,10,15,.75);backdrop-filter:saturate(200%) blur(50px);-webkit-backdrop-filter:saturate(200%) blur(50px);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.5)}
 .notif-panel-bg.show .notif-panel{transform:translateX(0)}
 .notif-header{padding:calc(var(--safe-top,44px) + 12px) 20px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--sep);flex-shrink:0}
 .notif-header-title{font-size:17px;font-weight:600}
 .notif-close{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:16px;color:var(--t2);display:flex;align-items:center;justify-content:center}
 .notif-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px}
-.notif-item{display:flex;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:8px;background:var(--glass);border:.5px solid var(--glass-b);cursor:pointer;transition:var(--tr)}
-.notif-item:active{opacity:.8}
-.notif-item.unread{border-left:3px solid var(--accent)}
-.notif-item.unread-warn{border-left:3px solid var(--amber)}
-.notif-item.unread-danger{border-left:3px solid var(--red)}
+.notif-item{display:flex;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:8px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.06);border-left:3px solid rgba(255,255,255,.15);cursor:pointer;transition:var(--tr);opacity:.5}
+.notif-item:active{opacity:.4}
+.notif-item.unread{background:var(--glass);border:.5px solid var(--glass-b);border-left:3px solid var(--accent);opacity:1}
+.notif-item.unread-warn{background:var(--glass);border:.5px solid var(--glass-b);border-left:3px solid var(--amber);opacity:1}
+.notif-item.unread-danger{background:var(--glass);border:.5px solid var(--glass-b);border-left:3px solid var(--red);opacity:1}
 .notif-dot{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .notif-info{flex:1;min-width:0}
 .notif-title{font-size:14px;font-weight:500;margin-bottom:2px}
@@ -634,7 +634,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* Modal nouveau compte */
 .account-modal-bg{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end}
 .account-modal-bg.show{opacity:1;pointer-events:all}
-.account-modal{width:100%;background:rgba(15,15,20,.70);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+28px);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:85vh;overflow-y:auto}
+.account-modal{width:100%;background:rgba(15,15,20,.35);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+28px);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:85vh;overflow-y:auto}
 .account-modal-bg.show .account-modal{transform:translateY(0)}
 .account-modal .btn-save{background:var(--accent);border:none;color:#fff;font-size:16px;font-weight:600;padding:14px;border-radius:16px;width:100%;cursor:pointer;font-family:var(--font);margin-top:4px}
 .account-type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
@@ -710,9 +710,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
 
 /* confirm modal */
-.modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .modal-bg.show{opacity:1;pointer-events:all}
-.modal{background:var(--bg2);border-radius:var(--radius);margin:0 16px calc(env(safe-area-inset-bottom,0px) + 12px);width:calc(100% - 32px);max-width:500px;transform:translateY(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.modal{background:rgba(15,15,20,.40);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;margin:0;width:100%;transform:translateY(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow:hidden}
 .modal-bg.show .modal{transform:translateY(0)}
 .modal-inner{padding:22px 20px 20px}
 .modal-title{font-size:17px;font-weight:600;text-align:center;margin-bottom:8px}
@@ -929,22 +929,24 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="account-modal">
     <div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>
     <div style="font-size:17px;font-weight:600;margin-bottom:14px">Nouveau placement</div>
-    <div class="placement-type-grid" id="placementTypeGrid"></div>
-    <div class="f-group" style="margin-bottom:10px">
-      <label class="f-label">Nom (optionnel)</label>
-      <input type="text" id="placementNameInput" placeholder="Ex : Mon Livret A">
-    </div>
-    <div class="f-row" style="margin-bottom:14px">
-      <div class="f-group" style="margin-bottom:0">
-        <label class="f-label">Solde actuel</label>
-        <input type="number" id="placementBalInput" placeholder="0" inputmode="decimal">
+    <div class="placement-type-grid" id="placementTypeGrid" style="padding:0 12px"></div>
+    <div style="padding:0 12px">
+      <div class="f-group" style="margin-bottom:10px">
+        <label class="f-label">Nom (optionnel)</label>
+        <input type="text" id="placementNameInput" placeholder="Ex : Mon Livret A">
       </div>
-      <div class="f-group" style="margin-bottom:0">
-        <label class="f-label">Taux % (si différent)</label>
-        <input type="number" id="placementRateInput" placeholder="Auto" inputmode="decimal" step="0.01">
+      <div class="f-row" style="margin-bottom:14px">
+        <div class="f-group" style="margin-bottom:0">
+          <label class="f-label">Solde actuel</label>
+          <input type="number" id="placementBalInput" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="f-group" style="margin-bottom:0">
+          <label class="f-label">Taux % (si différent)</label>
+          <input type="number" id="placementRateInput" placeholder="Auto" inputmode="decimal" step="0.01">
+        </div>
       </div>
+      <button class="btn-save" onclick="savePlacement()" style="width:100%">Ajouter le placement</button>
     </div>
-    <button class="btn-save" onclick="savePlacement()" style="width:100%">Ajouter le placement</button>
   </div>
 </div>
 <div class="cat-perso-modal-bg" id="catPersoModalBg" onclick="closeCatPersoModal(event)">
@@ -1950,8 +1952,8 @@ function closePlacementModal(e){
 function renderPlacementTypeGrid(){
   var grid = document.getElementById('placementTypeGrid');
   if(!grid) return;
-  var btnStyle = 'padding:14px 12px;border-radius:16px;border:.5px solid rgba(255,255,255,.2);background:rgba(60,60,80,0.9);cursor:pointer;transition:all .2s';
-  var btnStyleSel = 'padding:14px 12px;border-radius:16px;border:1.5px solid var(--accent);background:rgba(79,142,255,.22);cursor:pointer;transition:all .2s;box-shadow:0 0 12px rgba(79,142,255,.25)';
+  var btnStyle = 'padding:14px 12px;border-radius:16px;border:.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);cursor:pointer;transition:all .2s';
+  var btnStyleSel = 'padding:14px 12px;border-radius:16px;border:.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.18);cursor:pointer;transition:all .2s;box-shadow:0 2px 16px rgba(0,0,0,.3)';
   grid.innerHTML = SAVINGS_ACCOUNTS.map(function(t){
     var isSel = selectedPlacementType===t.id;
     return '<div style="'+(isSel?btnStyleSel:btnStyle)+'" onclick="selectPlacementType(\''+t.id+'\')">'+
