@@ -3031,10 +3031,7 @@ function setRecType(t){
   document.getElementById('rec-btn-exp').classList.toggle('active', t==='expense');
   document.getElementById('rec-btn-inc').classList.toggle('active', t==='income');
   var sel = document.getElementById('rec-cat');
-  var customCats = getCustomCats();
-  var hidden = getHiddenBaseCats();
-  var baseCats = CATS[t].filter(function(c){return hidden.indexOf(c.id)===-1;});
-  var allCats = baseCats.concat(t==='expense'?customCats:[]);
+  var allCats = t==='expense'?getVisibleExpenseCats():CATS.income;
   if(sel) sel.innerHTML = allCats.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
 }
 
@@ -3233,7 +3230,7 @@ function openEditRec(i){
 
   // Cat selector
   var catSel = document.getElementById('editrec-cat');
-  catSel.innerHTML = CATS.expense.concat(CATS.income).map(function(c){return '<option value="'+c.id+'"'+(c.id===r.cat?' selected':'')+'>'+c.e+' '+c.l+'</option>';}).join('');
+  catSel.innerHTML = getVisibleAllCats().map(function(c){return '<option value="'+c.id+'"'+(c.id===r.cat?' selected':'')+'>'+c.e+' '+c.l+'</option>';}).join('');
 
   document.getElementById('editRecModalBg').classList.add('show');
 }
@@ -4636,6 +4633,18 @@ function closeCatPersoModal(e){
 }
 
 // Get hidden base cats from localStorage
+
+function getVisibleExpenseCats(){
+  var hidden = getHiddenBaseCats();
+  var custom = getCustomCats();
+  return CATS.expense.filter(function(c){return hidden.indexOf(c.id)===-1;}).concat(custom);
+}
+function getVisibleAllCats(){
+  var hidden = getHiddenBaseCats();
+  var custom = getCustomCats();
+  var exp = CATS.expense.filter(function(c){return hidden.indexOf(c.id)===-1;});
+  return exp.concat(CATS.income).concat(custom);
+}
 function getHiddenBaseCats(){
   return JSON.parse(localStorage.getItem('budget_hidden_cats')||'[]');
 }
@@ -4753,15 +4762,14 @@ function saveCatPerso(){
   // Refresh ALL selects
   setType(txType);
   var customCats = getCustomCats();
-  var allExp = CATS.expense.concat(customCats);
+  var visExp = getVisibleExpenseCats();
   var recCat = document.getElementById('rec-cat');
-  if(recCat) recCat.innerHTML = allExp.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+  if(recCat) recCat.innerHTML = visExp.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
   var bcat = document.getElementById('bcat');
-  if(bcat) bcat.innerHTML = allExp.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+  if(bcat) bcat.innerHTML = visExp.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
   var editCat = document.getElementById('edit-cat');
   if(editCat){
-    var allCats = CATS.expense.concat(CATS.income).concat(customCats);
-    editCat.innerHTML = allCats.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+    editCat.innerHTML = getVisibleAllCats().map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
   }
   renderHistory();
 }
