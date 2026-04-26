@@ -691,11 +691,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* ─ CATÉGORIES PERSO ─ */
 .cat-perso-modal-bg{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end}
 .cat-perso-modal-bg.show{opacity:1;pointer-events:all}
-.cat-perso-modal{width:100%;background:rgba(28,28,30,.92);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+28px);max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.cat-perso-modal{width:100%;background:rgba(15,15,20,.35);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 18px calc(env(safe-area-inset-bottom,0px)+28px);max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .cat-perso-modal-bg.show .cat-perso-modal{transform:translateY(0)}
-.cat-list-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--glass);border:.5px solid var(--glass-b);margin-bottom:8px}
-.cat-emoji-btn{width:40px;height:40px;border-radius:10px;background:var(--surface2);border:.5px solid var(--glass-b);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.cat-name-input{flex:1;background:none;border:none;font-size:14px;font-weight:500;color:var(--text);font-family:var(--font);outline:none}
+.cat-list-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.12);margin-bottom:10px}
+.cat-emoji-btn{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);border:.5px solid rgba(255,255,255,.15);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.cat-name-input{flex:1;background:rgba(255,255,255,.06);border:.5px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:500;color:#fff;font-family:var(--font);outline:none}
 .emoji-picker-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-height:200px;overflow-y:auto;padding:8px 0}
 .emoji-picker-btn{font-size:22px;padding:6px;border-radius:8px;cursor:pointer;text-align:center;transition:var(--tr);border:none;background:none}
 .emoji-picker-btn:active{background:var(--surface2);transform:scale(1.2)}
@@ -951,13 +951,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 <div class="cat-perso-modal-bg" id="catPersoModalBg" onclick="closeCatPersoModal(event)">
   <div class="cat-perso-modal">
-    <div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:0 18px">
       <div style="font-size:17px;font-weight:600">Personnaliser les catégories</div>
       <button onclick="addCustomCat()" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">+ Ajouter</button>
     </div>
-    <div id="catPersoList"></div>
-    <button onclick="saveCatPerso()" style="width:100%;padding:13px;border-radius:14px;background:var(--accent);border:none;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px">Enregistrer</button>
+    <div style="background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:.5px solid var(--glass-b);border-radius:var(--radius);padding:18px;margin-bottom:12px"><div id="catPersoList"></div>
+    <button onclick="saveCatPerso()" style="width:100%;padding:13px;border-radius:14px;background:var(--accent);border:none;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px">Enregistrer</button></div>
   </div>
 </div>
 <div class="account-modal-bg" id="accountModalBg" onclick="closeAccountModal(event)">
@@ -3032,7 +3032,9 @@ function setRecType(t){
   document.getElementById('rec-btn-inc').classList.toggle('active', t==='income');
   var sel = document.getElementById('rec-cat');
   var customCats = getCustomCats();
-  var allCats = CATS[t].concat(t==='expense'?customCats:[]);
+  var hidden = getHiddenBaseCats();
+  var baseCats = CATS[t].filter(function(c){return hidden.indexOf(c.id)===-1;});
+  var allCats = baseCats.concat(t==='expense'?customCats:[]);
   if(sel) sel.innerHTML = allCats.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
 }
 
@@ -4623,7 +4625,8 @@ function getCat(id){
 
 function openCatPersoModal(){
   var custom = getCustomCats();
-  renderCatPersoList(custom);
+  tempCats = custom.slice();
+  renderCatPersoList();
   document.getElementById('catPersoModalBg').classList.add('show');
 }
 
@@ -4632,48 +4635,68 @@ function closeCatPersoModal(e){
     document.getElementById('catPersoModalBg').classList.remove('show');
 }
 
-function renderCatPersoList(cats){
+// Get hidden base cats from localStorage
+function getHiddenBaseCats(){
+  return JSON.parse(localStorage.getItem('budget_hidden_cats')||'[]');
+}
+
+function renderCatPersoList(){
   var el = document.getElementById('catPersoList');
   if(!el) return;
+  var hidden = getHiddenBaseCats();
   var html = '';
-  if(cats.length===0){
-    html = '<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">Aucune catégorie personnalisée.<br>Appuie sur + Ajouter pour commencer.</div>';
+
+  // Section catégories de base
+  html += '<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Catégories de base</div>';
+  CATS.expense.forEach(function(c, i){
+    var isHidden = hidden.indexOf(c.id) !== -1;
+    html += '<div class="cat-list-item" style="opacity:'+(isHidden?'0.4':'1')+'">';
+    html += '<div style="width:44px;height:44px;border-radius:12px;background:'+c.c+'22;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">'+c.e+'</div>';
+    html += '<span style="flex:1;font-size:14px;font-weight:500">'+c.l+'</span>';
+    html += '<button onclick="toggleBasecat(\''+c.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;padding:4px;color:'+(isHidden?'var(--exp-t)':'var(--inc-t)')+'">'+(isHidden?'🚫':'✓')+'</button>';
+    html += '</div>';
+  });
+
+  // Section catégories personnalisées
+  html += '<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin:16px 0 8px">Mes catégories</div>';
+  if(tempCats.length===0){
+    html += '<div style="text-align:center;padding:16px;color:var(--t3);font-size:13px">Aucune catégorie personnalisée.<br>Appuie sur + Ajouter.</div>';
   }
-  cats.forEach(function(c, i){
+  tempCats.forEach(function(c, i){
     html += '<div class="cat-list-item">';
     html += '<div class="cat-emoji-btn" onclick="openEmojiPicker('+i+')" id="cat-emoji-'+i+'">'+c.e+'</div>';
-    html += '<input class="cat-name-input" type="text" value="'+c.l+'" placeholder="Nom de la catégorie" oninput="updateCatName('+i+',this.value)" id="cat-name-'+i+'">';
-    html += '<button onclick="removeCat('+i+')" style="background:none;border:none;font-size:18px;color:var(--t3);cursor:pointer;padding:4px">×</button>';
+    html += '<input class="cat-name-input" type="text" value="'+c.l+'" placeholder="Nom" oninput="updateCatName('+i+',this.value)" id="cat-name-'+i+'">';
+    html += '<button onclick="removeCat('+i+')" style="background:none;border:none;font-size:18px;color:var(--exp-t);cursor:pointer;padding:4px">×</button>';
     html += '</div>';
-    html += '<div id="emoji-picker-'+i+'" style="display:none;margin-bottom:8px">';
-    html += '<div class="emoji-picker-wrap">';
-    EMOJI_LIST.forEach(function(em){
-      html += '<div class="emoji-picker-btn" onclick="selectEmoji('+i+',\''+em+'\')">'+em+'</div>';
-    });
-    html += '</div></div>';
+
   });
   el.innerHTML = html;
+}
+
+function toggleBasecat(id){
+  var hidden = getHiddenBaseCats();
+  var idx = hidden.indexOf(id);
+  if(idx === -1) hidden.push(id);
+  else hidden.splice(idx, 1);
+  localStorage.setItem('budget_hidden_cats', JSON.stringify(hidden));
+  renderCatPersoList();
+  // Refresh selects
+  setType(txType);
 }
 
 var tempCats = [];
 
 function addCustomCat(){
-  var custom = getCustomCats();
-  tempCats = custom.slice();
   tempCats.push({id:'custom_'+Date.now(), l:'Nouvelle catégorie', e:'✨', c:'#9b59b6'});
-  renderCatPersoList(tempCats);
+  renderCatPersoList();
 }
 
 function removeCat(i){
-  var custom = getCustomCats();
-  tempCats = custom.slice();
   tempCats.splice(i,1);
-  renderCatPersoList(tempCats);
+  renderCatPersoList();
 }
 
 function updateCatName(i, val){
-  var custom = getCustomCats();
-  tempCats = custom.slice();
   if(tempCats[i]) tempCats[i].l = val;
 }
 
@@ -4709,7 +4732,6 @@ function selectEmoji(i, emoji){
 }
 
 function saveCatPerso(){
-  // Collect current values from inputs
   var saved = [];
   var items = document.querySelectorAll('#catPersoList .cat-list-item');
   items.forEach(function(item, i){
@@ -4720,7 +4742,7 @@ function saveCatPerso(){
       saved.push({
         id: existing.id || ('custom_'+Date.now()+'_'+i),
         l: nameInput.value.trim(),
-        e: emojiBtn ? emojiBtn.textContent : '✨',
+        e: emojiBtn ? emojiBtn.textContent.trim() : '✨',
         c: existing.c || '#9b59b6'
       });
     }
@@ -4728,8 +4750,20 @@ function saveCatPerso(){
   localStorage.setItem('budget_custom_cats', JSON.stringify(saved));
   document.getElementById('catPersoModalBg').classList.remove('show');
   toast('✅ Catégories sauvegardées !');
-  // Refresh category selects
+  // Refresh ALL selects
   setType(txType);
+  var customCats = getCustomCats();
+  var allExp = CATS.expense.concat(customCats);
+  var recCat = document.getElementById('rec-cat');
+  if(recCat) recCat.innerHTML = allExp.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+  var bcat = document.getElementById('bcat');
+  if(bcat) bcat.innerHTML = allExp.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+  var editCat = document.getElementById('edit-cat');
+  if(editCat){
+    var allCats = CATS.expense.concat(CATS.income).concat(customCats);
+    editCat.innerHTML = allCats.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+  }
+  renderHistory();
 }
 // Init
 if(!prefs.payDay) prefs.payDay=25;
