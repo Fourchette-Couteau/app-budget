@@ -1297,9 +1297,9 @@ function openEditTx(id){
 
   // Fill category select with right type
   var sel = document.getElementById('edit-cat');
-  sel.innerHTML = [...CATS.expense, ...CATS.income].map(cat =>
-    '<option value="'+cat.id+'" '+(cat.id===tx.cat?'selected':'')+'>'+cat.e+' '+cat.l+'</option>'
-  ).join('');
+  sel.innerHTML = getVisibleAllCats().map(function(cat){
+    return '<option value="'+cat.id+'" '+(cat.id===tx.cat?'selected':'')+'>'+cat.e+' '+cat.l+'</option>';
+  }).join('');
 
   document.getElementById('editModalBg').classList.add('show');
 }
