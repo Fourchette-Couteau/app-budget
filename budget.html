@@ -1237,7 +1237,8 @@ function setType(t){
   document.getElementById('btn-inc').classList.toggle('active',t==='income');
   var sel=document.getElementById('cat');
   var favCats=prefs.favCats||[];
-  var sorted=CATS[t].slice().sort(function(a,b){
+  var baseCats = t==='expense' ? getVisibleExpenseCats() : CATS.income;
+  var sorted=baseCats.slice().sort(function(a,b){
     var aFav=favCats.indexOf(a.id)!==-1;
     var bFav=favCats.indexOf(b.id)!==-1;
     if(aFav&&!bFav) return -1;
@@ -2303,7 +2304,10 @@ function renderSettings(){
   html+='<div class="set-row" onclick="nav(\'gamif\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(255,179,64,.15)">🏆</div>';
   html+='<div class="set-info"><div class="set-name">Succès &amp; Badges</div><div class="set-desc" id="badgeCount">'+getUnlockedBadges().length+'/'+BADGES.length+' badges débloqués</div></div><span class="set-right">›</span></div>';
   html+='<div class="divider"></div>';
-  html+='<div class="set-row" onclick="nav(\'perso\')" style="cursor:pointer"><div class="set-icon" style="background:rgba(156,39,176,.15)">🎛️</div>';
+  html+='<div class="set-row" onclick="openCatPersoModal()" style="cursor:pointer"><div class="set-icon" style="background:rgba(255,152,0,.15)">✏️</div>';
+  html+='<div class="set-info"><div class="set-name">Catégories</div><div class="set-desc">Gérer et personnaliser les catégories</div></div><span class="set-right">›</span></div>';
+  html+='<div class="divider"></div>';
+  html+='<div class="set-row" onclick="nav(\'perso\')" " style="cursor:pointer"><div class="set-icon" style="background:rgba(156,39,176,.15)">🎛️</div>';
   html+='<div class="set-info"><div class="set-name">Personnalisation</div><div class="set-desc">Onglets, catégories favorites</div></div><span class="set-right">›</span></div>';
   html+='</div></div>';
 
@@ -2974,10 +2978,7 @@ function renderRecurring(){
     });
     html+='</div>';
   }
-  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-  html+='<div class="sec-label" style="margin-bottom:0">🔁 Nouvelle récurrence</div>';
-  html+='<button onclick="openCatPersoModal()" style="font-size:11px;padding:5px 10px;border-radius:8px;background:var(--surface2);border:none;color:var(--t2);cursor:pointer;font-family:var(--font)">✏️ Catégories</button>';
-  html+='</div>';
+  html+='<div class="sec-label">🔁 Nouvelle récurrence</div>';
   html+='<div class="rec-add-card">';
   html+='<div class="type-toggle" style="margin-bottom:12px">';
   html+='<button class="type-btn active" id="rec-btn-exp" onclick="setRecType(\'expense\')">Dépense</button>';
@@ -2990,7 +2991,7 @@ function renderRecurring(){
   for(var d=1;d<=28;d++) html+='<option value="'+d+'"'+(d===1?' selected':'')+'>'+d+'</option>';
   html+='</select></div></div>';
   html+='<div class="f-group"><label class="f-label">Catégorie</label><select id="rec-cat">';
-  CATS.expense.forEach(function(c){html+='<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';});
+  getVisibleExpenseCats().forEach(function(c){html+='<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';});
   html+='</select></div>';
   html+='<button class="btn-save" onclick="addRecurring()">Ajouter la récurrence</button></div>';
   if(data.recurring.length>0){
@@ -4607,7 +4608,10 @@ function buildScoreHistorySection(){
 var EMOJI_LIST = ['🛒','🚗','🏠','💊','🎬','👕','📱','🍽️','🏃','📦','✈️','🎮','🎓','💈','🐾','🎵','🏋️','🛠️','🚿','🌿','☕','🍕','🛍️','💻','📚','🎁','🏖️','🚂','🛒','⚽','🎯','🎪','🌮','🍣','🍺','💰','🔧','🏥','🚌','🎭','🌟','🎈','🦋','🐱','🐶','🌺','💎','🎸','🎹','🎨'];
 
 function getCustomCats(){
-  return JSON.parse(localStorage.getItem('budget_custom_cats')||'[]');
+  var raw = localStorage.getItem('budget_custom_cats');
+  if(!raw) return [];
+  var result = JSON.parse(raw);
+  return Array.isArray(result) ? result : [];
 }
 
 function getCat(id){
@@ -4741,26 +4745,37 @@ function selectEmoji(i, emoji){
 }
 
 function saveCatPerso(){
+  // Sync tempCats with current input values
   var saved = [];
-  var items = document.querySelectorAll('#catPersoList .cat-list-item');
-  items.forEach(function(item, i){
-    var nameInput = item.querySelector('.cat-name-input');
-    var emojiBtn = item.querySelector('.cat-emoji-btn');
-    var existing = tempCats[i] || getCustomCats()[i] || {};
-    if(nameInput && nameInput.value.trim()){
+  tempCats.forEach(function(c, i){
+    var nameInput = document.getElementById('cat-name-'+i);
+    var emojiBtn = document.getElementById('cat-emoji-'+i);
+    var name = nameInput ? nameInput.value.trim() : c.l;
+    var emoji = emojiBtn ? emojiBtn.textContent.trim() : c.e;
+    if(name){
       saved.push({
-        id: existing.id || ('custom_'+Date.now()+'_'+i),
-        l: nameInput.value.trim(),
-        e: emojiBtn ? emojiBtn.textContent.trim() : '✨',
-        c: existing.c || '#9b59b6'
+        id: c.id || ('custom_'+Date.now()+'_'+i),
+        l: name,
+        e: emoji,
+        c: c.c || '#9b59b6'
       });
     }
   });
   localStorage.setItem('budget_custom_cats', JSON.stringify(saved));
   document.getElementById('catPersoModalBg').classList.remove('show');
-  toast('✅ Catégories sauvegardées !');
-  // Refresh ALL selects
-  setType(txType);
+  toast('✅ '+saved.length+' catégorie(s) sauvegardée(s) !');
+  // Force refresh ALL selects AFTER save
+  setTimeout(function(){
+    setType(txType);
+    var visExp = getVisibleExpenseCats();
+    var visAll = getVisibleAllCats();
+    var recCat = document.getElementById('rec-cat');
+    if(recCat) recCat.innerHTML = visExp.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+    var bcat = document.getElementById('bcat');
+    if(bcat) bcat.innerHTML = visExp.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+    var editCat = document.getElementById('edit-cat');
+    if(editCat) editCat.innerHTML = visAll.map(function(c){return '<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';}).join('');
+  }, 50);
   var customCats = getCustomCats();
   var visExp = getVisibleExpenseCats();
   var recCat = document.getElementById('rec-cat');
