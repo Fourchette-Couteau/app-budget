@@ -725,6 +725,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .event-balance-card.settled{background:var(--surface2);border:.5px solid var(--glass-b)}
 .participant-chip{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:var(--glass);border:.5px solid var(--glass-b);cursor:pointer;transition:var(--tr);font-size:13px;font-weight:500}
 .participant-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.color-picker-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.color-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:var(--tr);border:2px solid transparent;flex-shrink:0}
+.color-dot.selected{border-color:#fff;transform:scale(1.2)}
+.color-dot:active{transform:scale(.9)}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 120px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:15px;line-height:1.8}
@@ -947,6 +951,26 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="notif-scroll" id="notifList"></div>
     <div class="notif-actions">
       <button class="btn-clear-notifs" onclick="clearNotifs()">Tout marquer comme lu</button>
+    </div>
+  </div>
+</div>
+<div class="account-modal-bg" id="eventRemboursModalBg" onclick="closeEventRemboursModal(event)">
+  <div class="account-modal">
+    <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>
+    <div style="padding:0 18px">
+      <div style="font-size:17px;font-weight:600;margin-bottom:6px">Enregistrer un remboursement</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:16px" id="remboursSubtitle"></div>
+      <input type="hidden" id="remboursEventId">
+      <input type="hidden" id="remboursParticipant">
+      <div class="f-group" style="margin-bottom:10px">
+        <label class="f-label">Montant remboursé (€)</label>
+        <input type="number" id="remboursAmt" placeholder="0" inputmode="decimal">
+      </div>
+      <div class="f-group" style="margin-bottom:16px">
+        <label class="f-label">Description (optionnel)</label>
+        <input type="text" id="remboursDesc" placeholder="Ex : Resto du vendredi...">
+      </div>
+      <button class="btn-save" onclick="saveRembours()" style="width:100%">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -4806,10 +4830,17 @@ function renderCatPersoList(){
     html += '<div style="text-align:center;padding:16px;color:var(--t3);font-size:13px">Aucune catégorie personnalisée.<br>Appuie sur + Ajouter.</div>';
   }
   tempCats.forEach(function(c, i){
-    html += '<div class="cat-list-item">';
-    html += '<div class="cat-emoji-btn" onclick="openEmojiPicker('+i+')" id="cat-emoji-'+i+'">'+c.e+'</div>';
+    html += '<div class="cat-list-item" style="flex-direction:column;align-items:stretch">';
+    html += '<div style="display:flex;align-items:center;gap:8px">';
+    html += '<div class="cat-emoji-btn" onclick="openEmojiPicker('+i+')" id="cat-emoji-'+i+'" style="background:'+c.c+'33;border-color:'+c.c+'66">'+c.e+'</div>';
     html += '<input class="cat-name-input" type="text" value="'+c.l+'" placeholder="Nom" oninput="updateCatName('+i+',this.value)" id="cat-name-'+i+'">';
     html += '<button onclick="removeCat('+i+')" style="background:none;border:none;font-size:18px;color:var(--exp-t);cursor:pointer;padding:4px">×</button>';
+    html += '</div>';
+    html += '<div class="color-picker-wrap" id="colorpicker-'+i+'">';
+    CAT_COLORS.forEach(function(col){
+      html += '<div class="color-dot'+(c.c===col?' selected':'')+('" data-color="'+col+'" style="background:'+col+'" onclick="setCatColor('+i+',\''+col+'\')" ></div>');
+    });
+    html += '</div>';
     html += '</div>';
 
   });
@@ -4830,13 +4861,24 @@ function toggleBasecat(id){
 var tempCats = [];
 
 function addCustomCat(){
-  tempCats.push({id:'custom_'+Date.now(), l:'Nouvelle catégorie', e:'✨', c:'#9b59b6'});
+  tempCats.push({id:'custom_'+Date.now(), l:'Nouvelle catégorie', e:'✨', c:getRandomCatColor()});
   renderCatPersoList();
 }
 
 function removeCat(i){
   tempCats.splice(i,1);
   renderCatPersoList();
+}
+
+function setCatColor(i, color){
+  if(tempCats[i]) tempCats[i].c = color;
+  var btn = document.getElementById('cat-emoji-'+i);
+  if(btn){ btn.style.background = color+'33'; btn.style.borderColor = color+'66'; }
+  var picker = document.getElementById('colorpicker-'+i);
+  if(picker) picker.querySelectorAll('.color-dot').forEach(function(d){
+    var dc = d.getAttribute('data-color');
+    d.classList.toggle('selected', dc === color);
+  });
 }
 
 function updateCatName(i, val){
@@ -5198,18 +5240,168 @@ function renderEvents(){
           html += '<div class="event-balance-card '+cls+'">';
           html += '<span style="font-weight:500">'+(isMe?'Toi':p)+'</span>';
           if(bal>0) html += '<span style="color:var(--inc-t);font-weight:600">reçoit '+fmtAmt(bal)+' '+cur+'</span>';
-          else html += '<span style="color:var(--exp-t);font-weight:600">doit '+fmtAmt(Math.abs(bal))+' '+cur+'</span>';
+          else {
+            html += '<div style="display:flex;align-items:center;gap:8px">';
+            html += '<span style="color:var(--exp-t);font-weight:600">doit '+fmtAmt(Math.abs(bal))+' '+cur+'</span>';
+            if(p!==ev.me) html += '<button onclick="openRemboursModal(\''+ev.id+'\',\''+p+'\')" style="font-size:11px;padding:3px 8px;border-radius:8px;background:rgba(99,217,160,.15);color:var(--inc-t);border:.5px solid rgba(99,217,160,.3);cursor:pointer;font-family:var(--font);white-space:nowrap">↩️ Remb.</button>';
+            html += '</div>';
+          }
           html += '</div>';
         });
       }
 
-      // Add expense button
-      html += '<button onclick="openEventExpenseModal(\''+ev.id+'\')" style="width:100%;padding:11px;border-radius:var(--radius-sm);background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px">+ Ajouter une dépense</button>';
+      // Share + recap
+      html += '<div style="display:flex;gap:8px;margin-top:8px">';
+      html += '<button onclick="shareEventRecap(\''+ev.id+'\')" style="flex:1;padding:11px;border-radius:var(--radius-sm);background:var(--glass);border:.5px solid var(--glass-b);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font)">📤 Partager le récap</button>';
+      html += '<button onclick="openEventExpenseModal(\''+ev.id+'\')" style="flex:2;padding:11px;border-radius:var(--radius-sm);background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">+ Dépense</button>';
+      html += '</div>';
+
       html += '</div>';
     });
   }
 
   el.innerHTML = html;
+}
+
+/* ── REMBOURSEMENTS ÉVÉNEMENTS ── */
+function openRemboursModal(eventId, participant){
+  var ev = getEvents().find(function(e){return e.id===eventId;});
+  if(!ev) return;
+  var balances = calcEventBalances(ev);
+  var bal = Math.round((balances[participant]||0)*100)/100;
+  document.getElementById('remboursEventId').value = eventId;
+  document.getElementById('remboursParticipant').value = participant;
+  document.getElementById('remboursAmt').value = '';
+  document.getElementById('remboursDesc').value = '';
+  var subtitle = participant + (bal < 0 ? ' doit ' + fmtAmt(Math.abs(bal)) + ' €' : ' reçoit ' + fmtAmt(bal) + ' €');
+  document.getElementById('remboursSubtitle').textContent = subtitle;
+  document.getElementById('eventRemboursModalBg').classList.add('show');
+}
+
+function closeEventRemboursModal(e){
+  if(!e||e.target===document.getElementById('eventRemboursModalBg'))
+    document.getElementById('eventRemboursModalBg').classList.remove('show');
+}
+
+function saveRembours(){
+  var eventId = document.getElementById('remboursEventId').value;
+  var participant = document.getElementById('remboursParticipant').value;
+  var amt = parseFloat(document.getElementById('remboursAmt').value)||0;
+  var desc = document.getElementById('remboursDesc').value.trim() || 'Remboursement';
+  if(!amt||amt<=0){ toast('💡 Entre un montant'); return; }
+  var ev = getEvents().find(function(e){return e.id===eventId;});
+  if(!ev) return;
+
+  // A remboursement is an expense paid by the participant to me (ev.me)
+  // split only between the two of them
+  if(!ev.remboursements) ev.remboursements = [];
+  ev.remboursements.push({
+    id:'rembours_'+Date.now(),
+    from: participant,
+    to: ev.me,
+    amount: amt,
+    desc: desc,
+    date: fmtDate(new Date())
+  });
+
+  // Also add as a special expense so calcEventBalances works
+  // payer = participant, splitWith = [participant, ev.me], but only credits me
+  ev.expenses.push({
+    id:'rexp_'+Date.now(),
+    desc: '↩️ '+desc+' (remb. de '+participant+')',
+    amount: amt,
+    payer: participant,
+    splitWith: [participant, ev.me],
+    share: amt/2,
+    isRembours: true
+  });
+
+  save();
+  document.getElementById('eventRemboursModalBg').classList.remove('show');
+  renderEvents();
+  toast('✅ Remboursement enregistré !');
+}
+
+function shareEventRecap(eventId){
+  var ev = getEvents().find(function(e){return e.id===eventId;});
+  if(!ev) return;
+  var cur = prefs.currency||'€';
+  var balances = calcEventBalances(ev);
+  var totalSpent = ev.expenses.filter(function(e){return !e.isRembours;}).reduce(function(s,e){return s+e.amount;},0);
+
+  var lines = [];
+  lines.push('📊 Récap — ' + ev.name);
+  lines.push('👥 ' + ev.participants.join(', '));
+  lines.push('💸 Total dépensé : ' + fmtAmt(totalSpent) + ' ' + cur);
+  lines.push('');
+  lines.push('── Dépenses ──');
+  ev.expenses.filter(function(e){return !e.isRembours;}).forEach(function(exp){
+    lines.push('• ' + exp.desc + ' : ' + fmtAmt(exp.amount) + ' ' + cur + ' (payé par ' + exp.payer + ', ÷' + exp.splitWith.length + ' = ' + fmtAmt(exp.share) + ' ' + cur + '/pers.)');
+  });
+  lines.push('');
+  lines.push('── Qui doit quoi ──');
+  ev.participants.forEach(function(p){
+    var bal = Math.round((balances[p]||0)*100)/100;
+    if(Math.abs(bal)<0.01){
+      lines.push('✅ ' + p + ' : soldé');
+    } else if(bal > 0){
+      lines.push('💚 ' + p + ' reçoit ' + fmtAmt(bal) + ' ' + cur);
+    } else {
+      lines.push('🔴 ' + p + ' doit ' + fmtAmt(Math.abs(bal)) + ' ' + cur);
+    }
+  });
+  lines.push('');
+  lines.push('Généré par Mon Budget 💰');
+
+  var text = lines.join('\n');
+
+  // Try native share sheet first (iOS Safari)
+  if(navigator.share){
+    navigator.share({title: 'Récap ' + ev.name, text: text}).catch(function(){
+      fallbackCopyRecap(text);
+    });
+  } else {
+    fallbackCopyRecap(text);
+  }
+}
+
+function closeRecapOverlay(btn){
+  var el = btn;
+  while(el && el.style && !el.style.cssText.includes('fixed')) el = el.parentElement;
+  if(el) el.remove();
+}
+
+function copyRecapText(btn){
+  var ta = btn.previousElementSibling;
+  if(ta) navigator.clipboard.writeText(ta.value).then(function(){
+    var toastEl = btn.nextElementSibling;
+    if(toastEl) toastEl.textContent = '✅ Copié !';
+  });
+}
+
+function fallbackCopyRecap(text){
+  // Show recap in a modal with copy button
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end';
+  var box = document.createElement('div');
+  box.style.cssText = 'width:100%;background:rgba(15,15,20,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+24px)';
+  box.innerHTML = '<div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>'
+    +'<div style="font-size:16px;font-weight:600;margin-bottom:12px">📊 Récapitulatif</div>'
+    +'<textarea readonly style="width:100%;height:220px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;font-size:12px;color:#fff;font-family:var(--font);resize:none;line-height:1.6">'+text+'</textarea>'
+    +'<button onclick="copyRecapText(this)" style="width:100%;margin-top:10px;padding:13px;border-radius:14px;background:var(--accent);border:none;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font)">📋 Copier le récap</button>'
+    +'<div data-recap-toast style="text-align:center;font-size:13px;color:var(--inc-t);height:20px;margin-top:8px"></div>'
+    +'<button onclick="closeRecapOverlay(this)" style="width:100%;margin-top:6px;padding:11px;border-radius:14px;background:rgba(255,255,255,.08);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font)">Fermer</button>';
+  overlay.appendChild(box);
+  overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
+var CAT_COLORS = ['#ff6b6b','#ff9f43','#ffd32a','#0be881','#17c0eb','#4f8eff','#a29bfe','#fd79a8','#55efc4','#00cec9','#e17055','#74b9ff','#6c5ce7','#fab1a0','#81ecec','#636e72','#b2bec3','#d63031','#00b894','#fdcb6e'];
+
+function getRandomCatColor(){
+  var used = getCustomCats().map(function(c){return c.c;});
+  var unused = CAT_COLORS.filter(function(c){return used.indexOf(c)===-1;});
+  var pool = unused.length ? unused : CAT_COLORS;
+  return pool[Math.floor(Math.random()*pool.length)];
 }
 // Init
 if(!prefs.payDay) prefs.payDay=25;
