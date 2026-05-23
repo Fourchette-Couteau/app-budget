@@ -1782,8 +1782,68 @@ function renderHistory(){
 
 /* ── RAPPORT MENSUEL ── */
 function generateRapport(){
+  // Build list of available periods (last 12 months based on pay day)
+  var payDay = prefs.payDay || 25;
+  var MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var periods = [];
+  var now = new Date();
+  for(var m=0; m<12; m++){
+    var d = new Date(now.getFullYear(), now.getMonth()-m, 1);
+    // Period start = payDay of this month
+    var start = new Date(d.getFullYear(), d.getMonth(), payDay);
+    var end = new Date(d.getFullYear(), d.getMonth()+1, payDay-1);
+    var label = MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+    var startStr = fmtDate(start);
+    var endStr = fmtDate(end);
+    // Only show if there are transactions
+    var hasTx = data.transactions.some(function(t){return t.date>=startStr&&t.date<=endStr;});
+    if(hasTx || m===0) periods.push({label:label, start:startStr, end:endStr});
+  }
+
+  // Show picker modal
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end';
+  var html = '<div style="width:100%;background:rgba(15,15,20,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+24px)">';
+  html += '<div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>';
+  html += '<div style="font-size:17px;font-weight:600;margin-bottom:16px;padding:0 2px">📊 Choisir la période</div>';
+  periods.forEach(function(p, i){
+    html += '<div data-start="'+p.start+'" data-label="'+p.label+'" onclick="doRapportPick('+i+')" style="padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.1);margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">';
+    html += '<span style="font-size:15px;font-weight:500">'+p.label+'</span>';
+    html += '<span style="font-size:12px;color:var(--t2)">'+p.start.slice(8)+'/'+p.start.slice(5,7)+' → '+p.end.slice(8)+'/'+p.end.slice(5,7)+'</span>';
+    html += '</div>';
+  });
+  html += '<button onclick="closeRapportPicker()" style="width:100%;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font);margin-top:4px">Annuler</button>';
+  html += '</div>';
+  overlay.innerHTML = html;
+  overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
+
+function closeRapportPicker(){
+  var ov = document.querySelector('div[style*="fixed"][style*="z-index:900"]');
+  if(ov) ov.remove();
+}
+
+function doRapportPick(i){
+  var items = document.querySelectorAll('[data-start]');
+  var el = items[i];
+  if(!el) return;
+  var start = el.getAttribute('data-start');
+  var label = el.getAttribute('data-label');
+  var overlay = el.closest('div[style*="fixed"]');
+  if(overlay) overlay.remove();
+  generateRapportForPeriod(start, label);
+}
+
+function generateRapportForPeriod(startStr, label){
   var cur = prefs.currency||'€';
-  var period = currentPeriod();
+  var payDay = prefs.payDay||25;
+  var endDate = new Date(startStr);
+  endDate.setMonth(endDate.getMonth()+1);
+  endDate.setDate(payDay-1);
+  var endStr = fmtDate(endDate);
+  var period = {start:startStr, end:endStr, label:label};
+  var mTx = data.transactions.filter(function(t){return t.date>=startStr&&t.date<=endStr;});
   var mTx = data.transactions.filter(function(t){return inPeriod(t.date,period);});
   var income = mTx.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
   var expense = mTx.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
@@ -1800,7 +1860,7 @@ function generateRapport(){
   var streak = getStreak(data);
 
   var lines = [
-    '📊 Rapport ' + period.label,
+    '📊 Rapport ' + (period.label||label||''),
     '━━━━━━━━━━━━━━━━━━━━',
     '💰 Revenus    : +' + fmtAmt(Math.round(income)) + ' ' + cur,
     '💸 Dépenses   : -' + fmtAmt(Math.round(expense)) + ' ' + cur,
@@ -4364,8 +4424,68 @@ function swipeDeleteTx(id){
 
 /* ── RAPPORT MENSUEL ── */
 function generateRapport(){
+  // Build list of available periods (last 12 months based on pay day)
+  var payDay = prefs.payDay || 25;
+  var MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var periods = [];
+  var now = new Date();
+  for(var m=0; m<12; m++){
+    var d = new Date(now.getFullYear(), now.getMonth()-m, 1);
+    // Period start = payDay of this month
+    var start = new Date(d.getFullYear(), d.getMonth(), payDay);
+    var end = new Date(d.getFullYear(), d.getMonth()+1, payDay-1);
+    var label = MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+    var startStr = fmtDate(start);
+    var endStr = fmtDate(end);
+    // Only show if there are transactions
+    var hasTx = data.transactions.some(function(t){return t.date>=startStr&&t.date<=endStr;});
+    if(hasTx || m===0) periods.push({label:label, start:startStr, end:endStr});
+  }
+
+  // Show picker modal
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end';
+  var html = '<div style="width:100%;background:rgba(15,15,20,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+24px)">';
+  html += '<div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>';
+  html += '<div style="font-size:17px;font-weight:600;margin-bottom:16px;padding:0 2px">📊 Choisir la période</div>';
+  periods.forEach(function(p, i){
+    html += '<div data-start="'+p.start+'" data-label="'+p.label+'" onclick="doRapportPick('+i+')" style="padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.1);margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">';
+    html += '<span style="font-size:15px;font-weight:500">'+p.label+'</span>';
+    html += '<span style="font-size:12px;color:var(--t2)">'+p.start.slice(8)+'/'+p.start.slice(5,7)+' → '+p.end.slice(8)+'/'+p.end.slice(5,7)+'</span>';
+    html += '</div>';
+  });
+  html += '<button onclick="closeRapportPicker()" style="width:100%;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font);margin-top:4px">Annuler</button>';
+  html += '</div>';
+  overlay.innerHTML = html;
+  overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
+
+function closeRapportPicker(){
+  var ov = document.querySelector('div[style*="fixed"][style*="z-index:900"]');
+  if(ov) ov.remove();
+}
+
+function doRapportPick(i){
+  var items = document.querySelectorAll('[data-start]');
+  var el = items[i];
+  if(!el) return;
+  var start = el.getAttribute('data-start');
+  var label = el.getAttribute('data-label');
+  var overlay = el.closest('div[style*="fixed"]');
+  if(overlay) overlay.remove();
+  generateRapportForPeriod(start, label);
+}
+
+function generateRapportForPeriod(startStr, label){
   var cur = prefs.currency||'€';
-  var period = currentPeriod();
+  var payDay = prefs.payDay||25;
+  var endDate = new Date(startStr);
+  endDate.setMonth(endDate.getMonth()+1);
+  endDate.setDate(payDay-1);
+  var endStr = fmtDate(endDate);
+  var period = {start:startStr, end:endStr, label:label};
+  var mTx = data.transactions.filter(function(t){return t.date>=startStr&&t.date<=endStr;});
   var mTx = data.transactions.filter(function(t){return inPeriod(t.date,period);});
   var income = mTx.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
   var expense = mTx.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
