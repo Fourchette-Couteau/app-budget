@@ -1170,6 +1170,21 @@ var CATS={
     {id:'autre_revenu',l:'Autre revenu',e:'💰',c:'#607D8B'},
   ]
 };
+
+function getVisibleExpenseCats(){
+  var hidden = getHiddenBaseCats();
+  var custom = getCustomCats();
+  return CATS.expense.filter(function(c){return hidden.indexOf(c.id)===-1;}).concat(custom);
+}
+function getVisibleAllCats(){
+  var hidden = getHiddenBaseCats();
+  var custom = getCustomCats();
+  var exp = CATS.expense.filter(function(c){return hidden.indexOf(c.id)===-1;});
+  return exp.concat(CATS.income).concat(custom);
+}
+function getHiddenBaseCats(){
+  return JSON.parse(localStorage.getItem('budget_hidden_cats')||'[]');
+}
 var ACCENTS=[
   {name:'Bleu',dark:'#4f8eff',light:'#2c6af6'},
   {name:'Violet',dark:'#a78bfa',light:'#7c3aed'},
@@ -1262,7 +1277,7 @@ function getCat(id){
   var custom=getCustomCats();
   var found=custom.find(function(c){return c.id===id;});
   if(found) return found;
-  var all=CATS.expense.concat(CATS.income);
+  var all=getVisibleAllCats();
   return all.find(function(c){return c.id===id;})||{id:id,l:id,e:'📦',c:'#888'};
 }
 function fmtAmt(v){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).format(v)}
@@ -2338,7 +2353,7 @@ function renderBudget(){
   html+='<div style="font-size:15px;font-weight:600;margin-bottom:14px">Ajouter une limite</div>';
   html+='<div class="f-row" style="margin-bottom:12px">';
   html+='<div class="f-group" style="margin-bottom:0"><label class="f-label">Catégorie</label><select id="bcat">';
-  CATS.expense.forEach(function(c){html+='<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';});
+  getVisibleExpenseCats().forEach(function(c){html+='<option value="'+c.id+'">'+c.e+' '+c.l+'</option>';});
   html+='</select></div>';
   html+='<div class="f-group" style="margin-bottom:0"><label class="f-label">Limite ('+cur+')</label><input type="number" id="blimit" placeholder="200" inputmode="decimal"></div>';
   html+='</div><button class="btn-add-bud" onclick="addBudget()">+ Ajouter</button></div></div>';
@@ -4185,7 +4200,7 @@ function renderPerso(){
   html += '<div class="glass-card" style="padding:12px;margin-bottom:12px">';
   html += '<div style="font-size:12px;color:var(--t2);margin-bottom:10px">Apparaissent en premier lors de l\'ajout</div>';
   html += '<div class="fav-cats-grid">';
-  CATS.expense.forEach(function(c){
+  getVisibleExpenseCats().forEach(function(c){
     var isFav = favCats.indexOf(c.id) !== -1;
     html += '<div class="fav-cat-item'+(isFav?' selected':'')+'" onclick="toggleFavCat(\''+c.id+'\')">';
     html += '<div class="fav-cat-emoji">'+c.e+'</div>';
@@ -4774,7 +4789,7 @@ function getCat(id){
   var found = custom.find(function(c){return c.id===id;});
   if(found) return found;
   // Check built-in
-  var all = CATS.expense.concat(CATS.income);
+  var all = getVisibleAllCats();
   return all.find(function(c){return c.id===id;}) || {id:id,l:'Autre',e:'📦',c:'#9E9E9E'};
 }
 
@@ -4792,20 +4807,6 @@ function closeCatPersoModal(e){
 
 // Get hidden base cats from localStorage
 
-function getVisibleExpenseCats(){
-  var hidden = getHiddenBaseCats();
-  var custom = getCustomCats();
-  return CATS.expense.filter(function(c){return hidden.indexOf(c.id)===-1;}).concat(custom);
-}
-function getVisibleAllCats(){
-  var hidden = getHiddenBaseCats();
-  var custom = getCustomCats();
-  var exp = CATS.expense.filter(function(c){return hidden.indexOf(c.id)===-1;});
-  return exp.concat(CATS.income).concat(custom);
-}
-function getHiddenBaseCats(){
-  return JSON.parse(localStorage.getItem('budget_hidden_cats')||'[]');
-}
 
 function renderCatPersoList(){
   var el = document.getElementById('catPersoList');
