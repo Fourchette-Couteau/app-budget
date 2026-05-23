@@ -3551,7 +3551,7 @@ function renderCalendar(){
   var daysWithTx=Object.keys(dayMap).length;
   var maxExpVal=Math.max.apply(null,Object.values(dayMap).map(function(d){return d.expense;}).concat([1]));
   var firstDay=new Date(calYear,calMonth,1).getDay();
-  var startOffset=(firstDay+6)%7;
+  var startOffset=firstDay===0?6:firstDay-1;
   var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   var monthLabel=new Date(calYear,calMonth,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
   var period=currentPeriod();
@@ -4499,62 +4499,6 @@ function doRapportPick(i){
   generateRapportForPeriod(start, label);
 }
 
-function generateRapportForPeriod(startStr, label){
-  var cur = prefs.currency||'€';
-  var payDay = prefs.payDay||25;
-  var endDate = new Date(startStr);
-  endDate.setMonth(endDate.getMonth()+1);
-  endDate.setDate(payDay-1);
-  var endStr = fmtDate(endDate);
-  var period = {start:startStr, end:endStr, label:label};
-  var mTx = data.transactions.filter(function(t){return t.date>=startStr&&t.date<=endStr;});
-  var mTx = data.transactions.filter(function(t){return inPeriod(t.date,period);});
-  var income = mTx.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
-  var expense = mTx.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
-  var balance = income - expense;
-  var savRate = income>0?Math.round(((income-expense)/income)*100):0;
-
-  // Top cats
-  var byCat = {};
-  mTx.filter(function(t){return t.type==='expense';}).forEach(function(t){byCat[t.cat]=(byCat[t.cat]||0)+t.amount;});
-  var topCats = Object.entries(byCat).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
-
-  var score = calcScore(data);
-  var grade = getScoreGrade(score);
-  var streak = getStreak(data);
-
-  var lines = [
-    '📊 Rapport ' + period.label,
-    '━━━━━━━━━━━━━━━━━━━━',
-    '💰 Revenus    : +' + fmtAmt(Math.round(income)) + ' ' + cur,
-    '💸 Dépenses   : -' + fmtAmt(Math.round(expense)) + ' ' + cur,
-    '📈 Solde      : ' + (balance>=0?'+':'') + fmtAmt(Math.round(balance)) + ' ' + cur,
-    '🎯 Taux épar. : ' + Math.max(0,savRate) + '%',
-    '',
-    '🏆 Top dépenses :',
-  ];
-  topCats.forEach(function(pair){
-    var c = getCat(pair[0]);
-    lines.push('  ' + c.e + ' ' + c.l + ' : ' + fmtAmt(Math.round(pair[1])) + ' ' + cur);
-  });
-  lines.push('');
-  lines.push('⭐ Score : ' + score + '/100 (Rang ' + grade.grade + ')');
-  lines.push('🔥 Streak : ' + streak + ' jours');
-  lines.push('━━━━━━━━━━━━━━━━━━━━');
-  lines.push('via Mon Budget ' + (prefs.appUrl||''));
-
-  var text = lines.join('\n');
-
-  if(navigator.share){
-    navigator.share({title:'Mon rapport budget', text:text}).catch(function(){});
-  } else {
-    navigator.clipboard.writeText(text).then(function(){
-      toast('📋 Rapport copié !');
-    }).catch(function(){
-      toast('📊 ' + text.slice(0,60) + '...');
-    });
-  }
-}
 
 /* ── DÉFI MENSUEL ── */
 var DEFIS = [
