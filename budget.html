@@ -1850,34 +1850,56 @@ function generateRapportForPeriod(startStr, label){
   var balance = income - expense;
   var savRate = income>0?Math.round(((income-expense)/income)*100):0;
 
-  // Top cats
+  // Toutes les dépenses par catégorie
   var byCat = {};
   mTx.filter(function(t){return t.type==='expense';}).forEach(function(t){byCat[t.cat]=(byCat[t.cat]||0)+t.amount;});
-  var topCats = Object.entries(byCat).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+  var allCatsSorted = Object.keys(byCat).sort(function(a,b){return byCat[b]-byCat[a];});
+
+  // Revenus par catégorie
+  var byIncCat = {};
+  mTx.filter(function(t){return t.type==='income';}).forEach(function(t){byIncCat[t.cat]=(byIncCat[t.cat]||0)+t.amount;});
+  var allIncCatsSorted = Object.keys(byIncCat).sort(function(a,b){return byIncCat[b]-byIncCat[a];});
 
   var score = calcScore(data);
   var grade = getScoreGrade(score);
   var streak = getStreak(data);
 
   var lines = [
-    '📊 Rapport ' + (period.label||label||''),
+    '📊 Rapport — ' + (period.label||label||''),
     '━━━━━━━━━━━━━━━━━━━━',
     '💰 Revenus    : +' + fmtAmt(Math.round(income)) + ' ' + cur,
     '💸 Dépenses   : -' + fmtAmt(Math.round(expense)) + ' ' + cur,
     '📈 Solde      : ' + (balance>=0?'+':'') + fmtAmt(Math.round(balance)) + ' ' + cur,
     '🎯 Taux épar. : ' + Math.max(0,savRate) + '%',
     '',
-    '🏆 Top dépenses :',
   ];
-  topCats.forEach(function(pair){
-    var c = getCat(pair[0]);
-    lines.push('  ' + c.e + ' ' + c.l + ' : ' + fmtAmt(Math.round(pair[1])) + ' ' + cur);
-  });
-  lines.push('');
+
+  // Revenus détaillés
+  if(allIncCatsSorted.length){
+    lines.push('💰 Revenus par catégorie :');
+    allIncCatsSorted.forEach(function(catId){
+      var c = getCat(catId);
+      var pct = income>0?Math.round((byIncCat[catId]/income)*100):0;
+      lines.push('  '+c.e+' '+c.l+' : +'+fmtAmt(Math.round(byIncCat[catId]))+' '+cur+' ('+pct+'%)');
+    });
+    lines.push('');
+  }
+
+  // Dépenses détaillées
+  if(allCatsSorted.length){
+    lines.push('💸 Dépenses par catégorie :');
+    allCatsSorted.forEach(function(catId){
+      var c = getCat(catId);
+      var pct = expense>0?Math.round((byCat[catId]/expense)*100):0;
+      lines.push('  '+c.e+' '+c.l+' : -'+fmtAmt(Math.round(byCat[catId]))+' '+cur+' ('+pct+'%)');
+    });
+    lines.push('');
+  }
+
   lines.push('⭐ Score : ' + score + '/100 (Rang ' + grade.grade + ')');
   lines.push('🔥 Streak : ' + streak + ' jours');
   lines.push('━━━━━━━━━━━━━━━━━━━━');
-  lines.push('via Mon Budget ' + (prefs.appUrl||''));
+  lines.push('via Mon Budget 💰');
 
   var text = lines.join('\n');
 
