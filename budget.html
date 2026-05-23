@@ -387,8 +387,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .cal-month-label{font-size:17px;font-weight:600;letter-spacing:-.3px}
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px}
 .cal-wd{text-align:center;font-size:11px;font-weight:600;color:var(--t3);padding:4px 0;text-transform:uppercase;letter-spacing:.5px}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.cal-day{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);position:relative;padding:2px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:start}
+.cal-day{height:44px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);position:relative;padding:2px}
 .cal-day:active{transform:scale(.92)}
 .cal-day.empty{pointer-events:none}
 .cal-day.today{border:2px solid var(--accent)}
