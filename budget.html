@@ -2407,7 +2407,16 @@ function renderBudget(){
   var todayDate=new Date(today);
   var daysLeft=Math.max(0,Math.round((endDate-todayDate)/(1000*60*60*24))+1);
   var el=document.getElementById('s-budget');
-  var html='<div class="bud-pad"><div class="sec-label">Limites du mois</div>';
+  var totalAlloue = data.budgets.reduce(function(s,b){return s+b.limit;},0);
+  var totalDepBudget = data.budgets.reduce(function(s,b){return s+(spent[b.cat]||0);},0);
+  var overBudget = totalDepBudget > totalAlloue;
+  var html='<div class="bud-pad">';
+  html+='<div class="sec-label" style="display:flex;justify-content:space-between;align-items:center">';
+  html+='<span>Limites du mois</span>';
+  if(data.budgets.length){
+    html+='<span style="font-size:12px;font-weight:600;color:'+(overBudget?'var(--exp-t)':'var(--t2)')+'">'+fmtAmt(Math.round(totalDepBudget))+' '+cur+' <span style="color:var(--t3);font-weight:400">/ '+fmtAmt(Math.round(totalAlloue))+' '+cur+'</span></span>';
+  }
+  html+='</div>';
   if(data.budgets.length){
     data.budgets.forEach(function(b,i){
       var c=getCat(b.cat);var s=spent[b.cat]||0;var pct=Math.min(Math.round((s/b.limit)*100),100);
