@@ -2426,7 +2426,7 @@ function renderBudget(){
       var perDayColor=pct>=100?'var(--red)':pct>=75?'var(--amber)':'var(--inc-t)';
       var clsColor=cls==='over'?'var(--red)':cls==='warn'?'var(--amber)':'var(--inc-t)';
       html+='<div class="glass-card bud-item">';
-      html+='<div class="bud-header"><div class="bud-name">'+c.e+' '+c.l+'</div><button class="tx-del" onclick="deleteBudget('+i+')">×</button></div>';
+      html+='<div class="bud-header"><div class="bud-name">'+c.e+' '+c.l+'</div><div style="display:flex;gap:6px"><button onclick="editBudget('+i+')" style="background:rgba(79,142,255,.12);color:var(--accent);border:none;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">✏️</button><button class="tx-del" onclick="deleteBudget('+i+')">×</button></div></div>';
       html+='<div class="bud-bar"><div class="bud-fill '+cls+'" style="width:'+pct+'%"></div></div>';
       html+='<div style="display:flex;justify-content:space-between;align-items:flex-end"><div>';
       html+='<div class="bud-vals">'+fmtAmt(s)+' '+cur+' / '+fmtAmt(b.limit)+' '+cur+'</div>';
@@ -2449,6 +2449,47 @@ function renderBudget(){
   html+='<div class="f-group" style="margin-bottom:0"><label class="f-label">Limite ('+cur+')</label><input type="number" id="blimit" placeholder="200" inputmode="decimal"></div>';
   html+='</div><button class="btn-add-bud" onclick="addBudget()">+ Ajouter</button></div></div>';
   el.innerHTML=html;
+}
+
+function editBudget(i){
+  var b = data.budgets[i];
+  if(!b) return;
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end';
+  var cur = prefs.currency||'€';
+  var c = getCat(b.cat);
+  overlay.innerHTML = '<div style="width:100%;background:rgba(15,15,20,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+24px)">'
+    +'<div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>'
+    +'<div style="font-size:17px;font-weight:600;margin-bottom:6px">Modifier le budget</div>'
+    +'<div style="font-size:14px;color:var(--t2);margin-bottom:16px">'+c.e+' '+c.l+'</div>'
+    +'<div class="f-group" style="margin-bottom:16px">'
+    +'<label class="f-label">Nouvelle limite ('+cur+')</label>'
+    +'<input type="number" id="editBudgetInput" value="'+b.limit+'" inputmode="decimal" style="width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.12);color:#fff;font-size:16px;font-family:var(--font);outline:none">'
+    +'</div>'
+    +'<button onclick="saveBudgetEdit('+i+')" style="width:100%;padding:13px;border-radius:14px;background:var(--accent);border:none;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:8px">Enregistrer</button>'
+    +'<button onclick="closeBudgetEdit()" style="width:100%;padding:11px;border-radius:14px;background:rgba(255,255,255,.06);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font)">Annuler</button>'
+    +'</div>';
+  overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+  setTimeout(function(){ var el=document.getElementById('editBudgetInput'); if(el){el.focus();el.select();} }, 100);
+}
+
+function closeBudgetEdit(){
+  var el = document.getElementById('editBudgetInput');
+  if(el){ var ov = el.closest('div[style*="fixed"]'); if(ov) ov.remove(); }
+}
+
+function saveBudgetEdit(i){
+  var input = document.getElementById('editBudgetInput');
+  if(!input) return;
+  var val = parseFloat(input.value);
+  if(!val||val<=0){ toast('💡 Entre un montant valide'); return; }
+  data.budgets[i].limit = val;
+  save();
+  var overlay = input.closest('div[style*="fixed"]');
+  if(overlay) overlay.remove();
+  renderBudget();
+  toast('✅ Budget modifié !');
 }
 
 function deleteBudget(i){openModal('Supprimer le budget','',()=>{data.budgets.splice(i,1);save();renderBudget();toast('Budget supprimé')})}
