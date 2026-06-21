@@ -634,7 +634,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* Modal nouveau compte */
 .account-modal-bg{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end}
 .account-modal-bg.show{opacity:1;pointer-events:all}
-.account-modal{width:100%;background:rgba(15,15,20,.35);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+28px);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:85vh;overflow-y:auto}
+.account-modal{width:100%;background:var(--bg2);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid var(--glass-b);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+28px);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:85vh;overflow-y:auto}
 .account-modal-bg.show .account-modal{transform:translateY(0)}
 .account-modal .btn-save{background:var(--accent);border:none;color:#fff;font-size:16px;font-weight:600;padding:14px;border-radius:16px;width:100%;cursor:pointer;font-family:var(--font);margin-top:4px}
 .account-type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
@@ -691,7 +691,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* ─ CATÉGORIES PERSO ─ */
 .cat-perso-modal-bg{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end}
 .cat-perso-modal-bg.show{opacity:1;pointer-events:all}
-.cat-perso-modal{width:100%;background:rgba(15,15,20,.35);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 18px calc(env(safe-area-inset-bottom,0px)+28px);max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.cat-perso-modal{width:100%;background:var(--bg2);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid var(--glass-b);border-radius:28px 28px 0 0;padding:24px 18px calc(env(safe-area-inset-bottom,0px)+28px);max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .cat-perso-modal-bg.show .cat-perso-modal{transform:translateY(0)}
 .cat-list-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.12);margin-bottom:10px}
 .cat-emoji-btn{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);border:.5px solid rgba(255,255,255,.15);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
@@ -736,7 +736,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* confirm modal */
 .modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .modal-bg.show{opacity:1;pointer-events:all}
-.modal{background:rgba(15,15,20,.40);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;margin:0;width:100%;transform:translateY(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.modal{background:var(--bg2);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:.5px solid var(--glass-b);border-radius:28px 28px 0 0;margin:0;width:100%;transform:translateY(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow:hidden}
 .modal-bg.show .modal{transform:translateY(0)}
 .modal-inner{padding:22px 20px 20px}
 .modal-title{font-size:17px;font-weight:600;text-align:center;margin-bottom:8px}
@@ -1802,8 +1802,8 @@ function generateRapport(){
 
   // Show picker modal
   var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end';
-  var html = '<div style="width:100%;background:rgba(15,15,20,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+24px)">';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;padding:0 16px';
+  var html = '<div style="width:100%;max-width:500px;background:var(--bg2);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid var(--glass-b);border-radius:24px 24px 0 0;padding:20px 24px calc(env(safe-area-inset-bottom,0px)+28px);margin-bottom:12px">';
   html += '<div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>';
   html += '<div style="font-size:17px;font-weight:600;margin-bottom:16px;padding:0 2px">📊 Choisir la période</div>';
   periods.forEach(function(p, i){
@@ -1812,7 +1812,7 @@ function generateRapport(){
     html += '<span style="font-size:12px;color:var(--t2)">'+p.start.slice(8)+'/'+p.start.slice(5,7)+' → '+p.end.slice(8)+'/'+p.end.slice(5,7)+'</span>';
     html += '</div>';
   });
-  html += '<button onclick="closeRapportPicker()" style="width:100%;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font);margin-top:4px">Annuler</button>';
+  html += '<button onclick="closeRapportPicker()" style="width:100%;padding:12px;border-radius:14px;background:var(--surface2);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font);margin-top:4px">Annuler</button>';
   html += '</div>';
   overlay.innerHTML = html;
   overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
@@ -2426,7 +2426,7 @@ function renderBudget(){
       var perDayColor=pct>=100?'var(--red)':pct>=75?'var(--amber)':'var(--inc-t)';
       var clsColor=cls==='over'?'var(--red)':cls==='warn'?'var(--amber)':'var(--inc-t)';
       html+='<div class="glass-card bud-item">';
-      html+='<div class="bud-header"><div class="bud-name">'+c.e+' '+c.l+'</div><div style="display:flex;gap:6px"><button onclick="editBudget('+i+')" style="background:rgba(79,142,255,.12);color:var(--accent);border:none;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">✏️</button><button class="tx-del" onclick="deleteBudget('+i+')">×</button></div></div>';
+      html+='<div class="bud-header"><div class="bud-name">'+c.e+' '+c.l+'</div><div style="display:flex;gap:6px"><button onclick="editBudget('+i+')" style="background:rgba(79,142,255,.12);color:var(--accent);border:none;border-radius:50%;width:28px;height:28px;font-size:13px;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;justify-content:center">✏️</button><button class="tx-del" onclick="deleteBudget('+i+')">×</button></div></div>';
       html+='<div class="bud-bar"><div class="bud-fill '+cls+'" style="width:'+pct+'%"></div></div>';
       html+='<div style="display:flex;justify-content:space-between;align-items:flex-end"><div>';
       html+='<div class="bud-vals">'+fmtAmt(s)+' '+cur+' / '+fmtAmt(b.limit)+' '+cur+'</div>';
@@ -2455,19 +2455,21 @@ function editBudget(i){
   var b = data.budgets[i];
   if(!b) return;
   var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;padding:0 16px';
   var cur = prefs.currency||'€';
   var c = getCat(b.cat);
-  overlay.innerHTML = '<div style="width:100%;background:rgba(15,15,20,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+24px)">'
-    +'<div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>'
+  overlay.innerHTML = '<div style="width:100%;max-width:500px;background:var(--bg2);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:.5px solid var(--glass-b);border-radius:24px 24px 0 0;padding:20px 24px calc(env(safe-area-inset-bottom,0px)+28px);margin-bottom:calc(env(safe-area-inset-bottom,0px) + 12px)">'
+    +'<div style="width:36px;height:4px;border-radius:2px;background:var(--sep);margin:0 auto 16px"></div>'
+    +'<div style="padding:0 10px">'
     +'<div style="font-size:17px;font-weight:600;margin-bottom:6px">Modifier le budget</div>'
     +'<div style="font-size:14px;color:var(--t2);margin-bottom:16px">'+c.e+' '+c.l+'</div>'
     +'<div class="f-group" style="margin-bottom:16px">'
     +'<label class="f-label">Nouvelle limite ('+cur+')</label>'
-    +'<input type="number" id="editBudgetInput" value="'+b.limit+'" inputmode="decimal" style="width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.12);color:#fff;font-size:16px;font-family:var(--font);outline:none">'
+    +'<input type="number" id="editBudgetInput" value="'+b.limit+'" inputmode="decimal" style="width:100%;padding:12px 14px;border-radius:12px;background:var(--surface2);border:.5px solid var(--glass-b);color:var(--text);font-size:16px;font-family:var(--font);outline:none">'
     +'</div>'
     +'<button onclick="saveBudgetEdit('+i+')" style="width:100%;padding:13px;border-radius:14px;background:var(--accent);border:none;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:8px">Enregistrer</button>'
-    +'<button onclick="closeBudgetEdit()" style="width:100%;padding:11px;border-radius:14px;background:rgba(255,255,255,.06);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font)">Annuler</button>'
+    +'<button onclick="closeBudgetEdit()" style="width:100%;padding:11px;border-radius:14px;background:var(--surface2);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font)">Annuler</button>'
+    +'</div>'
     +'</div>';
   overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
   document.body.appendChild(overlay);
@@ -4516,8 +4518,8 @@ function generateRapport(){
 
   // Show picker modal
   var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end';
-  var html = '<div style="width:100%;background:rgba(15,15,20,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+24px)">';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;padding:0 16px';
+  var html = '<div style="width:100%;max-width:500px;background:var(--bg2);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid var(--glass-b);border-radius:24px 24px 0 0;padding:20px 24px calc(env(safe-area-inset-bottom,0px)+28px);margin-bottom:12px">';
   html += '<div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>';
   html += '<div style="font-size:17px;font-weight:600;margin-bottom:16px;padding:0 2px">📊 Choisir la période</div>';
   periods.forEach(function(p, i){
@@ -4526,7 +4528,7 @@ function generateRapport(){
     html += '<span style="font-size:12px;color:var(--t2)">'+p.start.slice(8)+'/'+p.start.slice(5,7)+' → '+p.end.slice(8)+'/'+p.end.slice(5,7)+'</span>';
     html += '</div>';
   });
-  html += '<button onclick="closeRapportPicker()" style="width:100%;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font);margin-top:4px">Annuler</button>';
+  html += '<button onclick="closeRapportPicker()" style="width:100%;padding:12px;border-radius:14px;background:var(--surface2);border:none;color:var(--text);font-size:14px;cursor:pointer;font-family:var(--font);margin-top:4px">Annuler</button>';
   html += '</div>';
   overlay.innerHTML = html;
   overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
@@ -5521,7 +5523,7 @@ function fallbackCopyRecap(text){
   var overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end';
   var box = document.createElement('div');
-  box.style.cssText = 'width:100%;background:rgba(15,15,20,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid rgba(255,255,255,.12);border-radius:28px 28px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px)+24px)';
+  box.style.cssText = 'width:100%;max-width:500px;background:var(--bg2);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-top:.5px solid var(--glass-b);border-radius:24px 24px 0 0;padding:20px 24px calc(env(safe-area-inset-bottom,0px)+28px);margin-bottom:12px';
   box.innerHTML = '<div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px"></div>'
     +'<div style="font-size:16px;font-weight:600;margin-bottom:12px">📊 Récapitulatif</div>'
     +'<textarea readonly style="width:100%;height:220px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;font-size:12px;color:#fff;font-family:var(--font);resize:none;line-height:1.6">'+text+'</textarea>'
